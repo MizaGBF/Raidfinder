@@ -1,0 +1,659 @@
+[
+    [
+        [
+            "Griffin", 
+            "Lvl 20 Griffin", 
+            "Lv20 グリフォン"
+        ], 
+        [
+            "Griffin (H)", 
+            "Lvl 30 Griffin", 
+            "Lv30 グリフォン"
+        ], 
+        [
+            "dummy"
+        ], 
+        [
+            "dummy"
+        ], 
+        [
+            "Zarchnal F.", 
+            "Lvl 20 Zarchnal Flame", 
+            "Lv20 ザリチュナルフレイム"
+        ], 
+        [
+            "Zarchnal F. (H)", 
+            "Lvl 30 Zarchnal Flame", 
+            "Lv30 ザリチュナルフレイム"
+        ], 
+        [
+            "dummy"
+        ], 
+        [
+            "dummy"
+        ], 
+        [
+            "Imperial G.", 
+            "Lvl 20 Imperial Guard", 
+            "Lv20 インペリアルガード"
+        ], 
+        [
+            "Imperial G. (H)", 
+            "Lvl 30 Imperial Guard", 
+            "Lv30 インペリアルガード"
+        ], 
+        [
+            "dummy"
+        ], 
+        [
+            "dummy"
+        ], 
+        [
+            "dummy"
+        ], 
+        [
+            "Ancient Dragon", 
+            "Lvl 30 Ancient Dragon", 
+            "Lv30 エンシェントドラゴン"
+        ], 
+        [
+            "dummy"
+        ], 
+        [
+            "dummy"
+        ], 
+        [
+            "dummy"
+        ], 
+        [
+            "Evil Eye", 
+            "Lvl 30 Evil Eye", 
+            "Lv30 イービルアイ"
+        ], 
+        [
+            "dummy"
+        ], 
+        [
+            "dummy"
+        ], 
+        [
+            "dummy"
+        ], 
+        [
+            "Will-o'-Wisp", 
+            "Lvl 30 Will-o'-Wisp", 
+            "Lv30 ウィル･オ･ウィスプ"
+        ], 
+        [
+            "next"
+        ], 
+        [
+            "Tiamat", 
+            "Lvl 30 Tiamat", 
+            "Lv30 ティアマト"
+        ], 
+        [
+            "Tiamat (H)", 
+            "Lvl 50 Tiamat", 
+            "Lv50 ティアマト"
+        ], 
+        [
+            "Tiamat (H+)", 
+            "Lvl 60 Tiamat", 
+            "Lv60 ティアマト"
+        ], 
+        [
+            "dummy"
+        ], 
+        [
+            "Colossus", 
+            "Lvl 30 Colossus", 
+            "Lv30 コロッサス"
+        ], 
+        [
+            "Colossus (H)", 
+            "Lvl 50 Colossus", 
+            "Lv50 コロッサス"
+        ], 
+        [
+            "Colossus (H+)", 
+            "Lvl 60 Colossus", 
+            "Lv60 コロッサス"
+        ], 
+        [
+            "dummy"
+        ], 
+        [
+            "Leviathan", 
+            "Lvl 30 Leviathan", 
+            "Lv30 リヴァイアサン"
+        ], 
+        [
+            "Leviathan (H)", 
+            "Lvl 50 Leviathan", 
+            "Lv50 リヴァイアサン"
+        ], 
+        [
+            "Leviathan (H+)", 
+            "Lvl 60 Leviathan", 
+            "Lv60 リヴァイアサン"
+        ], 
+        [
+            "dummy"
+        ], 
+        [
+            "Yggdrasil", 
+            "Lvl 30 Yggdrasil", 
+            "Lv30 ユグドラシル"
+        ], 
+        [
+            "Yggdrasil (H)", 
+            "Lvl 50 Yggdrasil", 
+            "Lv50 ユグドラシル"
+        ], 
+        [
+            "Yggdrasil (H+)", 
+            "Lvl 60 Yggdrasil", 
+            "Lv60 ユグドラシル"
+        ], 
+        [
+            "dummy"
+        ], 
+        [
+            "Celeste", 
+            "Lvl 30 Celeste", 
+            "Lv30 セレスト"
+        ], 
+        [
+            "Celeste (H)", 
+            "Lvl 50 Celeste", 
+            "Lv50 セレスト"
+        ], 
+        [
+            "Celeste (H+)", 
+            "Lvl 60 Celeste", 
+            "Lv60 セレスト"
+        ], 
+        [
+            "dummy"
+        ], 
+        [
+            "Adversa", 
+            "Lvl 30 Adversa", 
+            "Lv30 アドウェルサ"
+        ], 
+        [
+            "Adversa (H)", 
+            "Lvl 50 Adversa", 
+            "Lv50 アドウェルサ"
+        ], 
+        [
+            "Adversa (H+)", 
+            "Lvl 60 Adversa", 
+            "Lv60 アドウェルサ"
+        ], 
+        [
+            "next"
+        ], 
+        [
+            "Tiamat Ω", 
+            "Lvl 50 Tiamat Omega", 
+            "Lv50 ティアマト・マグナ"
+        ], 
+        [
+            "Nezha", 
+            "Lvl 100 Nezha", 
+            "Lv100 ナタク"
+        ], 
+        [
+            "Garuda", 
+            "Lvl 100 Garuda", 
+            "Lv100 ガルーダ"
+        ], 
+        [
+            "Raphael", 
+            "Lvl 100 Raphael", 
+            "Lv100 ラファエル"
+        ], 
+        [
+            "Colossus Ω", 
+            "Lvl 70 Colossus Omega", 
+            "Lv70 コロッサス・マグナ"
+        ], 
+        [
+            "Flam=Glass", 
+            "Lvl 100 Twin Elements", 
+            "Lv100 フラム＝グラス"
+        ], 
+        [
+            "Athena", 
+            "Lvl 100 Athena", 
+            "Lv100 アテナ"
+        ], 
+        [
+            "Michael", 
+            "Lvl 100 Michael", 
+            "Lv100 ミカエル"
+        ], 
+        [
+            "Leviathan Ω", 
+            "Lvl 60 Leviathan Omega", 
+            "Lv60 リヴァイアサン・マグナ"
+        ], 
+        [
+            "Macula", 
+            "Lvl 100 Macula Marius", 
+            "Lv100 マキュラ・マリウス"
+        ], 
+        [
+            "Grani", 
+            "Lvl 100 Grani", 
+            "Lv100 グラニ"
+        ], 
+        [
+            "Gabriel", 
+            "Lvl 100 Gabriel", 
+            "Lv100 ガブリエル"
+        ], 
+        [
+            "Yggdrasil Ω", 
+            "Lvl 60 Yggdrasil Omega", 
+            "Lv60 ユグドラシル・マグナ"
+        ], 
+        [
+            "Medusa", 
+            "Lvl 100 Medusa", 
+            "Lv100 メドゥーサ"
+        ], 
+        [
+            "Baal", 
+            "Lvl 100 Baal", 
+            "Lv100 バアル"
+        ], 
+        [
+            "Uriel", 
+            "Lvl 100 Uriel", 
+            "Lv100 ウリエル"
+        ], 
+        [
+            "Celeste Ω", 
+            "Lvl 75 Celeste Omega", 
+            "Lv75 セレスト・マグナ"
+        ], 
+        [
+            "D.A.Olivia", 
+            "Lvl 100 Dark Angel Olivia", 
+            "Lv100 Dエンジェル・オリヴィエ"
+        ], 
+        [
+            "Lich", 
+            "Lvl 100 Lich", 
+            "Lv100 リッチ"
+        ], 
+        [
+            "dummy"
+        ], 
+        [
+            "Chevalier Ω", 
+            "Lvl 75 Luminiera Omega", 
+            "Lv75 シュヴァリエ・マグナ"
+        ], 
+        [
+            "Apollo", 
+            "Lvl 100 Apollo", 
+            "Lv100 アポロン"
+        ], 
+        [
+            "Odin", 
+            "Lvl 100 Odin", 
+            "Lv100 オーディン"
+        ], 
+        [
+            "next"
+        ], 
+[
+            "Zhuque", 
+            "Lvl 60 Zhuque", 
+            "Lv60 朱雀"
+        ], 
+        [
+            "Agni", 
+            "Lvl 90 Agni", 
+            "Lv90 アグニス"
+        ], 
+        [
+            "X. Ifrit", 
+            "Lvl 100 X. Ifrit", 
+            "Lv100 ゼノ・イフリート"
+        ], 
+        [
+            "Grand Order", 
+            "Lvl 100 The Grand Order", 
+            "Lv100 ジ・オーダー・グランデ"
+        ], 
+        [
+            "Xuanwu", 
+            "Lvl 60 Xuanwu", 
+            "Lv60 玄武"
+        ], 
+        [
+            "Neptune", 
+            "Lvl 90 Neptune", 
+            "Lv90 ネプチューン"
+        ], 
+        [
+            "X. Cocytus", 
+            "Lvl 100 X. Cocytus", 
+            "Lv100 ゼノ・コキュートス"
+        ], 
+        [
+            "Bahamut", 
+            "Lvl 100 Proto Bahamut", 
+            "Lv100 プロトバハムート"
+        ], 
+        [
+            "Baihu", 
+            "Lvl 60 Baihu", 
+            "Lv60 白虎"
+        ], 
+        [
+            "Titan", 
+            "Lvl 90 Titan", 
+            "Lv90 ティターン"
+        ], 
+        [
+            "X. Vohu M.", 
+            "Lvl 100 X. Vohu Manah", 
+            "Lv100 ゼノ・ウォフマナフ"
+        ], 
+        [
+            "Ulti.Baha", 
+            "Lvl 150 Ultimate Bahamut", 
+            "Lv150 アルティメットバハムート"
+        ], 
+        [
+            "Qinglong", 
+            "Lvl 60 Qinglong", 
+            "Lv60 青竜"
+        ], 
+        [
+            "Zephyrus", 
+            "Lvl 90 Zephyrus", 
+            "Lv90 ゼピュロス"
+        ], 
+        [
+            "X. Sagitt.", 
+            "Lvl 100 X. Sagittarius", 
+            "Lv100 ゼノ・サジタリウス"
+        ], 
+        [
+            "dummy"
+        ], 
+        [
+            "Huanglong", 
+            "Lvl 100 Huanglong", 
+            "Lv100 黄龍"
+        ], 
+        [
+            "Kirin", 
+            "Lvl 100 Qilin", 
+            "Lv100 黒麒麟"
+        ], 
+        [
+            "X. Diablo", 
+            "Lvl 100 X. Diablo", 
+            "Lv100 ゼノ・ディアボロス"
+        ], 
+        [
+            "dummy"
+        ], 
+        [
+            "H.&Kirin HL", 
+            "Lvl 120 Huanglong", 
+            "Lv120 黄龍"
+        ], 
+        [
+            "dummy"
+        ], 
+        [
+            "X. Corrow", 
+            "Lvl 100 X. Corow", 
+            "Lv100 ゼノ・コロゥ"
+        ], 
+        [
+            "next"
+        ],
+        [
+            "Tiamat HL", 
+            "Lvl 100 Tiamat Omega Ayr", 
+            "Lv100 ティアマト・マグナ＝エア"
+        ], 
+        [
+            "Nezha HL", 
+            "Lvl 120 Nezha", 
+            "Lv120 ナタク"
+        ], 
+        [
+            "Grimnir", 
+            "Lvl 120 Grimnir", 
+            "Lv120 グリームニル"
+        ], 
+        [
+            "dummy"
+        ], 
+        [
+            "Colo. HL", 
+            "Lvl 100 Colossus Omega", 
+            "Lv100 コロッサス・マグナ"
+        ], 
+        [
+            "Flam. HL", 
+            "Lvl 120 Twin Elements", 
+            "Lv120 フラム＝グラス"
+        ], 
+        [
+            "Shiva", 
+            "Lvl 120 Shiva", 
+            "Lv120 シヴァ"
+        ], 
+        [
+            "dummy"
+        ], 
+        [
+            "Levia. HL", 
+            "Lvl 100 Leviathan Omega", 
+            "Lv100 リヴァイアサン・マグナ"
+        ], 
+        [
+            "Macula HL", 
+            "Lvl 120 Macula Marius", 
+            "Lv120 マキュラ・マリウス"
+        ],
+        [
+            "Europa", 
+            "Lvl 120 Europa", 
+            "Lv120 エウロペ"
+        ], 
+        [
+            "dummy"
+        ], 
+        [
+            "Yggdr. HL", 
+            "Lvl 100 Yggdrasil Omega", 
+            "Lv100 ユグドラシル・マグナ"
+        ], 
+        [
+            "Medusa HL", 
+            "Lvl 120 Medusa", 
+            "Lv120 メドゥーサ"
+        ], 
+        [
+            "Alexiel", 
+            "Lvl 120 Godsworn Alexiel", 
+            "Lv120 ゴッドガード・ブローディア"
+        ], 
+        [
+            "dummy"
+        ], 
+        [
+            "Celeste HL", 
+            "Lvl 100 Celeste Omega", 
+            "Lv100 セレスト・マグナ"
+        ], 
+        [
+            "Olivia HL", 
+            "Lvl 120 Dark Angel Olivia", 
+            "Lv120 Dエンジェル・オリヴィエ"
+        ], 
+        [
+            "Avatar", 
+            "Lvl 120 Avatar", 
+            "Lv120 アバター"
+        ], 
+        [
+            "dummy"
+        ], 
+        [
+            "Chev. HL", 
+            "Lvl 100 Luminiera Omega", 
+            "Lv100 シュヴァリエ・マグナ"
+        ], 
+        [
+            "Apollo HL", 
+            "Lvl 120 Apollo", 
+            "Lv120 アポロン"
+        ], 
+        [
+            "Metatron", 
+            "Lvl 120 Metatron", 
+            "Lv120 メタトロン"
+        ], 
+        [
+            "next"
+        ], 
+        [
+            "Morrigna", 
+            "Lvl 120 Morrigna", 
+            "Lv120 バイヴカハ"
+        ], 
+        [
+            "Tiamat Malice", 
+            "Lvl 150 Tiamat Malice", 
+            "Lv150 ティアマト・マリス"
+        ],
+        [
+            "dummy"
+        ], 
+        [
+            "dummy"
+        ], 
+        [
+            "Prometheus", 
+            "Lvl 120 Prometheus", 
+            "Lv120 プロメテウス"
+        ],  
+        [
+            "dummy"
+        ], 
+        [
+            "dummy"
+        ], 
+        [
+            "dummy"
+        ], 
+        [
+            "Ca Ong", 
+            "Lvl 120 Ca Ong", 
+            "Lv120 カー・オン"
+        ], 
+        [
+            "Bahamut HL", 
+            "Lvl 150 Proto Bahamut", 
+            "Lv150 プロトバハムート"
+        ],
+        [
+            "dummy"
+        ], 
+        [
+            "dummy"
+        ], 
+        [
+            "Gilgamesh", 
+            "Lvl 120 Gilgamesh", 
+            "Lv120 ギルガメッシュ"
+        ], 
+        [
+            "Ulti.Baha HL", 
+            "Lvl 200 Ultimate Bahamut", 
+            "Lv200 アルティメットバハムート"
+        ],
+        [
+            "dummy"
+        ], 
+        [
+            "dummy"
+        ], 
+        [
+            "Anubis", 
+            "Lvl 120 Anubis", 
+            "Lv120 アヌビス"
+        ], 
+        [
+            "Rosequeen HL", 
+            "Lvl 110 Rose Queen", 
+            "Lv110 ローズクイーン"
+        ],
+        [
+            "dummy"
+        ], 
+        [
+            "dummy"
+        ], 
+        [
+            "Hector", 
+            "Lvl 120 Hector", 
+            "Lv120 ヘクトル"
+        ], 
+        [
+            "Akasha HL", 
+            "Lvl 200 Akasha", 
+            "Lv200 アーカーシャ"
+        ]
+    ], 
+    [
+        [
+            "#d7e5d7", 
+            "Normal",
+            2
+        ], 
+        [
+            "#d7e5d7", 
+            "Hard",
+            3
+        ], 
+        [
+            "#d7dee5", 
+            "Omega",
+            4
+        ], 
+        [
+            "#e5e3d7", 
+            "Extra",
+            4
+        ], 
+        [
+            "#e5d7d7", 
+            "Impossible",
+            3
+        ], 
+        [
+            "#e5e3d7", 
+            "Extra HL",
+            2
+        ], 
+        [
+            "#dfd7e5", 
+            "Custom"
+        ]
+    ]
+]

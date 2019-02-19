@@ -1,0 +1,63 @@
+﻿<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Manual - Raid ID copier Companion</title>
+        <style>
+            body {
+                font-size: 14pt;
+            }
+
+            span#api_status, span#previous_code {
+                font-family: Consolas, Courier New, monospace;
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body style="background-color:#303030"><font color="#C0C0C0">
+        <h2>Manual - Raid ID copier Companion</h2>
+
+        <b>Disclaimer:</b><br>
+        This extension is still in an experimental stage.<br>
+        Please report any bugs and send feedback to (You).<br>
+        Feel free to look at the source code if you don't trust this extension.<br>
+        You can also use the Raid ID Copier as usual, without this extension.<br>
+        Or use this extension with any raidfinder equipped of an auto-copy feature.
+
+        <h3>● Enable Viramate Web API</h3>
+
+        <img src="manual/01.png" border="1">
+
+        <h3>● How to install this extension</h3>
+
+        Open the Chrome Extension Menu, turn on <b>developer mode</b> and load this extension by selection the folder.
+
+        <h3>● How to run the extension</h3>
+
+        Click on the icon:<br>
+        <img src="manual/02.png" border="1"><br>
+        It will open this page (or something similar):<br>
+        <img src="manual/03.png" border="1"><br>
+        <b>As long as this page is open</b>, the extension is running.
+
+        <h3>● Use the auto-copy</h3>
+
+        The javascript will read your clipboard for any new code so be sure to turn on 'auto copy' in the Raid ID Copier.<br>
+        <img src="manual/04.png" border="1"><br>
+
+        <h3>● Extension inner workings</h3>
+
+        This extension doesn't modify the game in any way, it will simply ask Viramate to join a battle with the code it read from the clipboard.<br>
+        It will not try to join a raid if you are on these following pages:<br>
+        <li>Raid battles (solo, arcarum or multi)</li>
+        <li>Summon screens (solo, arcarum or multi)</li>
+        <li>Pending battles</li>
+        <li>Result screens (solo, arcarum or multi)</li>
+        <li>Any non GBF pages</li>
+        <br>
+        In addition:<br>
+        <li>You'll be sent to the Pending battles automatically if needed.</li>
+        <li>If you are lacking BP, you must refill manually.</li>
+
+    </font></body>
+</html>
