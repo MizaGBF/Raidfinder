@@ -1,5 +1,9 @@
 * rev 84
-- 
+- ported the raidfinder to python3
+- automatic install is disabled for now
+- the python2 version will be bundled with, for now
+- update_modules.py is removed, for now
+- README has been updated
 
 * rev 83
 - added a warning when the user has multiple raids with the same code

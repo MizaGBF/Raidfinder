@@ -1,21 +1,82 @@
 # -*- coding: utf-8 -*-
 import json
 import re
-import queue
-import configparser
-import time
+import thread
 import threading
+import Queue
+import ConfigParser
+import time
 from time import strftime
 import datetime
 import base64
 import webbrowser
 import sys, os
 
-import tkinter as Tk
-import tkinter.ttk as ttk
-from tkinter import colorchooser, simpledialog, messagebox
-import pyperclip
-import tweepy
+# =============================================================================================
+# Installation and import check
+# =============================================================================================
+try:
+    import Tkinter as Tk
+    import tkMessageBox
+    import tkColorChooser
+    import tkSimpleDialog
+    import ttk
+except ImportError:
+    print "Tkinter not found, please reinstall Python"
+    time.sleep(10)
+    sys.exit(0)
+
+try:
+    import pip
+    pipImport = True
+except ImportError:
+    print "pip not found"
+    pipImport = False
+
+try:
+    import ttk
+except ImportError:
+    if pipImport and not pip.main(['install', 'ttk']):
+        print "ttk installed"
+        import ttk
+    else:
+        print "failed to install ttk"
+        time.sleep(10)
+        sys.exit(0)
+
+try:
+    import tweepy
+except ImportError:
+    if pipImport and not pip.main(['install', 'tweepy']):
+        print "tweepy installed"
+        import tweepy
+    else:
+        print "failed to install tweepy"
+        time.sleep(10)
+        sys.exit(0)
+
+try:
+    import pyperclip
+except ImportError:
+    if pipImport and not pip.main(['install', 'pyperclip']):
+        print "pyperclip installed"
+        import pyperclip
+    else:
+        print "failed to install pyperclip"
+        time.sleep(10)
+        sys.exit(0)
+
+if os.name == 'nt': # windows only
+    try:
+        import winsound
+    except ImportError:
+        if pipImport and not pip.main(['install', 'winsound']):
+            print "winsound installed"
+            import winsound
+        else:
+            print "failed to install winsound"
+            time.sleep(10)
+            sys.exit(0)
 
 # =============================================================================================
 # Sound
@@ -39,7 +100,7 @@ else: # windows
 
     def playsound(): # run winsound.PlaySound() in a thread (SND_ASYNC doesn't work when playing a sound from the memory)
         if soundLoaded:
-            threading.Thread(target=winsound.PlaySound, args=(soundFile, winsound.SND_MEMORY)).start()
+            thread.start_new_thread(winsound.PlaySound, (soundFile, winsound.SND_MEMORY))
 
 # =============================================================================================
 # Variables
@@ -53,7 +114,7 @@ access_token = None
 access_token_secret = None
 config = None
 # thread variables
-tweetQueue = queue.Queue() # contains tweets to be processed
+tweetQueue = Queue.Queue() # contains tweets to be processed
 twitterThread = None # will store the current listener thread
 streamKill = False # if true, the watchdog will kill the stream
 rateLimit = False # if true, twitter is limiting us
@@ -151,7 +212,7 @@ class TwitterStreamListener(tweepy.StreamListener):
             tweet = json.loads(data)
             if tweet['source'] != u"<a href=\"http://granbluefantasy.jp/\" rel=\"nofollow\">グランブルー ファンタジー</a>":
                 return True # not a GBF tweet
-            st = tweet['text'] # tweet content in string form, utf-8
+            st = unicode(tweet['text'].encode('utf-8'), encoding='utf-8') # tweet content in string form, utf-8
             # blacklist check
             if settOn[sBlacklist] and tweet['user']['screen_name'] in blacklist:
                 stats[6] = stats[6] + 1
@@ -182,11 +243,11 @@ class TwitterStreamListener(tweepy.StreamListener):
         global watchdogKill
         if twitterConnected: # exception happened while being connected
             log("[Error] An exception occurred: " + str(exception), True)
-            print(exception)
+            print exception
             twitterConnected = False
         else: # else, the keys are probably invalid
             log("[Error] Invalid twitter keys. Check them at https://developer.twitter.com/en/apps", True) 
-            print("on_exception(): ", exception)
+            print "on_exception(): ", exception
             watchdogKill = True # kill the watchdog
  
     def on_error(self, status): # for error stuff
@@ -205,7 +266,7 @@ class TwitterStreamListener(tweepy.StreamListener):
             twitterConnected = False
         else:
             log("[Error] HTTP Error " + str(status) + ": check your internet connection or twitter server status", True)
-            print("on_error(): error http ", status)
+            print "on_error(): error http ", status
             twitterConnected = False
         return False # don't keep the stream alive
 
@@ -467,17 +528,17 @@ class simpleui(Tk.Tk):
         tmp = settOn[sPause] # save the pause setting
         settOn[sPause] = True # pause the app
         id = raidCount-customCount+i
-        v1 = simpledialog.askstring("Edit custom raid", "input a name", initialvalue=raidList[id][0]) # ask for user input
+        v1 = tkSimpleDialog.askstring("Edit custom raid", "input a name", initialvalue=raidList[id][0]) # ask for user input
         if v1 == None: # if the user cancelled
             focused = False
             settOn[sPause] = tmp
             return # we return
-        v2 = simpledialog.askstring("Edit custom raid", "input the japanese code", initialvalue=raidList[id][2])
+        v2 = tkSimpleDialog.askstring("Edit custom raid", "input the japanese code", initialvalue=raidList[id][2])
         if v2 == None: # same thing
             focused = False
             settOn[sPause] = tmp
             return
-        v3 = simpledialog.askstring("Edit custom raid", "input the english code", initialvalue=raidList[id][1])
+        v3 = tkSimpleDialog.askstring("Edit custom raid", "input the english code", initialvalue=raidList[id][1])
         if v3 == None: # same thing
             focused = False
             settOn[sPause] = tmp
@@ -523,7 +584,7 @@ class simpleui(Tk.Tk):
             return
         queueMutex.acquire()
         if queueCode[i] != None and queueRaid[i] != None: # must check both in case the user press the button at the same time one of them change from None to a string
-            pyperclip.copy(queueCode[i]) # put in the clipboard
+            pyperclip.copy(queueCode[i].encode('ascii','ignore')) # put in the clipboard
             log("[System] " + queueRaid[i] + ": " + queueCode[i] + " set in the clipboard")
             queueClicked[i] = True # set to true because we clicked it
             queueButton[i].config(background=buttonColor[1]) # change the color right now (we can't wait for the next update)
@@ -543,12 +604,12 @@ class simpleui(Tk.Tk):
 
     def reloadBlacklist(self):
         loadBlacklist("blacklist.txt")
-        messagebox.showinfo("Info", "'blacklist.txt' has been reloaded. " + str(len(blacklist)) + " entrie(s) found.")
+        tkMessageBox.showinfo("Info", "'blacklist.txt' has been reloaded. " + str(len(blacklist)) + " entrie(s) found.")
 
     def clickedColor(self):
         if freezeUI: # do nothing
             return
-        color = colorchooser.askcolor(color=buttonColor[1], title="Select the color")
+        color = tkColorChooser.askcolor(color=buttonColor[1], title="Select the color")
         if color != (None, None):
             buttonColor[1] = color[1]
 
@@ -563,20 +624,20 @@ class simpleui(Tk.Tk):
         if freezeUI: # do nothing
             return
         focused = True # to disable the keyboard shortcuts
-        v1 = simpledialog.askstring("Edit queue size", "input a value (min: 1, max: 150)", initialvalue=futureQueueSize) # ask for user input
+        v1 = tkSimpleDialog.askstring("Edit queue size", "input a value (min: 1, max: 150)", initialvalue=futureQueueSize) # ask for user input
         if v1 == None: # if the user cancelled
             focused = False
             return # we return
         try:
             v2 = int(v1) # check for int
             if v2 <= 0 or v2 > 150: # if invalid value
-                messagebox.showinfo("Error", "The value must be between 1 and 150 included")
+                tkMessageBox.showinfo("Error", "The value must be between 1 and 150 included")
                 focused = False
                 return # we return
             futureQueueSize = v2
-            messagebox.showinfo("Info", "The size will change after a restart\nThe new size is " + str(futureQueueSize))
+            tkMessageBox.showinfo("Info", "The size will change after a restart\nThe new size is " + str(futureQueueSize))
         except ValueError: # if not a number
-            messagebox.showinfo("Error", "The value isn't an integer")
+            tkMessageBox.showinfo("Error", "The value isn't an integer")
             focused = False
             return # we return
         focused = False # re-enable keyboard shortcuts
@@ -848,7 +909,7 @@ def process_tweet(): # process the queued tweets
                 if len(dupes) > 100: # limit the list to 100
                     dupes = dupes[:70] # remove the last 30
                 if cpyOn[foe] and settOn[sCopy]:
-                    pyperclip.copy(code) # copy in the clipboard first
+                    pyperclip.copy(code.encode('ascii','ignore')) # copy in the clipboard first
                     stats[1] = stats[1] + 1 # copy stat
                 if sndOn[foe] and not settOn[sMute]:
                     playsound() # then, play the sound
@@ -940,28 +1001,58 @@ def loadConfig(filename): # called once at the start
     settOn[sBlacklist] = 1 # blacklist is enabled
 
     # load the .cfg with the twitter API keys
-    config = configparser.ConfigParser()
-    config.read(filename)
-    if len(config) == 0 or 'Keys' not in config:
+    config = ConfigParser.ConfigParser()
+    dataset = config.read(filename)
+    if len(dataset) == 0: # if zero, the file wasn't found
         log("[Error] " + filename + " is not found, an empty one will be created", True)
         try:
-            config['Keys'] = {'consumer_key': '', 'consumer_secret': '', 'access_token_secret': '', 'access_token' : ''}
-            with open('gbfraidcopier.cfg', 'w') as configfile:
-                config.write(configfile)
+            config = ConfigParser.ConfigParser() # creating an empty config
+            if not config.has_section('Keys'):
+                config.add_section('Keys')
+            config.set('Keys', 'consumer_key', '')
+            config.set('Keys', 'consumer_secret', '')
+            config.set('Keys', 'access_token_secret', '')
+            config.set('Keys', 'access_token', '')
+            with open(filename, 'wb') as configfile: # saving to the disk
+                 config.write(configfile)
         except:
             log("[Error] couldn't create " + filename, True)
-            log("Get your personal keys at https://developer.twitter.com/en/apps", True)
-            log("and fill in " + filename, True)
-            log("Consult the README for more informations", True)
-            return False
+        log("Get your personal keys at https://developer.twitter.com/en/apps", True)
+        log("and fill in " + filename, True)
+        log("Consult the README for more informations", True)
+        return False
+
+    # if a key is missing
+    if not (config.has_section('Keys') and config.has_option('Keys', 'consumer_key') and config.has_option('Keys', 'consumer_secret') and config.has_option('Keys', 'access_token') and config.has_option('Keys', 'access_token_secret')):
+        log("[Error] your " + filename + " file is missing one or multiple keys", True)
+        try: # add the missing section and keys
+            if not config.has_section('Keys'):
+                config.add_section('Keys')
+            if not config.has_option('Keys', 'consumer_key'):
+                config.set('Keys', 'consumer_key', '')
+            if not config.has_option('Keys', 'consumer_secret'):
+                config.set('Keys', 'consumer_secret', '')
+            if not config.has_option('Keys', 'access_token_secret'):
+                config.set('Keys', 'access_token_secret', '')
+            if not config.has_option('Keys', 'access_token'):
+                config.set('Keys', 'access_token', '')
+            with open(filename, 'wb') as configfile: # saving to the disk
+                 config.write(configfile)
+        except:
+            pass
+        log("Get your personal keys at https://developer.twitter.com/en/apps", True)
+        log("and fill in " + filename, True)
+        log("Consult the README for more informations", True)
+        return False
 
     # storing the keys
-    try:
-        consumer_key = config['Keys']['consumer_key']
-        consumer_secret = config['Keys']['consumer_secret']
-        access_token = config['Keys']['access_token']
-        access_token_secret = config['Keys']['access_token_secret']
-    except:
+    consumer_key = config.get('Keys', 'consumer_key')
+    consumer_secret = config.get('Keys', 'consumer_secret')
+    access_token = config.get('Keys', 'access_token')
+    access_token_secret = config.get('Keys', 'access_token_secret')
+
+    # if a key is empty
+    if not consumer_key or not consumer_secret or not access_token or not access_token_secret:
         log("[Error] your " + filename + " file is missing one or multiple keys", True)
         log("Get your personal keys at https://developer.twitter.com/en/apps", True)
         log("and fill in " + filename, True)
@@ -969,64 +1060,76 @@ def loadConfig(filename): # called once at the start
         return False
 
     # check if last used settings are here. if yes, read them
-    if 'Settings' in config:
-        settOn[sJP] = int(config['Settings']['japanese'])
-        settOn[sEN] = int(config['Settings']['english'])
-        settOn[sMute] = int(config['Settings']['mute'])
-        settOn[sLog] = int(config['Settings']['log'])
-        settOn[sCopy] = int(config['Settings']['copy'])
-        settOn[sAuthor] = int(config['Settings']['author'])
-        settOn[sBlacklist] = int(config['Settings']['blacklist'])
-        settOn[sDupe] = int(config['Settings']['duplicate'])
-        buttonColor[1] = config['Settings']['clickcolor']
-        queueSize = int(config['Settings']['queuesize'])
-        try:
-            raidTab.select(int(config['Settings', 'lasttab']))
-        except:
-            pass
-
-    # custom user raids
-    if 'Raids' in config:
-        for i in range(0, customCount):
+    if config.has_section('Settings'):
+        if config.has_option('Settings', 'japanese'):
+            settOn[sJP] = config.getint('Settings', 'japanese')
+        if config.has_option('Settings', 'english'):
+            settOn[sEN] = config.getint('Settings', 'english')
+        if config.has_option('Settings', 'mute'):
+            settOn[sMute] = config.getint('Settings', 'mute')
+        if config.has_option('Settings', 'log'):
+            settOn[sLog] = config.getint('Settings', 'log')
+        if config.has_option('Settings', 'copy'):
+            settOn[sCopy] = config.getint('Settings', 'copy')
+        if config.has_option('Settings', 'author'):
+            settOn[sAuthor] = config.getint('Settings', 'author')
+        if config.has_option('Settings', 'blacklist'):
+            settOn[sBlacklist] = config.get('Settings', 'blacklist')
+        if config.has_option('Settings', 'duplicate'):
+            settOn[sDupe] = config.get('Settings', 'duplicate')
+        if config.has_option('Settings', 'clickcolor'):
+            buttonColor[1] = config.get('Settings', 'clickcolor')
+        if config.has_option('Settings', 'queuesize'):
+            queueSize = config.getint('Settings', 'queuesize')
+        if config.has_option('Settings', 'lasttab'):
+            sel = config.getint('Settings', 'lasttab')
             try:
-                raidList[raidCount-customCount+i][0] = base64.b64decode(config['Raids']['savedName' + str(i)]).decode('utf-8')
-                raidList[raidCount-customCount+i][2] = base64.b64decode(config['Raids']['savedJP' + str(i)]).decode('utf-8')
-                if raidList[raidCount-customCount+i][2] == "Lv100 ???":
-                    raidList[raidCount-customCount+i][2] = ""
-                raidList[raidCount-customCount+i][1] = base64.b64decode(config['Raids'][ 'savedEN' + str(i)]).decode('utf-8')
-                if raidList[raidCount-customCount+i][1] == "Lvl 100 ???":
-                    raidList[raidCount-customCount+i][1] = ""
+                raidTab.select(config.getint('Settings', 'lasttab'))
             except:
                 pass
+
+    # custom user raids
+    if config.has_section('Raids'):
+        for i in range(0, customCount):
+            if config.has_option('Raids', 'savedName' + str(i)):
+                raidList[raidCount-customCount+i][0] = base64.b64decode(config.get('Raids', 'savedName' + str(i))).decode('utf-8')
+            if config.has_option('Raids', 'savedJP' + str(i)):
+                raidList[raidCount-customCount+i][2] = base64.b64decode(config.get('Raids', 'savedJP' + str(i))).decode('utf-8')
+                if raidList[raidCount-customCount+i][2] == "Lv100 ???":
+                    raidList[raidCount-customCount+i][2] = ""
+            if config.has_option('Raids', 'savedEN' + str(i)):
+                raidList[raidCount-customCount+i][1] = base64.b64decode(config.get('Raids', 'savedEN' + str(i))).decode('utf-8')
+                if raidList[raidCount-customCount+i][1] == "Lvl 100 ???":
+                    raidList[raidCount-customCount+i][1] = ""
 
     
     return True
 
 def saveConfig(filename): # called when quitting
+    # add the section if not present in the config file
+    if not config.has_section('Settings'):
+        config.add_section('Settings')
+    if not config.has_section('Raids'):
+        config.add_section('Raids')
     # update the values
     # NOTE : pause setting isn't saved !
-    config['Settings'] = {
-        'japanese': str(settOn[sJP]),
-        'english': str(settOn[sEN]),
-        'mute': str(settOn[sMute]),
-        'log': str(settOn[sLog]),
-        'copy': str(settOn[sCopy]),
-        'author': str(settOn[sAuthor]),
-        'blacklist': str(settOn[sAuthor]),
-        'duplicate': str(settOn[sDupe]),
-        'clickcolor': str(buttonColor[1]),
-        'queuesize': str(futureQueueSize),
-        'lasttab':str( raidTabSaved),
-        }
-
-    if customCount:
-        config['Raids'] = {}
+    config.set('Settings', 'japanese', settOn[sJP])
+    config.set('Settings', 'english', settOn[sEN])
+    config.set('Settings', 'mute', settOn[sMute])
+    config.set('Settings', 'log', settOn[sLog])
+    config.set('Settings', 'copy', settOn[sCopy])
+    config.set('Settings', 'author', settOn[sAuthor])
+    config.set('Settings', 'blacklist', settOn[sAuthor])
+    config.set('Settings', 'duplicate', settOn[sDupe])
+    config.set('Settings', 'clickcolor', buttonColor[1])
+    config.set('Settings', 'queuesize', futureQueueSize)
+    config.set('Settings', 'lasttab', raidTabSaved)
     for i in range(0, customCount): # custom user raids
-        config['Raids']['savedName' + str(i)] = base64.b64encode(raidList[raidCount-customCount+i][0].encode('utf-8')).decode('ascii') 
-        config['Raids']['savedJP' + str(i)] = base64.b64encode(raidList[raidCount-customCount+i][2].encode('utf-8')).decode('ascii') 
-        config['Raids']['savedEN' + str(i)] = base64.b64encode(raidList[raidCount-customCount+i][1].encode('utf-8')).decode('ascii') 
+        config.set('Raids', 'savedName' + str(i), base64.b64encode(raidList[raidCount-customCount+i][0].encode('utf-8')))
+        config.set('Raids', 'savedJP' + str(i), base64.b64encode(raidList[raidCount-customCount+i][2].encode('utf-8')))
+        config.set('Raids', 'savedEN' + str(i), base64.b64encode(raidList[raidCount-customCount+i][1].encode('utf-8')))
     # Writing our configuration file
-    with open(filename, 'w') as configfile:
+    with open(filename, 'wb') as configfile:
          config.write(configfile)
 
     return True
@@ -1102,8 +1205,8 @@ def jsonLoad(): # load the raid list and ui appearance
     global sndOn
 
     try: # open the fail and load the data
-        with open('raid.json', encoding='utf-8') as f:
-            raidData = json.load(f)
+        f = file("raid.json", "r")
+        raidData = json.load(f)
     except:
         return "[JSON Error] File missing or invalid\nPlease check if 'raid.json' is present beside this python script\nAlternatively, please reinstall"
 
@@ -1149,7 +1252,6 @@ def jsonLoad(): # load the raid list and ui appearance
 if __name__ == "__main__":
     # load the raid list
     logstr = jsonLoad() # return a non empty string if an error happens
-    print(logstr)
     # create the UI
     app = simpleui(None)
     app.title('Raid ID copier - (You) edition - ' + revision)
@@ -1172,6 +1274,7 @@ if __name__ == "__main__":
     if cfgLoaded: # if the twitter keys are loaded
         updateCustomRaids()
         # messages to the user
+        log("[Warning] You are using the python 2 version")
         if not settOn[sLog]: log("[Info] Logs are disabled", True)
         if not settOn[sJP]: log("[Info] Japanese is disabled")
         if not settOn[sEN]: log("[Info] English is disabled")

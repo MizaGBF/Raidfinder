@@ -1,16 +1,28 @@
-﻿Mod based on https://github.com/UmaiCake script
+﻿== PYTHON 2 USERS ==
+If you were using the previous python 2 version, this one is now using python 3. python 2 isn't supported starting from 2020.
+You might want to uninstall python2 before installing python 3, as coexisting python installation can be a big pain in the butt.
+(It will also fix your file association in windows explorer)
+I'll keep an old version bundled with but I recommend making the switch.
 
 == INSTALLATION ==
-1) Download and Install Python 2.7 https://www.python.org/
-2) Click on the python script to start it (Required packages will be installed the first time, be patient)
+1) Download and Install Python 3.7 https://www.python.org/ (I haven't tested on a further version)
+2) Open a command prompt and type: python --version
+2a) If it doesn't work, you might have to replace "python" with the full path (example for me: C:\Python36\python.exe --version )
+2b) If it doesn't show version 3-something but 2 instead, another version is causing conflict so use the full path as above, too.
+3) now install the required modules (use the full path if needed):
+python -m pip install pyperclip
+python -m pip install tweepy
+3a) If you are on windows:
+python -m pip install winsound
+
+bonus: The command to update pip is:
+python -m pip install --upgrade pip
+
 
 == UPDATE THE PACKAGES ==
-It may be good to update the used python modules from time to time (for reasons such a bugfixes).
-Just run 'update_modules.py' to do it easily.
-Don't panic if you see red messages.
+Same commands as during the installation process
 
 == TWITTER KEYS ==
-As of August 2018, Twitter changed their API and the way to request tokens for an application.
 1) Go to https://developer.twitter.com/en/apply/account to apply for a Developper account.
 You'll need a phone number linked to your account like in the past, but they also request a bit more informations to be sure you won't be misusing the API. You don't need to give personal informations.
 2) Go to https://developer.twitter.com/en/apps to create a new App.
@@ -52,16 +64,5 @@ I'm using beep for linux, install it with 'apt-get install beep' or whatever you
 I have no solution for mac. Feel free to edit the script if you have one, though.
 
 == TROUBLESHOOTING ==
-* I'm using Python 3:
-Add '#!/usr/bin/env python2' without the ' on the first line of gbfraidcopier.pyw (the 'coding: utf8' line will be second now).
-Use notepad++ to edit the script.
-
-* It doesn't start:
-Make sure internet is working (the first time, it will download and install some needed modules).
-If you are using Python 3, check above.
-If you are using Python 2, something may be wrong with your installation (for example if you didn't install some of the optional modules coming with python).
-
-Additionally, you can rename 'gbfraidcopier.pyw' into 'gbfraidcopier.py' to open the command prompt. An error message may appear on this.
+You can rename 'gbfraidcopier.pyw' into 'gbfraidcopier.py' to open the command prompt. An error message may appear on this.
 You can also open a command prompt with shift + right click and start manually with the command "python gbfraidcopier.pyw". If python isn't in your PATH, you need to write its full path instead of just "python".
-
-If you get the message "pip not found" the first time and it fails to install the other modules, install pip with this script: https://bootstrap.pypa.io/get-pip.py
