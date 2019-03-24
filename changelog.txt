@@ -1,3 +1,7 @@
+* rev 85
+- added an icon
+- fixed the last tab not being remembered properly
+
 * rev 84
 - ported the raidfinder to python3
 - automatic install is disabled for now

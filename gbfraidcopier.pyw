@@ -45,7 +45,7 @@ else: # windows
 # Variables
 # =============================================================================================
 # version number
-revision = "rev.84"
+revision = "rev.85"
 # to store the twitter API keys ( https://developer.twitter.com/en/apps )
 consumer_key = None
 consumer_secret = None
@@ -233,6 +233,7 @@ class simpleui(Tk.Tk):
         self.settings = []
         self.custom = []
 
+        self.iconbitmap('favicon.ico')
         # top part containing the raids
         # do nothing if the json failed to load
         if raidList:
@@ -981,7 +982,7 @@ def loadConfig(filename): # called once at the start
         buttonColor[1] = config['Settings']['clickcolor']
         queueSize = int(config['Settings']['queuesize'])
         try:
-            raidTab.select(int(config['Settings', 'lasttab']))
+            raidTab.select(int(config['Settings']['lasttab']))
         except:
             pass
 
@@ -1149,7 +1150,6 @@ def jsonLoad(): # load the raid list and ui appearance
 if __name__ == "__main__":
     # load the raid list
     logstr = jsonLoad() # return a non empty string if an error happens
-    print(logstr)
     # create the UI
     app = simpleui(None)
     app.title('Raid ID copier - (You) edition - ' + revision)
