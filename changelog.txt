@@ -1,3 +1,6 @@
+* rev 86
+- removed the extension, RIP Viramate
+
 * rev 85
 - added an icon
 - fixed the last tab not being remembered properly

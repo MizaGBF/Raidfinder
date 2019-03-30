@@ -18,7 +18,6 @@ python -m pip install winsound
 bonus: The command to update pip is:
 python -m pip install --upgrade pip
 
-
 == UPDATE THE PACKAGES ==
 Same commands as during the installation process
 
@@ -52,10 +51,6 @@ Always backup your file when editing. Also, if you encounter errors, check you d
 == SOUND FILE (for Windows) ==
 Just replace 'alert.wav' with another file if you want to change the sound effect.
 It must be named 'alert.wav'
-
-== CHROME EXTENSION ==
-If you want to use the viramate auto-join feature, simply install the extension provided with this app.
-Refer to manual.html for more informations.
 
 == LINUX AND MAC ==
 The installation should be similar.

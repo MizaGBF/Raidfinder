@@ -45,7 +45,7 @@ else: # windows
 # Variables
 # =============================================================================================
 # version number
-revision = "rev.85"
+revision = "rev.86"
 # to store the twitter API keys ( https://developer.twitter.com/en/apps )
 consumer_key = None
 consumer_secret = None
@@ -737,12 +737,15 @@ def updateGui(): # called in the main thread (because Tkinter isn't thread safe)
     logMutex.acquire()
     if len(logStrings) > 0:
         logtext.configure(state="normal") # state set to normal to write in
-        for i in range(0, len(logStrings)):
-            logtext.insert(Tk.END, logStrings[i]+"\n")
-            if logSize > logLimit: # one call = one line, so if the number of line reachs the limit...
-                logtext.delete(1.0, 2.0) # delete the oldest line
-            else: # else, increase
-                logSize += 1
+        try:
+            for i in range(0, len(logStrings)):
+                logtext.insert(Tk.END, logStrings[i]+"\n")
+                if logSize > logLimit: # one call = one line, so if the number of line reachs the limit...
+                    logtext.delete(1.0, 2.0) # delete the oldest line
+                else: # else, increase
+                    logSize += 1
+        except:
+            pass
         logtext.configure(state="disabled") # back to read only
         logtext.yview(Tk.END) # to the end of the text
         del logStrings[:] # delete the stored lines
