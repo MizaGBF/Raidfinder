@@ -17,6 +17,9 @@ from tkinter import colorchooser, simpledialog, messagebox
 import pyperclip
 import tweepy
 
+# version number
+revision = "rev.90"
+
 # =============================================================================================
 # Sound
 # =============================================================================================
@@ -44,8 +47,6 @@ else: # windows
 # =============================================================================================
 # Variables
 # =============================================================================================
-# version number
-revision = "rev.86"
 # to store the twitter API keys ( https://developer.twitter.com/en/apps )
 consumer_key = None
 consumer_secret = None
@@ -775,10 +776,6 @@ def twitter_stream():
     global stream
     log("[System] Connecting the twitter stream...")
     try: # tweepy stuff
-        auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-        auth.secure = True
-        auth.set_access_token(access_token, access_token_secret)
-        api = tweepy.API(auth, retry_count=100, retry_delay=8, retry_errors=set([401, 404, 420, 500, 502, 503, 504]), wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
         streamListener = TwitterStreamListener()
         stream = tweepy.Stream(auth=auth, listener=streamListener)
         stream.filter(track=searchStrings) # this thread will block here until an issue occur
@@ -1020,7 +1017,7 @@ def saveConfig(filename): # called when quitting
         'duplicate': str(settOn[sDupe]),
         'clickcolor': str(buttonColor[1]),
         'queuesize': str(futureQueueSize),
-        'lasttab':str( raidTabSaved),
+        'lasttab':str( raidTabSaved)
         }
 
     if customCount:
@@ -1174,6 +1171,14 @@ if __name__ == "__main__":
 
     if cfgLoaded: # if the twitter keys are loaded
         updateCustomRaids()
+        # twitter auth
+        try:
+            auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+            auth.secure = True
+            auth.set_access_token(access_token, access_token_secret)
+            api = tweepy.API(auth, retry_count=100, retry_delay=8, retry_errors=set([401, 404, 420, 500, 502, 503, 504]), wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
+        except:
+            pass
         # messages to the user
         if not settOn[sLog]: log("[Info] Logs are disabled", True)
         if not settOn[sJP]: log("[Info] Japanese is disabled")

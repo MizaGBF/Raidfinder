@@ -1,3 +1,16 @@
+* rev 90
+- updated the Kirin & Huanglong HL code to the new one
+
+* rev 89
+- fixed the Four Primarchs raid codes
+
+* rev 88
+- better (hopefully) handling of the reconnection to twitter
+- added the Four Primarchs raid
+
+* rev 87
+- added Lucilius raids
+
 * rev 86
 - removed the extension, RIP Viramate
 

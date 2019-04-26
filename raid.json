@@ -409,8 +409,8 @@
         ], 
         [
             "H.&Kirin HL", 
-            "Lvl 120 Huanglong", 
-            "Lv120 黄龍"
+            "Huanglong & Qilin (Impossible)", 
+            "黄龍・黒麒麟HL"
         ], 
         [
             "dummy"
@@ -537,15 +537,19 @@
             "Lv120 バイヴカハ"
         ], 
         [
+            "Lucilius HL", 
+            "Lvl 150 Lucilius", 
+            "Lv150 ルシファー"
+        ],
+        [
             "Tiamat Malice", 
             "Lvl 150 Tiamat Malice", 
             "Lv150 ティアマト・マリス"
         ],
         [
-            "dummy"
-        ], 
-        [
-            "dummy"
+            "Primarchs HL", 
+            "The Four Primarchs", 
+            "四大天司ＨＬ"
         ], 
         [
             "Prometheus", 
@@ -553,8 +557,10 @@
             "Lv120 プロメテウス"
         ],  
         [
-            "dummy"
-        ], 
+            "Lucilius HL+", 
+            "Lvl 250 Lucilius", 
+            "Lv250 ルシファー"
+        ],
         [
             "dummy"
         ], 
@@ -643,7 +649,7 @@
         ], 
         [
             "#e5d7d7", 
-            "Impossible",
+            "HL",
             3
         ], 
         [
