@@ -1,3 +1,6 @@
+* rev 91
+- added the Magna+ raids
+
 * rev 90
 - updated the Kirin & Huanglong HL code to the new one
 

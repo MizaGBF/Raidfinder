@@ -201,6 +201,11 @@
             "Lv50 ティアマト・マグナ"
         ], 
         [
+            "Tiamat Ω+", 
+            "Lvl 60 Tiamat Omega", 
+            "Lv60 ティアマト・マグナ"
+        ], 
+        [
             "Nezha", 
             "Lvl 100 Nezha", 
             "Lv100 ナタク"
@@ -211,14 +216,14 @@
             "Lv100 ガルーダ"
         ], 
         [
-            "Raphael", 
-            "Lvl 100 Raphael", 
-            "Lv100 ラファエル"
-        ], 
-        [
             "Colossus Ω", 
             "Lvl 70 Colossus Omega", 
             "Lv70 コロッサス・マグナ"
+        ], 
+        [
+            "Colossus Ω+", 
+            "Lvl 80 Colossus Omega", 
+            "Lv80 コロッサス・マグナ"
         ], 
         [
             "Flam=Glass", 
@@ -231,14 +236,14 @@
             "Lv100 アテナ"
         ], 
         [
-            "Michael", 
-            "Lvl 100 Michael", 
-            "Lv100 ミカエル"
-        ], 
-        [
             "Leviathan Ω", 
             "Lvl 60 Leviathan Omega", 
             "Lv60 リヴァイアサン・マグナ"
+        ], 
+        [
+            "Leviathan Ω+", 
+            "Lvl 70 Leviathan Omega", 
+            "Lv70 リヴァイアサン・マグナ"
         ], 
         [
             "Macula", 
@@ -251,14 +256,14 @@
             "Lv100 グラニ"
         ], 
         [
-            "Gabriel", 
-            "Lvl 100 Gabriel", 
-            "Lv100 ガブリエル"
-        ], 
-        [
             "Yggdrasil Ω", 
             "Lvl 60 Yggdrasil Omega", 
             "Lv60 ユグドラシル・マグナ"
+        ], 
+        [
+            "Yggdrasil Ω+", 
+            "Lvl 70 Yggdrasil Omega", 
+            "Lv70 ユグドラシル・マグナ"
         ], 
         [
             "Medusa", 
@@ -271,14 +276,14 @@
             "Lv100 バアル"
         ], 
         [
-            "Uriel", 
-            "Lvl 100 Uriel", 
-            "Lv100 ウリエル"
-        ], 
-        [
             "Celeste Ω", 
             "Lvl 75 Celeste Omega", 
             "Lv75 セレスト・マグナ"
+        ], 
+        [
+            "Celeste Ω+", 
+            "Lvl 85 Celeste Omega", 
+            "Lv85 セレスト・マグナ"
         ], 
         [
             "D.A.Olivia", 
@@ -291,12 +296,14 @@
             "Lv100 リッチ"
         ], 
         [
-            "dummy"
-        ], 
-        [
             "Chevalier Ω", 
             "Lvl 75 Luminiera Omega", 
             "Lv75 シュヴァリエ・マグナ"
+        ], 
+        [
+            "Chevalier Ω+", 
+            "Lvl 85 Luminiera Omega", 
+            "Lv85 シュヴァリエ・マグナ"
         ], 
         [
             "Apollo", 
@@ -309,9 +316,6 @@
             "Lv100 オーディン"
         ], 
         [
-            "next"
-        ], 
-[
             "Zhuque", 
             "Lvl 60 Zhuque", 
             "Lv60 朱雀"
@@ -327,9 +331,9 @@
             "Lv100 ゼノ・イフリート"
         ], 
         [
-            "Grand Order", 
-            "Lvl 100 The Grand Order", 
-            "Lv100 ジ・オーダー・グランデ"
+            "Bahamut", 
+            "Lvl 100 Proto Bahamut", 
+            "Lv100 プロトバハムート"
         ], 
         [
             "Xuanwu", 
@@ -347,9 +351,9 @@
             "Lv100 ゼノ・コキュートス"
         ], 
         [
-            "Bahamut", 
-            "Lvl 100 Proto Bahamut", 
-            "Lv100 プロトバハムート"
+            "Ulti.Baha", 
+            "Lvl 150 Ultimate Bahamut", 
+            "Lv150 アルティメットバハムート"
         ], 
         [
             "Baihu", 
@@ -367,9 +371,9 @@
             "Lv100 ゼノ・ウォフマナフ"
         ], 
         [
-            "Ulti.Baha", 
-            "Lvl 150 Ultimate Bahamut", 
-            "Lv150 アルティメットバハムート"
+            "Raphael", 
+            "Lvl 100 Raphael", 
+            "Lv100 ラファエル"
         ], 
         [
             "Qinglong", 
@@ -387,7 +391,9 @@
             "Lv100 ゼノ・サジタリウス"
         ], 
         [
-            "dummy"
+            "Michael", 
+            "Lvl 100 Michael", 
+            "Lv100 ミカエル"
         ], 
         [
             "Huanglong", 
@@ -405,7 +411,9 @@
             "Lv100 ゼノ・ディアボロス"
         ], 
         [
-            "dummy"
+            "Gabriel", 
+            "Lvl 100 Gabriel", 
+            "Lv100 ガブリエル"
         ], 
         [
             "H.&Kirin HL", 
@@ -413,7 +421,9 @@
             "黄龍・黒麒麟HL"
         ], 
         [
-            "dummy"
+            "Grand Order", 
+            "Lvl 100 The Grand Order", 
+            "Lv100 ジ・オーダー・グランデ"
         ], 
         [
             "X. Corrow", 
@@ -421,8 +431,10 @@
             "Lv100 ゼノ・コロゥ"
         ], 
         [
-            "next"
-        ],
+            "Uriel", 
+            "Lvl 100 Uriel", 
+            "Lv100 ウリエル"
+        ], 
         [
             "Tiamat HL", 
             "Lvl 100 Tiamat Omega Ayr", 
