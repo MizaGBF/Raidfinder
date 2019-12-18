@@ -1,3 +1,6 @@
+* rev 92
+- added new HL raids
+
 * rev 91
 - added the Magna+ raids
 

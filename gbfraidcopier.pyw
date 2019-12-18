@@ -18,7 +18,7 @@ import pyperclip
 import tweepy
 
 # version number
-revision = "rev.91"
+revision = "rev.92"
 
 # =============================================================================================
 # Sound
