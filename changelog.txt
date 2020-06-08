@@ -9,6 +9,7 @@
 - The raid list can now be reloaded at runtime (it's now easier to test your custom raid.json)
 - Fixed a few mistakes in the raid codes (Xeno raid english codes were incorrect)
 - Custom raid limit up to 30
+- Editing a Custom raid doesn't require to restart the twitter stream anymore
 - The urllib error "('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))" is now handled differently. It shouldn't interrupt the stream anymore
 - The twitter stream now behave differently on error, which will hopefully avoid the infinite twitter reconnection issue
 - Increased the log box height
