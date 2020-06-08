@@ -1,4 +1,4 @@
-version = "2.1" # raidfinder version
+version = "2.2" # raidfinder version
 
 #######################################################################
 # import
@@ -458,9 +458,12 @@ class RaidfinderUI(Tk.Tk):
         Tk.Button(self.subtabs[-1], text="Latest Version", command=lambda n=0 : self.openBrowser(n)).grid(row=0, column=2, sticky="ews") # download link button
         Tk.Button(self.subtabs[-1], text="Latest raid.json", command=lambda n=1 : self.openBrowser(n)).grid(row=1, column=2, sticky="ews") # download link button
 
+        # thread count spinbox
         Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Tweet processing threads").grid(row=0, column=3, sticky="ews")
-        self.tweetThreadCount = Tk.StringVar(value=str(self.raidfinder.maxTweetThread))
-        Tk.Spinbox(self.subtabs[-1], from_=1, to=50, textvariable=self.tweetThreadCount, command=lambda: self.updateTweetThreadCount()).grid(row=1, column=3, sticky="ews")
+        self.threadSpinBox = Tk.Spinbox(self.subtabs[-1], from_=1, to=50, textvariable=Tk.StringVar(value=str(self.raidfinder.maxTweetThread)), validatecommand=self.updateTweetThreadCount)
+        self.threadSpinBox.grid(row=1, column=3, sticky="ews")
+        self.threadSpinBox.bind("<FocusIn>", self.focusin)
+        self.threadSpinBox.bind("<FocusOut>", self.focusout)
 
         ### stats
         # mostly text labels, you can skip over it
@@ -641,15 +644,29 @@ class RaidfinderUI(Tk.Tk):
             else:
                 messagebox.showinfo("Error", "Failed to reload 'raid.json'\Exception: {}".format(err))
 
-    def updateTweetThreadCount(self):
-        n = int(self.tweetThreadCount.get())
-        while n < len(self.raidfinder.tweetDaemon):
-            self.raidfinder.tweetDaemon.pop()
-        while n > len(self.raidfinder.tweetDaemon):
-            self.raidfinder.tweetDaemon.append(threading.Thread(target=self.raidfinder.processTweet, args=[len(self.raidfinder.tweetDaemon)]))
-            self.raidfinder.tweetDaemon[-1].setDaemon(True)
-            self.raidfinder.tweetDaemon[-1].start()
-        self.raidfinder.maxTweetThread = len(self.raidfinder.tweetDaemon)
+    def updateTweetThreadCount(self, entry):
+        try: # validate the spinbox value
+            n = int(entry)
+            valid = value in range(1, 50)
+        except ValueError:
+            valid = False
+        if not valid:
+            self.threadSpinBox.after_idle(lambda: self.threadSpinBox.config(validate='focusout'))
+        else: # update our threads
+            while n < len(self.raidfinder.tweetDaemon):
+                self.raidfinder.tweetDaemon.pop()
+            while n > len(self.raidfinder.tweetDaemon):
+                self.raidfinder.tweetDaemon.append(threading.Thread(target=self.raidfinder.processTweet, args=[len(self.raidfinder.tweetDaemon)]))
+                self.raidfinder.tweetDaemon[-1].setDaemon(True)
+                self.raidfinder.tweetDaemon[-1].start()
+            self.raidfinder.maxTweetThread = len(self.raidfinder.tweetDaemon)
+        return valid
+
+    def focusin(self, event): # event for managing a widget focus
+        self.inputting = True
+
+    def focusout(self, event): # event for managing a widget focus
+        self.inputting = False
 
     def resetStats(self): # simply reset the stats
         self.raidfinder.stats = {'runtime':None, 'tweet':0, 'all tweet':0, 'dupe':0, 'blacklist':0, 'last':None}

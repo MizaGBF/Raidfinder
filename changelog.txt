@@ -1,3 +1,7 @@
+* 2.2
+- Keyboard shortcut disabled while inputting directly a new thread count
+- Minor changes
+
 * 2.1
 - Added multithreading to the tweet processing function
 - Added a new setting to change the number of thread on the fly
