@@ -1,3 +1,8 @@
+* 2.1
+- Added multithreading to the tweet processing function
+- Added a new setting to change the number of thread on the fly
+- Minor changes and fixes
+
 * 2.0
 - Major rewrite of the raidfinder and changed the way the version number if incremented, as a result
 - Removed the Show, Copy and Alert individual buttons, the raid list is more compact as a result
