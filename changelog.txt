@@ -4,6 +4,7 @@
 - Tweepy filter is now way smaller, which should result in better performance
 - Moved the most import settings under the raid list
 - The setting to disable the log has been removed
+- The mute setting has been replaced with the sound setting
 - The raid queue has been removed. Give me feedback if you want it back
 - raid.json format has been improved. Old raid.json aren't compatible (if you made a custom one, please use the new one as base)
 - The raid list can now be reloaded at runtime (it's now easier to test your custom raid.json)
