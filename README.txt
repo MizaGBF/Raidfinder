@@ -1,8 +1,7 @@
 ﻿== PYTHON 2 USERS ==
-If you were using the previous python 2 version, this one is now using python 3. python 2 isn't supported starting from 2020.
-You might want to uninstall python2 before installing python 3, as coexisting python installation can be a big pain in the butt.
+If you were using the previous python 2 version, this one is now using python 3.
+You might want to uninstall python2 before installing python 3, as coexisting python installations can be a big pain in the butt.
 (It will also fix your file association in windows explorer)
-I'll keep an old version bundled with but I recommend making the switch.
 
 == INSTALLATION ==
 1) Download and Install Python 3.7 https://www.python.org/ (I haven't tested on a further version)
@@ -33,20 +32,27 @@ If you need to find your key later, the application you created should be listed
 
 == USAGE ==
 Just double click on 'gbfraidcopier.pyw', assuming you installed everything properly
+Alternatively on Windows, shift+right click in the folder > "Open a command prompt here" > type the command "python gbfraidcopier.pyw" without the quotes. If python isn't in your PATH, you need to write its full path instead of just "python".
 
 == BLACKLIST ==
-If you need to blacklist users, open blacklist.txt (create it if you deleted it or it's missing) and add the user twitter handle (without the @) in the file.
+If you need to blacklist twitter users, open blacklist.txt (create it if you deleted it or it's missing) and add the user twitter handle (without the @) in the file.
 One handle by line.
 You can also put your own twitter handle in, so you don't try to join your own raids by mistake.
 
 == JSON ==
 The 'raid.json' file is used to load all raids displayed on the ui and more. You can edit it to add/remove raids or change the presentation.
-
-* The first array contains the raid list. Raids are loaded in order and displayed from left to right, top to bottom, up to 24 per tab. To skip a space, use the "dummy" keyword. To go early on the next tab, use the "next" keyword. The custom tab can't be modified.
-* The second array contains data used to make the tab. A tab is composed of : color (in hexadecimal), name, number of labels at the top.
-
-The custom tab is a special case, again. You can't set the number of labels at the top (as the number of raid is fixed) and it must always be the last one.
 Always backup your file when editing. Also, if you encounter errors, check you didn't forget a comma between two objects.
+
+Quick explanation:
+* "custom color" if the Custom tab background color
+* A page correspond to a tab:
+    * "name" is its name
+    * "color" is its background color
+    * "list" contains all the raids to be displayed in this tab
+    * A raid in the "list" has 5 fields:
+        * its "name"
+        * its "english" and "japanese" codes
+        * its position on the tab, "posX" being the horizontal position and "posY" the vertical one. Just imagine the tab is a 2D grid.
 
 == SOUND FILE (for Windows) ==
 Just replace 'alert.wav' with another file if you want to change the sound effect.
@@ -60,4 +66,4 @@ I have no solution for mac. Feel free to edit the script if you have one, though
 
 == TROUBLESHOOTING ==
 You can rename 'gbfraidcopier.pyw' into 'gbfraidcopier.py' to open the command prompt. An error message may appear on this.
-You can also open a command prompt with shift + right click and start manually with the command "python gbfraidcopier.pyw". If python isn't in your PATH, you need to write its full path instead of just "python".
+Alternatively on Windows, shift+right click in the folder > "Open a command prompt here" > type the command "python gbfraidcopier.pyw" without the quotes. If python isn't in your PATH, you need to write its full path instead of just "python".

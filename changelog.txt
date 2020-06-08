@@ -1,3 +1,25 @@
+* 2.0
+- Major rewrite of the raidfinder and changed the way the version number if incremented, as a result
+- Removed the Show, Copy and Alert individual buttons, the raid list is more compact as a result
+- Tweepy filter is now way smaller, which should result in better performance
+- Moved the most import settings under the raid list
+- The setting to disable the log has been removed
+- The raid queue has been removed. Give me feedback if you want it back
+- raid.json format has been improved. Old raid.json aren't compatible (if you made a custom one, please use the new one as base)
+- The raid list can now be reloaded at runtime (it's now easier to test your custom raid.json)
+- Fixed a few mistakes in the raid codes (Xeno raid english codes were incorrect)
+- Custom raid limit up to 30
+- The urllib error "('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))" is now handled differently. It shouldn't interrupt the stream anymore
+- The twitter stream now behave differently on error, which will hopefully avoid the infinite twitter reconnection issue
+- Increased the log box height
+- Lot of minor changes and fixes
+
+* rev 94
+- added Beelzebub
+
+* rev 93
+- added Lindwyrm HL
+
 * rev 92
 - added new HL raids
 
