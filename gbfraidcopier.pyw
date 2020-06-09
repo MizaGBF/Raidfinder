@@ -330,14 +330,14 @@ class Raidfinder(tweepy.StreamListener):
             try:
                 if i >= len(self.tweetDaemon):
                     return
-                try: data = self.tweetQueue.get(timeout=1) # get the next tweet data
+                try: data = self.tweetQueue.get(block=True, timeout=1) # get the next tweet data
                 except:
                     time.sleep(0.01)
                     continue
                 if self.paused or not self.running: # if the app isn't running, we have nothing to do and we don't care about the tweets
                     if i <= 0: # only the main thread clears the queue while the app is paused
-                        while not self.tweetQueue.empty(): # empty the queue (because we won't process it)
-                            try: self.tweetQueue.get()
+                        while not self.tweetQueue.empty() and (self.paused or not self.running): # empty the queue (because we won't process it)
+                            try: self.tweetQueue.get(block=True, timeout=1)
                             except: pass
                     else:
                         time.sleep(0.01) # else sleep during 10 ms
