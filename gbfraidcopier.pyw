@@ -1,4 +1,4 @@
-version = "2.2" # raidfinder version
+version = "2.3" # raidfinder version
 
 #######################################################################
 # import
@@ -245,7 +245,7 @@ class Raidfinder(tweepy.StreamListener):
 
     def on_exception(self, exception): # when a problem occurs
         if str(exception).find("('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))") != -1:
-            return
+            return True
         elif self.connected: # exception happened while being connected
             self.UI.log("[Error] An exception occurred: {}".format(exception))
             print(exception)
@@ -253,6 +253,7 @@ class Raidfinder(tweepy.StreamListener):
         else: # else, the keys are probably invalid
             self.UI.log("[Error] Invalid twitter keys. Check them at https://developer.twitter.com/en/apps") 
             print("on_exception(): ", exception)
+        return False
  
     def on_error(self, status): # for error stuff
         if status == 420:
@@ -483,10 +484,10 @@ class RaidfinderUI(Tk.Tk):
         Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Filtered/Received:").grid(row=3, column=0, sticky="ws")
         self.stats.append(Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=""))
         self.stats[-1].grid(row=3, column=1, sticky="nw")
-        Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="All Tweet rate:").grid(row=1, column=2, sticky="ws")
+        Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Received rate:").grid(row=1, column=2, sticky="ws")
         self.stats.append(Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=""))
         self.stats[-1].grid(row=1, column=3, sticky="nw")
-        Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="User Tweet rate:").grid(row=2, column=2, sticky="ws")
+        Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Filtered rate:").grid(row=2, column=2, sticky="ws")
         self.stats.append(Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=""))
         self.stats[-1].grid(row=2, column=3, sticky="nw")
         Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Blacklisted:").grid(row=1, column=4, sticky="ws")
@@ -495,7 +496,7 @@ class RaidfinderUI(Tk.Tk):
         Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Dupes:").grid(row=2, column=4, sticky="ws")
         self.stats.append(Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=""))
         self.stats[-1].grid(row=2, column=5, sticky="nw")
-        Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Last Tweet:").grid(row=3, column=2, sticky="ws")
+        Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Last Received:").grid(row=3, column=2, sticky="ws")
         self.stats.append(Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=""))
         self.stats[-1].grid(row=3, column=3, sticky="nw")
 
