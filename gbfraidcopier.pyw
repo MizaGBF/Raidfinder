@@ -1,4 +1,4 @@
-version = "2.4" # raidfinder version
+version = "2.5" # raidfinder version
 
 #######################################################################
 # import
@@ -244,21 +244,21 @@ class Raidfinder(tweepy.StreamListener):
         self.connected = False
 
     def on_exception(self, exception): # when a problem occurs
+        print("on_exception():", exception)
         if str(exception).find("('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))") != -1:
             return True
         elif self.connected: # exception happened while being connected
             self.UI.log("[Error] An exception occurred: {}".format(exception))
-            print(exception)
             self.connected = False
         else: # else, unknown error
             self.UI.log("[Error] Twitter keys might be invalid or your Internet is down.") 
             self.UI.log("Exception: {}".format(exception)) 
-            print("on_exception(): ", exception)
             self.connected = False
             self.reconnect = False
         return False
  
     def on_error(self, status): # for error stuff
+        print("on_error():", status)
         if status == 420:
             self.UI.log("[Error] Rate limited by twitter, restarting might be needed")
             self.connected = False
@@ -386,6 +386,7 @@ class Raidfinder(tweepy.StreamListener):
                         self.stats['tweet'] += 1
                         if self.settings['dupe'] and code in self.dupes:
                             self.stats['dupe'] += 1
+                            self.tweetLock.release()
                             break
                         self.tweetLock.release()
                         if self.settings['copy']: pyperclip.copy(code) # copy if enabled
@@ -465,7 +466,7 @@ class RaidfinderUI(Tk.Tk):
 
         # thread count spinbox
         Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Tweet processing threads").grid(row=0, column=3, sticky="ews")
-        self.threadSpinBox = Tk.Spinbox(self.subtabs[-1], from_=1, to=50, textvariable=Tk.StringVar(value=str(self.raidfinder.maxTweetThread)), validatecommand=self.updateTweetThreadCount)
+        self.threadSpinBox = Tk.Spinbox(self.subtabs[-1], from_=1, to=50, textvariable=Tk.StringVar(value=str(self.raidfinder.maxTweetThread)), validate='all', validatecommand=(self.subtabs[-1].register(self.updateTweetThreadCount), '%P'))
         self.threadSpinBox.grid(row=1, column=3, sticky="ews")
         self.threadSpinBox.bind("<FocusIn>", self.focusin)
         self.threadSpinBox.bind("<FocusOut>", self.focusout)
@@ -655,19 +656,17 @@ class RaidfinderUI(Tk.Tk):
     def updateTweetThreadCount(self, entry):
         try: # validate the spinbox value
             n = int(entry)
-            valid = value in range(1, 50)
+            valid = n in range(1, 50)
         except ValueError:
             valid = False
-        if not valid:
-            self.threadSpinBox.after_idle(lambda: self.threadSpinBox.config(validate='focusout'))
-        else: # update our threads
+        if valid: # update the threads
+            self.raidfinder.maxTweetThread = n
             while n < len(self.raidfinder.tweetDaemon):
                 self.raidfinder.tweetDaemon.pop()
             while n > len(self.raidfinder.tweetDaemon):
                 self.raidfinder.tweetDaemon.append(threading.Thread(target=self.raidfinder.processTweet, args=[len(self.raidfinder.tweetDaemon)]))
                 self.raidfinder.tweetDaemon[-1].setDaemon(True)
                 self.raidfinder.tweetDaemon[-1].start()
-            self.raidfinder.maxTweetThread = len(self.raidfinder.tweetDaemon)
         return valid
 
     def focusin(self, event): # event for managing a widget focus
