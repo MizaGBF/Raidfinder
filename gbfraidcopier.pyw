@@ -1,4 +1,4 @@
-version = "2.6" # raidfinder version
+version = "2.7" # raidfinder version
 
 #######################################################################
 # import
@@ -11,6 +11,7 @@ import threading
 import datetime
 import time
 from time import strftime
+import html
 import re
 import base64
 import tkinter as Tk
@@ -355,14 +356,14 @@ class Raidfinder(tweepy.StreamListener):
                     self.stats['blacklist'] += 1
                     self.tweetLock.release()
                     continue # author is blacklisted, we skip
-                st = tweet['text'] # tweet content
+                st = html.unescape(tweet['text']) # tweet content
                 # search the ID in this string
                 m = self.idregex.search(st)
                 if not m:
                     continue # not found, we skip
                 code = m.group(1) # get the code
 
-                p = st.find("参加者募集！\n") # search the japanese 'I need backup' first (because it's most likely to be a japanese tweet
+                p = st.rfind("参加者募集！\n") # search the japanese 'I need backup' first (because it's most likely to be a japanese tweet
                 lg = '(JP)'
                 mp = 0 # minimal position of I need backup + raidname (used later to retrive the author comment if any)
                 if p != -1 and p >= 15: # check the minimal position for jp
@@ -370,7 +371,7 @@ class Raidfinder(tweepy.StreamListener):
                     p += 7 # valid, add the size of JP I need backup. p nows points to the raid name
                     mp = 22
                 else:
-                    p = st.find("I need backup!\n") # same thing but for english
+                    p = st.rfind("I need backup!\n") # same thing but for english
                     if p < 20 or not self.settings['en']: continue # english isn't valid, so is JP, we skip
                     p += 15 # size of I need backup
                     mp = 35
