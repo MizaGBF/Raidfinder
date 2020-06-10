@@ -1,4 +1,4 @@
-version = "2.5" # raidfinder version
+version = "2.6" # raidfinder version
 
 #######################################################################
 # import
@@ -366,11 +366,12 @@ class Raidfinder(tweepy.StreamListener):
                 lg = '(JP)'
                 mp = 0 # minimal position of I need backup + raidname (used later to retrive the author comment if any)
                 if p != -1 and p >= 15: # check the minimal position for jp
+                    if not self.settings['jp']: continue
                     p += 7 # valid, add the size of JP I need backup. p nows points to the raid name
                     mp = 22
                 else:
                     p = st.find("I need backup!\n") # same thing but for english
-                    if p < 20: continue # english isn't valid, so is JP, we skip
+                    if p < 20 or not self.settings['en']: continue # english isn't valid, so is JP, we skip
                     p += 15 # size of I need backup
                     mp = 35
                     lg = '(EN)'
