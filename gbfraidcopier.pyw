@@ -391,9 +391,14 @@ class Raidfinder(tweepy.StreamListener):
                             self.tweetLock.release()
                             break
                         self.tweetLock.release()
-                        if self.settings['copy']: pyperclip.copy(code) # copy if enabled
+                        if self.settings['copy']: pyperclip.copy(code) # copy if enabled (note: is this thread safe?)
                         if self.settings['sound']: playsound() # play a sound if enabled
-                        self.UI.log('[{}] {} : {} {} [@{}] {}'.format(strftime("%H:%M:%S"), r, code, lg, tweet['user']['screen_name'], st[:p-mp]))
+                        comment = "" # get the author comment, ignoring out of range characters
+                        for c in range(0, p-mp):
+                            if ord(st[c]) in range(65536):
+                                comment += st[c]
+                        # write to the log
+                        self.UI.log('[{}] {} : {} {} [@{}] {}'.format(strftime("%H:%M:%S"), r, code, lg, tweet['user']['screen_name'], comment))
                         self.tweetLock.acquire()
                         self.stats['last filter'] = time.time()
                         self.dupes.append(code)

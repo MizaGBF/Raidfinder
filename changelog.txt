@@ -1,3 +1,6 @@
+* 2.8
+- Fixed a crash happening when certain out-of-range unicode characters are written to the log
+
 * 2.7
 - Fixed tweets not being processed if they contain another tweet in the field
 - Fixed some characters being encoded (like the '&' in the HL Huanglong & Qilin english raid code) and, as a result, causing the tweet to not be processed
