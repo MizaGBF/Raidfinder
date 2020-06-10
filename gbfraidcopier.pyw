@@ -1,4 +1,4 @@
-version = "2.7" # raidfinder version
+version = "2.8" # raidfinder version
 
 #######################################################################
 # import
