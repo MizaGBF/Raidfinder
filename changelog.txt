@@ -1,3 +1,6 @@
+* 2.4
+- Fixed stat labels
+
 * 2.3
 - Fixed on_exception() causing issues with the error "('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))". Also return properly now
 - Minor changes

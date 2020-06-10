@@ -1,4 +1,4 @@
-version = "2.3" # raidfinder version
+version = "2.4" # raidfinder version
 
 #######################################################################
 # import
@@ -62,7 +62,7 @@ class Raidfinder(tweepy.StreamListener):
         self.dupes = []
         self.raids = {}
         self.custom = []
-        self.stats = {'runtime':None, 'tweet':0, 'all tweet':0, 'dupe':0, 'blacklist':0, 'last':None}
+        self.stats = {'runtime':None, 'tweet':0, 'all tweet':0, 'dupe':0, 'blacklist':0, 'last':None, 'last filter':None}
         self.time = time.time()
         self.elapsed = 0
         self.lasttab = 0
@@ -250,9 +250,12 @@ class Raidfinder(tweepy.StreamListener):
             self.UI.log("[Error] An exception occurred: {}".format(exception))
             print(exception)
             self.connected = False
-        else: # else, the keys are probably invalid
-            self.UI.log("[Error] Invalid twitter keys. Check them at https://developer.twitter.com/en/apps") 
+        else: # else, unknown error
+            self.UI.log("[Error] Twitter keys might be invalid or your Internet is down.") 
+            self.UI.log("Exception: {}".format(exception)) 
             print("on_exception(): ", exception)
+            self.connected = False
+            self.reconnect = False
         return False
  
     def on_error(self, status): # for error stuff
@@ -375,6 +378,7 @@ class Raidfinder(tweepy.StreamListener):
                 raidName = st[p:].rsplit('\nhttp', 1)[0] # retrieve the raid name
                 self.tweetLock.acquire()
                 self.stats['all tweet'] += 1
+                self.stats['last'] = time.time()
                 self.tweetLock.release()
                 for r in self.raids.get(raidName, []): # get the corresponding raids
                     if r in self.UI.readonly and self.UI.readonly[r]: # check if enabled on the UI
@@ -388,7 +392,7 @@ class Raidfinder(tweepy.StreamListener):
                         if self.settings['sound']: playsound() # play a sound if enabled
                         self.UI.log('[{}] {} : {} {} [@{}] {}'.format(strftime("%H:%M:%S"), r, code, lg, tweet['user']['screen_name'], st[:p-mp]))
                         self.tweetLock.acquire()
-                        self.stats['last'] = time.time()
+                        self.stats['last filter'] = time.time()
                         self.dupes.append(code)
                         if len(self.dupes) > 150: self.dupes = self.dupes[50:]
                         self.tweetLock.release()
@@ -499,6 +503,9 @@ class RaidfinderUI(Tk.Tk):
         Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Last Received:").grid(row=3, column=2, sticky="ws")
         self.stats.append(Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=""))
         self.stats[-1].grid(row=3, column=3, sticky="nw")
+        Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Last Filtered:").grid(row=4, column=2, sticky="ws")
+        self.stats.append(Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=""))
+        self.stats[-1].grid(row=4, column=3, sticky="nw")
 
         # others
         self.statusLabel = Tk.Label(self, text="Offline", bg='#edc7c7') # for the offline/online text
@@ -670,7 +677,7 @@ class RaidfinderUI(Tk.Tk):
         self.inputting = False
 
     def resetStats(self): # simply reset the stats
-        self.raidfinder.stats = {'runtime':None, 'tweet':0, 'all tweet':0, 'dupe':0, 'blacklist':0, 'last':None}
+        self.raidfinder.stats = {'runtime':None, 'tweet':0, 'all tweet':0, 'dupe':0, 'blacklist':0, 'last':None, 'last filter':None}
 
     def openBrowser(self, n): # open the user web browser
         if n == 0: webbrowser.open('https://drive.google.com/file/d/0B9YhZA7dWJUsY1lKMXY4bV9nZUE/view?usp=sharing', new=2)
@@ -706,6 +713,10 @@ class RaidfinderUI(Tk.Tk):
             self.stats[8].config(text="{:.2f}s".format(time.time() - self.raidfinder.stats['last']))
         else: 
             self.stats[8].config(text="0.00s")
+        if self.raidfinder.stats['last filter'] is not None:
+            self.stats[9].config(text="{:.2f}s".format(time.time() - self.raidfinder.stats['last filter']))
+        else: 
+            self.stats[9].config(text="0.00s")
         
         # update the time and online indicator
         self.timeLabel.config(text=strftime("%H:%M:%S"))
