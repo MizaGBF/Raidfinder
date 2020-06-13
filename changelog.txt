@@ -1,3 +1,10 @@
+* 2.9
+- Fixed an error making impossible to change the advanced settings
+- Added a setting to skip 'old tweets' (currently set to 3 minutes or older)
+- Added a stat showing the number of skipped tweets
+- Added a setting to use the tweet creation time (instead of the current time) in the log. You can have an idea of the twitter API delay that way
+- Minor changes
+
 * 2.8
 - Fixed a crash happening when certain out-of-range unicode characters are written to the log
 

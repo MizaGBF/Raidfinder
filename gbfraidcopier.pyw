@@ -1,4 +1,4 @@
-version = "2.8" # raidfinder version
+version = "2.9" # raidfinder version
 
 #######################################################################
 # import
@@ -47,7 +47,7 @@ else:
 class Raidfinder(tweepy.StreamListener):
     def __init__(self):
         # class variables
-        self.settings = {'jp':1, 'en':1, 'sound':1, 'copy':1, 'author':1, 'blacklist':1, 'dupe':1}
+        self.settings = {'jp':1, 'en':1, 'sound':1, 'copy':1, 'author':1, 'blacklist':1, 'dupe':1, 'old':1, 'time_mode':0}
         self.tweetQueue = queue.Queue()
         self.listenerDaemon = None
         self.tweetDaemon = []
@@ -63,7 +63,7 @@ class Raidfinder(tweepy.StreamListener):
         self.dupes = []
         self.raids = {}
         self.custom = []
-        self.stats = {'runtime':None, 'tweet':0, 'all tweet':0, 'dupe':0, 'blacklist':0, 'last':None, 'last filter':None}
+        self.stats = {'runtime':None, 'tweet':0, 'all tweet':0, 'dupe':0, 'blacklist':0, 'last':None, 'last filter':None, 'skip':0}
         self.time = time.time()
         self.elapsed = 0
         self.lasttab = 0
@@ -130,6 +130,10 @@ class Raidfinder(tweepy.StreamListener):
             except: pass
             try: self.settings['dupe'] = int(config['Settings']['duplicate'])
             except: pass
+            try: self.settings['old'] = int(config['Settings']['outdated'])
+            except: pass
+            try: self.settings['time_mode'] = int(config['Settings']['time_mode'])
+            except: pass
             try: self.lasttab = int(config['Settings']['lasttab'])
             except: pass
             try: self.maxTweetThread = int(config['Settings']['maxthread'])
@@ -163,6 +167,8 @@ class Raidfinder(tweepy.StreamListener):
             'author': str(self.settings['author']),
             'blacklist': str(self.settings['blacklist']),
             'duplicate': str(self.settings['dupe']),
+            'outdated': str(self.settings['old']),
+            'time_mode': str(self.settings['time_mode']),
             'lasttab':str(self.lasttab),
             'maxthread':str(self.maxTweetThread)
         }
@@ -245,7 +251,6 @@ class Raidfinder(tweepy.StreamListener):
         self.connected = False
 
     def on_exception(self, exception): # when a problem occurs
-        print("on_exception():", exception)
         if str(exception).find("('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))") != -1:
             return True
         elif self.connected: # exception happened while being connected
@@ -256,6 +261,7 @@ class Raidfinder(tweepy.StreamListener):
             self.UI.log("Exception: {}".format(exception)) 
             self.connected = False
             self.reconnect = False
+        print("on_exception():", exception)
         return False
  
     def on_error(self, status): # for error stuff
@@ -350,6 +356,15 @@ class Raidfinder(tweepy.StreamListener):
                 tweet = json.loads(data) # convert the json
                 if tweet['source'] != u"<a href=\"http://granbluefantasy.jp/\" rel=\"nofollow\">グランブルー ファンタジー</a>":
                     continue # not a GBF tweet, we skip
+                # timestamp check
+                tweet_creation = datetime.datetime.strptime(tweet['created_at'], '%a %b %d %H:%M:%S %z %Y')
+                current_time = datetime.datetime.now(datetime.timezone.utc)
+                delta = current_time - tweet_creation
+                if self.settings['old'] and delta.seconds >= 180:
+                    self.tweetLock.acquire()
+                    self.stats['skip'] += 1
+                    self.tweetLock.release()
+                    continue # tweet is considered old, skip
                 # blacklist check
                 if self.settings['blacklist'] and tweet['user']['screen_name'] in self.blacklist:
                     self.tweetLock.acquire()
@@ -398,7 +413,9 @@ class Raidfinder(tweepy.StreamListener):
                             if ord(st[c]) in range(65536):
                                 comment += st[c]
                         # write to the log
-                        self.UI.log('[{}] {} : {} {} [@{}] {}'.format(strftime("%H:%M:%S"), r, code, lg, tweet['user']['screen_name'], comment))
+                        if self.settings['time_mode'] == 1: t = tweet_creation.strftime("%H:%M:%S")
+                        else: t = current_time.strftime("%H:%M:%S")
+                        self.UI.log('[{}] {} : {} {} [@{}] {}'.format(t, r, code, lg, tweet['user']['screen_name'], comment))
                         self.tweetLock.acquire()
                         self.stats['last filter'] = time.time()
                         self.dupes.append(code)
@@ -462,14 +479,16 @@ class RaidfinderUI(Tk.Tk):
         ### advanced settings
         self.subtabs.append(Tk.Frame(self.mainframes[-1], bg='#dfe5d7'))
         self.mainframes[-1].add(self.subtabs[-1], text="Advanced")
-        Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Ignore duplicate codes", variable=self.newIntVar(self.advsett, self.raidfinder.settings['dupe']), command=lambda n=0: self.toggleAdvSetting(n)).grid(row=0, column=0, stick=Tk.W)
-        Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Show twitter handle", variable=self.newIntVar(self.advsett, self.raidfinder.settings['author']), command=lambda n=1: self.toggleAdvSetting(n)).grid(row=1, column=0, stick=Tk.W)
+        Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Ignore Duplicate Codes", variable=self.newIntVar(self.advsett, self.raidfinder.settings['dupe']), command=lambda n=0: self.toggleAdvSetting(n)).grid(row=0, column=0, stick=Tk.W)
+        Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Show Twitter Handle", variable=self.newIntVar(self.advsett, self.raidfinder.settings['author']), command=lambda n=1: self.toggleAdvSetting(n)).grid(row=1, column=0, stick=Tk.W)
         Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Enable Author Blacklist", variable=self.newIntVar(self.advsett, self.raidfinder.settings['blacklist']), command=lambda n=2: self.toggleAdvSetting(n)).grid(row=2, column=0, stick=Tk.W)
+        Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Skip 3min old Tweets", variable=self.newIntVar(self.advsett, self.raidfinder.settings['old']), command=lambda n=3: self.toggleAdvSetting(n)).grid(row=3, column=0, stick=Tk.W)
+        Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Use tweet timestamp", variable=self.newIntVar(self.advsett, self.raidfinder.settings['time_mode']), command=lambda n=4: self.toggleAdvSetting(n)).grid(row=0, column=1, stick=Tk.W)
 
-        Tk.Button(self.subtabs[-1], text="Reload Blacklist", command=self.reloadBlacklist).grid(row=0, column=1, sticky="ews") # reload blacklist button
-        Tk.Button(self.subtabs[-1], text="Reload Raid List", command=self.reloadRaidList).grid(row=1, column=1, sticky="ews") # reload raid list button
-        Tk.Button(self.subtabs[-1], text="Latest Version", command=lambda n=0 : self.openBrowser(n)).grid(row=0, column=2, sticky="ews") # download link button
-        Tk.Button(self.subtabs[-1], text="Latest raid.json", command=lambda n=1 : self.openBrowser(n)).grid(row=1, column=2, sticky="ews") # download link button
+        Tk.Button(self.subtabs[-1], text="Reload Blacklist", command=self.reloadBlacklist).grid(row=0, column=2, sticky="ews") # reload blacklist button
+        Tk.Button(self.subtabs[-1], text="Reload Raid List", command=self.reloadRaidList).grid(row=1, column=2, sticky="ews") # reload raid list button
+        Tk.Button(self.subtabs[-1], text="Latest Version", command=lambda n=0 : self.openBrowser(n)).grid(row=0, column=3, sticky="ews") # download link button
+        Tk.Button(self.subtabs[-1], text="Latest raid.json", command=lambda n=1 : self.openBrowser(n)).grid(row=1, column=3, sticky="ews") # download link button
 
         # thread count spinbox
         Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Tweet processing threads").grid(row=0, column=3, sticky="ews")
@@ -514,6 +533,12 @@ class RaidfinderUI(Tk.Tk):
         Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Last Filtered:").grid(row=2, column=4, sticky="ws")
         self.stats.append(Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=""))
         self.stats[-1].grid(row=2, column=5, sticky="nw")
+        Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Queued Tweets:").grid(row=3, column=2, sticky="ws")
+        self.stats.append(Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=""))
+        self.stats[-1].grid(row=3, column=3, sticky="nw")
+        Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Skipped:").grid(row=0, column=5, sticky="ws")
+        self.stats.append(Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=""))
+        self.stats[-1].grid(row=0, column=6, sticky="nw")
 
         # others
         self.statusLabel = Tk.Label(self, text="Offline", bg='#edc7c7') # for the offline/online text
@@ -587,10 +612,12 @@ class RaidfinderUI(Tk.Tk):
         else:  self.log("[Settings] '{}' is disabled".format(self.mainsett_tag[n]))
 
     def toggleAdvSetting(self, n): # called when un/checking an advanced setting
-        state = self.subsett[n].get()
+        state = self.advsett[n].get()
         if n == 0: self.raidfinder.settings['dupe'] = state
         elif n == 1: self.raidfinder.settings['author'] = state
         elif n == 2: self.raidfinder.settings['blacklist'] = state
+        elif n == 3: self.raidfinder.settings['old'] = state
+        elif n == 4: self.raidfinder.settings['time_mode'] = state
 
     def editCustom(self, i): # called when editing a custom raid
         self.inputting = True # to disable the keyboard shortcuts
@@ -683,7 +710,7 @@ class RaidfinderUI(Tk.Tk):
         self.inputting = False
 
     def resetStats(self): # simply reset the stats
-        self.raidfinder.stats = {'runtime':None, 'tweet':0, 'all tweet':0, 'dupe':0, 'blacklist':0, 'last':None, 'last filter':None}
+        self.raidfinder.stats = {'runtime':None, 'tweet':0, 'all tweet':0, 'dupe':0, 'blacklist':0, 'last':None, 'last filter':None, 'skip':0}
 
     def openBrowser(self, n): # open the user web browser
         if n == 0: webbrowser.open('https://drive.google.com/file/d/0B9YhZA7dWJUsY1lKMXY4bV9nZUE/view?usp=sharing', new=2)
@@ -723,6 +750,8 @@ class RaidfinderUI(Tk.Tk):
             self.stats[9].config(text="{:.2f}s".format(time.time() - self.raidfinder.stats['last filter']))
         else: 
             self.stats[9].config(text="0.00s")
+        self.stats[10].config(text="{}".format(self.raidfinder.tweetQueue.qsize()))
+        self.stats[11].config(text="{}".format(self.raidfinder.stats['skip']))
         
         # update the time and online indicator
         self.timeLabel.config(text=strftime("%H:%M:%S"))
