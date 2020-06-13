@@ -482,8 +482,8 @@ class RaidfinderUI(Tk.Tk):
         Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Ignore Duplicate Codes", variable=self.newIntVar(self.advsett, self.raidfinder.settings['dupe']), command=lambda n=0: self.toggleAdvSetting(n)).grid(row=0, column=0, stick=Tk.W)
         Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Show Twitter Handle", variable=self.newIntVar(self.advsett, self.raidfinder.settings['author']), command=lambda n=1: self.toggleAdvSetting(n)).grid(row=1, column=0, stick=Tk.W)
         Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Enable Author Blacklist", variable=self.newIntVar(self.advsett, self.raidfinder.settings['blacklist']), command=lambda n=2: self.toggleAdvSetting(n)).grid(row=2, column=0, stick=Tk.W)
-        Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Skip 3min old Tweets", variable=self.newIntVar(self.advsett, self.raidfinder.settings['old']), command=lambda n=3: self.toggleAdvSetting(n)).grid(row=3, column=0, stick=Tk.W)
-        Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Use tweet timestamp", variable=self.newIntVar(self.advsett, self.raidfinder.settings['time_mode']), command=lambda n=4: self.toggleAdvSetting(n)).grid(row=0, column=1, stick=Tk.W)
+        Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Skip 3min Old Tweets", variable=self.newIntVar(self.advsett, self.raidfinder.settings['old']), command=lambda n=3: self.toggleAdvSetting(n)).grid(row=3, column=0, stick=Tk.W)
+        Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Use Tweet Timestamp", variable=self.newIntVar(self.advsett, self.raidfinder.settings['time_mode']), command=lambda n=4: self.toggleAdvSetting(n)).grid(row=0, column=1, stick=Tk.W)
 
         Tk.Button(self.subtabs[-1], text="Reload Blacklist", command=self.reloadBlacklist).grid(row=0, column=2, sticky="ews") # reload blacklist button
         Tk.Button(self.subtabs[-1], text="Reload Raid List", command=self.reloadRaidList).grid(row=1, column=2, sticky="ews") # reload raid list button
@@ -491,9 +491,9 @@ class RaidfinderUI(Tk.Tk):
         Tk.Button(self.subtabs[-1], text="Latest raid.json", command=lambda n=1 : self.openBrowser(n)).grid(row=1, column=3, sticky="ews") # download link button
 
         # thread count spinbox
-        Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Tweet processing threads").grid(row=0, column=3, sticky="ews")
+        Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Tweet processing threads").grid(row=0, column=4, sticky="ews")
         self.threadSpinBox = Tk.Spinbox(self.subtabs[-1], from_=1, to=50, textvariable=Tk.StringVar(value=str(self.raidfinder.maxTweetThread)), validate='all', validatecommand=(self.subtabs[-1].register(self.updateTweetThreadCount), '%P'))
-        self.threadSpinBox.grid(row=1, column=3, sticky="ews")
+        self.threadSpinBox.grid(row=1, column=4, sticky="ews")
         self.threadSpinBox.bind("<FocusIn>", self.focusin)
         self.threadSpinBox.bind("<FocusOut>", self.focusout)
 
