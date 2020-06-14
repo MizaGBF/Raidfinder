@@ -1,3 +1,7 @@
+* 2.11
+- Added a ping stat (stream.twitter.com is pinged every second or so. 'Down' means packet loss)
+- Minor changes
+
 * 2.10
 - Removed an useless call to the twitter API, leftover from the pre-2.0 version
 - The Tweepy stream now use a default timeout of 4 seconds
