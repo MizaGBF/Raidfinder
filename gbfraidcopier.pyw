@@ -1,4 +1,4 @@
-version = "2.11" # raidfinder version
+version = "2.12" # raidfinder version
 
 #######################################################################
 # import
@@ -52,8 +52,9 @@ class Raidfinder(tweepy.StreamListener):
         self.settings = {'jp':1, 'en':1, 'sound':1, 'copy':1, 'author':1, 'blacklist':1, 'dupe':1, 'old':1, 'time_mode':0}
         self.tweetQueue = queue.Queue()
         self.tweetDaemon = []
-        self.maxTweetThread = 4 # control the number of tweet processing threads
+        self.maxTweetThread = 4 # default value
         self.THREAD_LIMIT = 50 # const
+        self.TWITTER_TIMEOUT = 4 # const
         self.tweetLock0 = threading.Lock()
         self.tweetLock1 = threading.Lock()
         self.tweetLock2 = threading.Lock()
@@ -70,10 +71,12 @@ class Raidfinder(tweepy.StreamListener):
         self.dupes = []
         self.raids = {}
         self.custom = []
-        self.stats = {'runtime':None, 'tweet':0, 'all tweet':0, 'dupe':0, 'blacklist':0, 'last':None, 'last filter':None, 'skip':0, 'delay':0, 'ping':''}
+        self.stats = {'runtime':None, 'tweet':0, 'all tweet':0, 'dupe':0, 'blacklist':0, 'last':None, 'last filter':None, 'skip':0, 'delay':0}
         self.time = time.time()
         self.elapsed = 0
         self.lasttab = 0
+        self.ping = None
+        self.pingLock = threading.Lock()
 
         # tweepy stuff
         self.keys = {'consumer_key': '', 'consumer_secret': '', 'access_token_secret': '', 'access_token' : ''}
@@ -316,10 +319,6 @@ class Raidfinder(tweepy.StreamListener):
                 listenerDaemon = threading.Thread(target=self.runDaemon) # start the Twitter listener
                 listenerDaemon.setDaemon(True)
                 listenerDaemon.start()
-
-                pingDaemon = threading.Thread(target=self.pingTwitter) # start the Twitter listener
-                pingDaemon.setDaemon(True)
-                pingDaemon.start()
             except Exception as e:
                 self.UI.log("[Error] Failed to start the raidfinder, check your Twitter keys.")
                 self.UI.log("Check them at https://developer.twitter.com/en/apps")
@@ -332,6 +331,13 @@ class Raidfinder(tweepy.StreamListener):
             if not self.paused and self.connected:
                 if self.stats['runtime'] is None: self.stats['runtime'] = self.elapsed
                 else: self.stats['runtime'] += self.elapsed
+            if self.ping is not None:
+                msg = ""
+                if self.ping[0] > 0: msg += "Minimum {}ms, Average {}ms, Maximum {}ms\n".format(self.ping[2], self.ping[3], self.ping[4])
+                if self.ping[1] > 0: msg += "{:.2f}% Packet Loss".format(100*self.ping[1]/(self.ping[0]+self.ping[1]))
+                messagebox.showinfo("Ping Results", msg)
+                self.UI.log("[Info] Ping Results\n" + msg)
+                self.ping = None
             self.UI.updateAll()
             time.sleep(0.02)
 
@@ -339,24 +345,39 @@ class Raidfinder(tweepy.StreamListener):
         for t in range(0, self.THREAD_LIMIT): # for each possible thread
             self.tweetQueue.put(None) # putting dummies to unblock the threads
 
-    def pingTwitter(self): # update the ping stat
-        regex = re.compile('\d+ms')
-        param = '-n' if platform.system().lower()=='windows' else '-c' # param
-        command = ['ping', param, '1', "stream.twitter.com"] # command
-        while self.running:
-            p = subprocess.Popen(command, stdout = subprocess.PIPE) # call ping
-            strout = str(p.communicate()[0]) # get output
+    def pingTwitter(self, n=1): # update the ping stat
+        if n < 1: return
+        with self.pingLock:
+            if self.ping is not None:
+                return
+            self.UI.log("[Info] Sending 10 pings to stream.twitter.com ...")
+            regex = re.compile('\d+ms')
+            param = '-n' if platform.system().lower()=='windows' else '-c' # param
+            command = ['ping', param, '1', "stream.twitter.com"] # command
+            result = [0, 0, 0, 0, 0]
+            pings = []
+            for i in range(0, n):
+                p = subprocess.Popen(command, stdout = subprocess.PIPE) # call ping
+                strout = str(p.communicate()[0]) # get output
 
-            m = regex.search(strout) # search result
-            if m:
-                self.stats['ping'] = m.group(0)
-            else:
-                self.stats['ping'] = "Down"
-            time.sleep(1)
+                m = regex.search(strout) # search result
+                if m:
+                    try:
+                        pings.append(int(m.group(0)[:-2]))
+                        result[0] += 1
+                    except:
+                        pass
+                else:
+                    result[1] += 1
+            if result[0] > 0:
+                result[2] = sum(pings) // result[0]
+                result[3] = min(pings)
+                result[4] = max(pings)
+            self.ping = result
 
     def runDaemon(self): # tweepy listener thread
         self.UI.log("[System] Connecting to Twitter...")
-        stream = tweepy.Stream(auth=self.auth, listener=self, timeout=4)
+        stream = tweepy.Stream(auth=self.auth, listener=self, timeout=self.TWITTER_TIMEOUT)
         while self.running:
             try: # starting tweepy
                 stream.filter(track=["参加者募集！\n", u"I need backup!\n"]) # this thread will block here until an issue occur
@@ -516,6 +537,7 @@ class RaidfinderUI(Tk.Tk):
 
         Tk.Button(self.subtabs[-1], text="Reload Blacklist", command=self.reloadBlacklist).grid(row=0, column=2, sticky="ews") # reload blacklist button
         Tk.Button(self.subtabs[-1], text="Reload Raid List", command=self.reloadRaidList).grid(row=1, column=2, sticky="ews") # reload raid list button
+        Tk.Button(self.subtabs[-1], text="Ping Twitter", command=self.startPing).grid(row=2, column=2, sticky="ews") # reload raid list button
         Tk.Button(self.subtabs[-1], text="Latest Version", command=lambda n=0 : self.openBrowser(n)).grid(row=0, column=3, sticky="ews") # download link button
         Tk.Button(self.subtabs[-1], text="Latest raid.json", command=lambda n=1 : self.openBrowser(n)).grid(row=1, column=3, sticky="ews") # download link button
 
@@ -532,7 +554,7 @@ class RaidfinderUI(Tk.Tk):
         self.mainframes[-1].add(self.subtabs[-1], text="Statistics")
         self.stats = []
         Tk.Button(self.subtabs[-1], text="Reset", command=self.resetStats).grid(row=4, column=0, sticky="ews") # reset button
-        labels = [["Connection Time:", 0, 0, "0:00:00"],["Received tweets:", 0, 1, "0"],["Filtered tweets:", 0, 2, "0"],["Filtered/Received:", 0, 3, "0.00%"],["Received rate:", 1, 1, "0/s"],["Filtered rate:", 1, 2, "0/s"],["Blacklisted:", 1, 0, "0"],["Dupes:", 2, 0, "0"],["Last Received:", 2, 1, "?"],["Last Filtered:", 2, 2, "?"],["Queued Tweets:", 1, 3, "0"],["Skipped:", 3, 0, "0"],["Twitter Delay:", 2, 3, "0s"],["Twitter Ping:", 3, 3, ""]
+        labels = [["Connection Time:", 0, 0, "0:00:00"],["Received tweets:", 0, 1, "0"],["Filtered tweets:", 0, 2, "0"],["Filtered/Received:", 0, 3, "0.00%"],["Received rate:", 1, 1, "0/s"],["Filtered rate:", 1, 2, "0/s"],["Blacklisted:", 1, 0, "0"],["Dupes:", 2, 0, "0"],["Last Received:", 2, 1, "?"],["Last Filtered:", 2, 2, "?"],["Queued Tweets:", 1, 3, "0"],["Skipped:", 3, 0, "0"],["Twitter Delay:", 2, 3, "0s"]
         ]
         for l in labels:
             Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=l[0]).grid(row=l[2], column=l[1]*2, sticky="ws")
@@ -709,11 +731,16 @@ class RaidfinderUI(Tk.Tk):
         self.inputting = False
 
     def resetStats(self): # simply reset the stats
-        self.raidfinder.stats = {'runtime':None, 'tweet':0, 'all tweet':0, 'dupe':0, 'blacklist':0, 'last':None, 'last filter':None, 'skip':0, 'delay':0, 'ping':''}
+        self.raidfinder.stats = {'runtime':None, 'tweet':0, 'all tweet':0, 'dupe':0, 'blacklist':0, 'last':None, 'last filter':None, 'skip':0, 'delay':0}
 
     def openBrowser(self, n): # open the user web browser
         if n == 0: webbrowser.open('https://drive.google.com/file/d/0B9YhZA7dWJUsY1lKMXY4bV9nZUE/view?usp=sharing', new=2)
         elif n == 1: webbrowser.open('https://drive.google.com/file/d/1mq0zkMwqf6Uvem12gdoUIvSJhC_u7jDT/view?usp=sharing', new=2)
+
+    def startPing(self): # open the user web browser
+        thread = threading.Thread(target=self.raidfinder.pingTwitter, args=[10])
+        thread.setDaemon(True)
+        thread.start()
 
     def updateAll(self): # update the UI
         # update the log
@@ -752,7 +779,6 @@ class RaidfinderUI(Tk.Tk):
         self.stats[10].config(text="{}".format(self.raidfinder.tweetQueue.qsize()))
         self.stats[11].config(text="{}".format(self.raidfinder.stats['skip']))
         self.stats[12].config(text="{}s".format(self.raidfinder.stats['delay']))
-        self.stats[13].config(text="{}".format(self.raidfinder.stats['ping']))
         
         # update the time and online indicator
         self.timeLabel.config(text=strftime("%H:%M:%S"))
