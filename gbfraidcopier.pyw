@@ -511,12 +511,12 @@ class RaidfinderUI(Tk.Tk):
         self.mainframes[-1].add(self.subtabs[-1], text="Statistics")
         self.stats = []
         Tk.Button(self.subtabs[-1], text="Reset", command=self.resetStats).grid(row=4, column=0, sticky="ews") # reset button
-        labels = [["Connection Time:", 0, 0, "0:00:00"],["Received tweets:", 0, 1, "0"],["Filtered tweets:", 0, 2, "0"],["Filtered/Received:", 0, 3, "0.00%"],["Received rate:", 2, 1, "0/s"],["Filtered rate:", 2, 2, "0/s"],["Blacklisted:", 2, 0, "0"],["Dupes:", 4, 0, "0"],["Last Received:", 4, 1, "?"],["Last Filtered:", 4, 2, "?"],["Queued Tweets:", 2, 3, "0"],["Skipped:", 5, 0, "0"],["Tweet Delay:", 4, 3, "0s"],
+        labels = [["Connection Time:", 0, 0, "0:00:00"],["Received tweets:", 0, 1, "0"],["Filtered tweets:", 0, 2, "0"],["Filtered/Received:", 0, 3, "0.00%"],["Received rate:", 1, 1, "0/s"],["Filtered rate:", 1, 2, "0/s"],["Blacklisted:", 1, 0, "0"],["Dupes:", 2, 0, "0"],["Last Received:", 2, 1, "?"],["Last Filtered:", 2, 2, "?"],["Queued Tweets:", 1, 3, "0"],["Skipped:", 3, 0, "0"],["Tweet Delay:", 2, 3, "0s"],
         ]
         for l in labels:
-            Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=l[0]).grid(row=l[2], column=l[1], sticky="ws")
+            Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=l[0]).grid(row=l[2], column=l[1]*2, sticky="ws")
             self.stats.append(Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=l[3]))
-            self.stats[-1].grid(row=l[2], column=l[1]+1, sticky="nw")
+            self.stats[-1].grid(row=l[2], column=l[1]*2+1, sticky="nw")
 
         # others
         self.statusLabel = Tk.Label(self, text="Offline", bg='#edc7c7') # for the offline/online text
