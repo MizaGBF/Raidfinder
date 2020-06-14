@@ -1,4 +1,4 @@
-version = "2.9" # raidfinder version
+version = "2.10" # raidfinder version
 
 #######################################################################
 # import
@@ -49,21 +49,26 @@ class Raidfinder(tweepy.StreamListener):
         # class variables
         self.settings = {'jp':1, 'en':1, 'sound':1, 'copy':1, 'author':1, 'blacklist':1, 'dupe':1, 'old':1, 'time_mode':0}
         self.tweetQueue = queue.Queue()
-        self.listenerDaemon = None
         self.tweetDaemon = []
         self.maxTweetThread = 4 # control the number of tweet processing threads
-        self.tweetLock = threading.Lock()
+        self.THREAD_LIMIT = 50 # const
+        self.tweetLock0 = threading.Lock()
+        self.tweetLock1 = threading.Lock()
+        self.tweetLock2 = threading.Lock()
+        self.tweetLock3 = threading.Lock()
+        self.tweetLock4 = threading.Lock()
+        self.tweetLock5 = threading.Lock()
         self.running = True
         self.pause = False
         self.connected = False
-        self.reconnect = True
+        self.retry_delay = 0
         self.blacklist = []
         self.dupes = []
         self.idregex = re.compile('([A-F0-9]{8}) :')
         self.dupes = []
         self.raids = {}
         self.custom = []
-        self.stats = {'runtime':None, 'tweet':0, 'all tweet':0, 'dupe':0, 'blacklist':0, 'last':None, 'last filter':None, 'skip':0}
+        self.stats = {'runtime':None, 'tweet':0, 'all tweet':0, 'dupe':0, 'blacklist':0, 'last':None, 'last filter':None, 'skip':0, 'delay':0}
         self.time = time.time()
         self.elapsed = 0
         self.lasttab = 0
@@ -71,7 +76,6 @@ class Raidfinder(tweepy.StreamListener):
         # tweepy stuff
         self.keys = {'consumer_key': '', 'consumer_secret': '', 'access_token_secret': '', 'access_token' : ''}
         self.auth = None
-        self.api = None
         self.stream = None
 
         # tweet streaming
@@ -86,7 +90,7 @@ class Raidfinder(tweepy.StreamListener):
         self.runRaidfinder()
 
     def loadConfig(self, tmpLog): # call it once at the start
-        # load the .cfg with the twitter API keys
+        # load the .cfg with the Twitter API keys
         config = configparser.ConfigParser()
         config.read('gbfraidcopier.cfg')
         if len(config) == 0 or 'Keys' not in config: # create a file if empty
@@ -106,7 +110,7 @@ class Raidfinder(tweepy.StreamListener):
         try:
             self.keys = config['Keys']
         except:
-            tmpLog.append("[Error] your 'gbfraidcopier.cfg' file is missing one or multiple twitter keys")
+            tmpLog.append("[Error] your 'gbfraidcopier.cfg' file is missing one or multiple Twitter keys")
             tmpLog.append("Get your personal keys at https://developer.twitter.com/en/apps")
             tmpLog.append("and fill in 'gbfraidcopier.cfg'")
             tmpLog.append("Consult the README for more informations")
@@ -139,6 +143,7 @@ class Raidfinder(tweepy.StreamListener):
             try: self.maxTweetThread = int(config['Settings']['maxthread'])
             except: pass
             if self.maxTweetThread < 1: self.maxTweetThread = 1
+            elif self.maxTweetThread > self.THREAD_LIMIT: self.maxTweetThread = self.THREAD_LIMIT
 
         # custom user raids
         if 'Raids' in config:
@@ -234,51 +239,58 @@ class Raidfinder(tweepy.StreamListener):
 
         return ""
 
-    def on_data(self, data): # when twitter data is received
-        if self.paused or not self.running: # if the app isn't running, nothing to do
-            return True
-        self.tweetQueue.put(data) # queue the data
+    def on_data(self, data): # when Twitter data is received
+        self.tweetQueue.put_nowait((data, datetime.datetime.now(datetime.timezone.utc))) # queue the data and reception time
         return True
 
-    def on_connect(self): # when the twitter stream connects
+    def on_connect(self): # when the Twitter stream connects
         if not self.connected:
             self.UI.log("[System] Twitter stream connected")
         self.connected = True
 
-    def on_disconnect(self): # when the twitter stream disconnects
+    def on_disconnect(self): # when the Twitter stream disconnects
         if self.connected:
             self.UI.log("[System] Twitter stream disconnected")
         self.connected = False
 
     def on_exception(self, exception): # when a problem occurs
-        if str(exception).find("('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))") != -1:
+        print("on_exception():", exception)
+        if str(exception) == "('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))":
+            self.retry_delay = 0
             return True
+        elif str(exception) == "HTTPSConnectionPool(host='stream.twitter.com', port=443): Read timed out.":
+            self.UI.log("[Error] Read timeout. Check your internet connection or Twitter server status.") 
+            self.connected = False
+            self.retry_delay = 10
         elif self.connected: # exception happened while being connected
             self.UI.log("[Error] An exception occurred: {}".format(exception))
             self.connected = False
+            self.retry_delay = 60
         else: # else, unknown error
             self.UI.log("[Error] Twitter keys might be invalid or your Internet is down.") 
             self.UI.log("Exception: {}".format(exception)) 
             self.connected = False
-            self.reconnect = False
-        print("on_exception():", exception)
+            self.retry_delay = -1
         return False
  
     def on_error(self, status): # for error stuff
         print("on_error():", status)
         if status == 420:
-            self.UI.log("[Error] Rate limited by twitter, restarting might be needed")
+            self.UI.log("[Error] Rate limited by Twitter, restarting might be needed")
             self.connected = False
+            self.retry_delay = 90
         elif status >= 500 and status < 600:
-            self.UI.log("[Error] HTTP Error {}: Server error, twitter might be overloaded".format(status))
+            self.UI.log("[Error] HTTP Error {}: Server error, Twitter might be overloaded".format(status))
             self.connected = False
+            self.retry_delay = 90
         elif not self.connected:
-            self.UI.log("[Error] Invalid twitter keys. Check them at https://developer.twitter.com/en/apps")
+            self.UI.log("[Error] Invalid Twitter keys. Check them at https://developer.twitter.com/en/apps")
             self.connected = False
-            self.reconnect = False
+            self.retry_delay = -1
         else:
-            self.UI.log("[Error] HTTP Error {}: Check your internet connection or twitter server status".format(status))
+            self.UI.log("[Error] HTTP Error {}: Check your internet connection or Twitter server status".format(status))
             self.connected = False
+            self.retry_delay = 60
         return False
 
     def runRaidfinder(self): # MAIN FUNCTION
@@ -289,22 +301,21 @@ class Raidfinder(tweepy.StreamListener):
         self.loadBlacklist() # load blacklist.txt
         if self.configLoaded: # don't bother starting the threads if our config file didn't load
             try:
-                # twitter authentification
+                # Twitter authentification
                 self.auth = tweepy.OAuthHandler(self.keys['consumer_key'], self.keys['consumer_secret'])
                 self.auth.secure = True
                 self.auth.set_access_token(self.keys['access_token'], self.keys['access_token_secret'])
-                self.api = tweepy.API(self.auth, retry_count=100, retry_delay=8, retry_errors=set([401, 404, 420, 500, 502, 503, 504]), wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
                 # prepare and start the threads
-                for i in range(0, self.maxTweetThread): # process the tweets
-                    self.tweetDaemon.append(threading.Thread(target=self.processTweet, args=[i]))
+                while len(self.tweetDaemon) < self.maxTweetThread:
+                    self.tweetDaemon.append(threading.Thread(target=self.processTweet, args=[len(self.tweetDeamon)]))
                     self.tweetDaemon[-1].setDaemon(True)
                     self.tweetDaemon[-1].start()
 
-                self.listenerDaemon = threading.Thread(target=self.runDaemon) # start the twitter listener
-                self.listenerDaemon.setDaemon(True)
-                self.listenerDaemon.start()
+                listenerDaemon = threading.Thread(target=self.runDaemon) # start the Twitter listener
+                listenerDaemon.setDaemon(True)
+                listenerDaemon.start()
             except Exception as e:
-                self.UI.log("[Error] Failed to start the raidfinder, check your twitter keys.")
+                self.UI.log("[Error] Failed to start the raidfinder, check your Twitter keys.")
                 self.UI.log("Check them at https://developer.twitter.com/en/apps")
                 self.UI.log("Exception: {}".format(e))
 
@@ -312,64 +323,65 @@ class Raidfinder(tweepy.StreamListener):
         while self.running:
             self.elapsed = time.time() - self.time # measure elapsed time
             self.time = time.time()
-            if not self.paused:
+            if not self.paused and self.connected:
                 if self.stats['runtime'] is None: self.stats['runtime'] = self.elapsed
                 else: self.stats['runtime'] += self.elapsed
             self.UI.updateAll()
             time.sleep(0.02)
 
+        # quitting
+        for t in range(0, self.THREAD_LIMIT): # for each possible thread
+            self.tweetQueue.put(None) # putting dummies to unblock the threads
+
     def runDaemon(self): # tweepy listener thread
         self.UI.log("[System] Connecting to Twitter...")
-        stream = tweepy.Stream(auth=self.auth, listener=self)
+        stream = tweepy.Stream(auth=self.auth, listener=self, timeout=4)
         while self.running:
             try: # starting tweepy
                 stream.filter(track=["参加者募集！\n", u"I need backup!\n"]) # this thread will block here until an issue occur
             except:
                 pass
-            if not self.running or not self.reconnect:
+            if not self.running or self.retry_delay == -1:
                 return
             elif self.connected:
                 continue
-            else:
-                self.UI.log("[System] Attempting a new connection in 90 seconds")
-                time.sleep(90)
+            elif self.retry_delay > 0:
+                if self.retry_delay > 3:
+                    self.UI.log("[System] Attempting a new connection in {} seconds".format(self.retry_delay))
+                time.sleep(self.retry_delay)
                 self.UI.log("[System] Connecting to Twitter...")
                 stream = tweepy.Stream(auth=self.auth, listener=self)
 
     def processTweet(self, i = -1): # tweet processing thread (can be run in parallel)
         while self.running:
             try:
-                if i >= len(self.tweetDaemon):
+                if i >= len(self.tweetDaemon): # quit the thread if the number of threads got reduced
                     return
-                try: data = self.tweetQueue.get(block=True, timeout=1) # get the next tweet data
+                try:
+                    data, current_time = self.tweetQueue.get(block=True, timeout=0.01) # retrieve next tweet data
                 except:
-                    time.sleep(0.01)
                     continue
-                if self.paused or not self.running: # if the app isn't running, we have nothing to do and we don't care about the tweets
-                    if i <= 0: # only the main thread clears the queue while the app is paused
-                        while not self.tweetQueue.empty() and (self.paused or not self.running): # empty the queue (because we won't process it)
-                            try: self.tweetQueue.get(block=True, timeout=1)
-                            except: pass
-                    else:
-                        time.sleep(0.01) # else sleep during 10 ms
-                    continue # continue to loop
+                if not self.running: # app stopped, we quit
+                    return
+                if self.paused: # app paused, we skip
+                    continue
                 tweet = json.loads(data) # convert the json
                 if tweet['source'] != u"<a href=\"http://granbluefantasy.jp/\" rel=\"nofollow\">グランブルー ファンタジー</a>":
                     continue # not a GBF tweet, we skip
                 # timestamp check
                 tweet_creation = datetime.datetime.strptime(tweet['created_at'], '%a %b %d %H:%M:%S %z %Y')
-                current_time = datetime.datetime.now(datetime.timezone.utc)
-                delta = current_time - tweet_creation
-                if self.settings['old'] and delta.seconds >= 180:
-                    self.tweetLock.acquire()
-                    self.stats['skip'] += 1
-                    self.tweetLock.release()
+                delay = current_time - tweet_creation
+                with self.tweetLock0:
+                    self.stats['delay'] = delay.seconds
+
+                if self.settings['old'] and delay.seconds >= 180:
+                    with self.tweetLock1:
+                        self.stats['skip'] += 1
                     continue # tweet is considered old, skip
                 # blacklist check
                 if self.settings['blacklist'] and tweet['user']['screen_name'] in self.blacklist:
-                    self.tweetLock.acquire()
-                    self.stats['blacklist'] += 1
-                    self.tweetLock.release()
+                    with self.tweetLock2:
+                        self.stats['blacklist'] += 1
                     continue # author is blacklisted, we skip
                 st = html.unescape(tweet['text']) # tweet content
                 # search the ID in this string
@@ -393,34 +405,30 @@ class Raidfinder(tweepy.StreamListener):
                     lg = '(EN)'
 
                 raidName = st[p:].rsplit('\nhttp', 1)[0] # retrieve the raid name
-                self.tweetLock.acquire()
-                self.stats['all tweet'] += 1
-                self.stats['last'] = time.time()
-                self.tweetLock.release()
+                with self.tweetLock3:
+                    self.stats['all tweet'] += 1
+                    self.stats['last'] = time.time()
                 for r in self.raids.get(raidName, []): # get the corresponding raids
                     if r in self.UI.readonly and self.UI.readonly[r]: # check if enabled on the UI
-                        self.tweetLock.acquire()
-                        self.stats['tweet'] += 1
-                        if self.settings['dupe'] and code in self.dupes:
-                            self.stats['dupe'] += 1
-                            self.tweetLock.release()
-                            break
-                        self.tweetLock.release()
+                        with self.tweetLock4:
+                            self.stats['tweet'] += 1
+                            if self.settings['dupe'] and code in self.dupes:
+                                self.stats['dupe'] += 1
+                                break
                         if self.settings['copy']: pyperclip.copy(code) # copy if enabled (note: is this thread safe?)
                         if self.settings['sound']: playsound() # play a sound if enabled
-                        comment = "" # get the author comment, ignoring out of range characters
-                        for c in range(0, p-mp):
+                        comment = "" # build the author comment
+                        for c in range(0, p-mp): # ignoring out of range characters
                             if ord(st[c]) in range(65536):
                                 comment += st[c]
                         # write to the log
-                        if self.settings['time_mode'] == 1: t = tweet_creation.strftime("%H:%M:%S")
+                        if self.settings['time_mode'] == 1: t = tweet_creation.strftime("%H:%M:%S") + " UTC"
                         else: t = current_time.strftime("%H:%M:%S")
                         self.UI.log('[{}] {} : {} {} [@{}] {}'.format(t, r, code, lg, tweet['user']['screen_name'], comment))
-                        self.tweetLock.acquire()
-                        self.stats['last filter'] = time.time()
-                        self.dupes.append(code)
-                        if len(self.dupes) > 150: self.dupes = self.dupes[50:]
-                        self.tweetLock.release()
+                        with self.tweetLock5: # stat + dupe cleanup
+                            self.stats['last filter'] = time.time()
+                            self.dupes.append(code)
+                            if len(self.dupes) > 200: self.dupes = self.dupes[50:] # removing 50 oldest if 200 dupes
                         break
             except Exception as e:
                 if i == -1: print(e)
@@ -492,7 +500,7 @@ class RaidfinderUI(Tk.Tk):
 
         # thread count spinbox
         Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Tweet processing threads").grid(row=0, column=4, sticky="ews")
-        self.threadSpinBox = Tk.Spinbox(self.subtabs[-1], from_=1, to=50, textvariable=Tk.StringVar(value=str(self.raidfinder.maxTweetThread)), validate='all', validatecommand=(self.subtabs[-1].register(self.updateTweetThreadCount), '%P'))
+        self.threadSpinBox = Tk.Spinbox(self.subtabs[-1], from_=1, to=self.raidfinder.THREAD_LIMIT, textvariable=Tk.StringVar(value=str(self.raidfinder.maxTweetThread)), validate='all', validatecommand=(self.subtabs[-1].register(self.updateTweetThreadCount), '%P'))
         self.threadSpinBox.grid(row=1, column=4, sticky="ews")
         self.threadSpinBox.bind("<FocusIn>", self.focusin)
         self.threadSpinBox.bind("<FocusOut>", self.focusout)
@@ -503,42 +511,12 @@ class RaidfinderUI(Tk.Tk):
         self.mainframes[-1].add(self.subtabs[-1], text="Statistics")
         self.stats = []
         Tk.Button(self.subtabs[-1], text="Reset", command=self.resetStats).grid(row=4, column=0, sticky="ews") # reset button
-        Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Connection Time:").grid(row=0, column=0, sticky="ws")
-        self.stats.append(Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=""))
-        self.stats[-1].grid(row=0, column=1, sticky="nw")
-        Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Received tweets:").grid(row=1, column=0, sticky="ws")
-        self.stats.append(Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=""))
-        self.stats[-1].grid(row=1, column=1, sticky="nw")
-        Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Filtered tweets:").grid(row=2, column=0, sticky="ws")
-        self.stats.append(Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=""))
-        self.stats[-1].grid(row=2, column=1, sticky="nw")
-        Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Filtered/Received:").grid(row=3, column=0, sticky="ws")
-        self.stats.append(Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=""))
-        self.stats[-1].grid(row=3, column=1, sticky="nw")
-        Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Received rate:").grid(row=1, column=2, sticky="ws")
-        self.stats.append(Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=""))
-        self.stats[-1].grid(row=1, column=3, sticky="nw")
-        Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Filtered rate:").grid(row=2, column=2, sticky="ws")
-        self.stats.append(Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=""))
-        self.stats[-1].grid(row=2, column=3, sticky="nw")
-        Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Blacklisted:").grid(row=0, column=2, sticky="ws")
-        self.stats.append(Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=""))
-        self.stats[-1].grid(row=0, column=3, sticky="nw")
-        Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Dupes:").grid(row=0, column=4, sticky="ws")
-        self.stats.append(Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=""))
-        self.stats[-1].grid(row=0, column=5, sticky="nw")
-        Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Last Received:").grid(row=1, column=4, sticky="ws")
-        self.stats.append(Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=""))
-        self.stats[-1].grid(row=1, column=5, sticky="nw")
-        Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Last Filtered:").grid(row=2, column=4, sticky="ws")
-        self.stats.append(Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=""))
-        self.stats[-1].grid(row=2, column=5, sticky="nw")
-        Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Queued Tweets:").grid(row=3, column=2, sticky="ws")
-        self.stats.append(Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=""))
-        self.stats[-1].grid(row=3, column=3, sticky="nw")
-        Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Skipped:").grid(row=0, column=5, sticky="ws")
-        self.stats.append(Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=""))
-        self.stats[-1].grid(row=0, column=6, sticky="nw")
+        labels = [["Connection Time:", 0, 0, "0:00:00"],["Received tweets:", 0, 1, "0"],["Filtered tweets:", 0, 2, "0"],["Filtered/Received:", 0, 3, "0.00%"],["Received rate:", 2, 1, "0/s"],["Filtered rate:", 2, 2, "0/s"],["Blacklisted:", 2, 0, "0"],["Dupes:", 4, 0, "0"],["Last Received:", 4, 1, "?"],["Last Filtered:", 4, 2, "?"],["Queued Tweets:", 2, 3, "0"],["Skipped:", 5, 0, "0"],["Tweet Delay:", 4, 3, "0s"],
+        ]
+        for l in labels:
+            Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=l[0]).grid(row=l[2], column=l[1], sticky="ws")
+            self.stats.append(Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=l[3]))
+            self.stats[-1].grid(row=l[2], column=l[1]+1, sticky="nw")
 
         # others
         self.statusLabel = Tk.Label(self, text="Offline", bg='#edc7c7') # for the offline/online text
@@ -690,7 +668,7 @@ class RaidfinderUI(Tk.Tk):
     def updateTweetThreadCount(self, entry):
         try: # validate the spinbox value
             n = int(entry)
-            valid = n in range(1, 50)
+            valid = n in range(1, self.raidfinder.THREAD_LIMIT)
         except ValueError:
             valid = False
         if valid: # update the threads
@@ -710,7 +688,7 @@ class RaidfinderUI(Tk.Tk):
         self.inputting = False
 
     def resetStats(self): # simply reset the stats
-        self.raidfinder.stats = {'runtime':None, 'tweet':0, 'all tweet':0, 'dupe':0, 'blacklist':0, 'last':None, 'last filter':None, 'skip':0}
+        self.raidfinder.stats = {'runtime':None, 'tweet':0, 'all tweet':0, 'dupe':0, 'blacklist':0, 'last':None, 'last filter':None, 'skip':0, 'delay':0}
 
     def openBrowser(self, n): # open the user web browser
         if n == 0: webbrowser.open('https://drive.google.com/file/d/0B9YhZA7dWJUsY1lKMXY4bV9nZUE/view?usp=sharing', new=2)
@@ -736,10 +714,10 @@ class RaidfinderUI(Tk.Tk):
         self.stats[2].config(text="{}".format(self.raidfinder.stats['tweet']))
         if self.raidfinder.stats['all tweet'] == 0: self.stats[3].config(text="0%")
         else: self.stats[3].config(text="{:.2f}%".format(100*self.raidfinder.stats['tweet']/self.raidfinder.stats['all tweet']))
-        if self.raidfinder.stats['runtime'] > 0: self.stats[4].config(text="{:.2f}/s".format(self.raidfinder.stats['all tweet']/self.raidfinder.stats['runtime']))
-        else: self.stats[4].config(text="0/s")
-        if self.raidfinder.stats['runtime'] > 0: self.stats[5].config(text="{:.2f}/s".format(self.raidfinder.stats['tweet']/self.raidfinder.stats['runtime']))
-        else: self.stats[5].config(text="0/s")
+        try: self.stats[4].config(text="{:.2f}/s".format(self.raidfinder.stats['all tweet']/self.raidfinder.stats['runtime']))
+        except: self.stats[4].config(text="0/s")
+        try: self.stats[5].config(text="{:.2f}/s".format(self.raidfinder.stats['tweet']/self.raidfinder.stats['runtime']))
+        except: self.stats[5].config(text="0/s")
         self.stats[6].config(text="{}".format(self.raidfinder.stats['blacklist']))
         self.stats[7].config(text="{}".format(self.raidfinder.stats['dupe']))
         if self.raidfinder.stats['last'] is not None:
@@ -752,6 +730,7 @@ class RaidfinderUI(Tk.Tk):
             self.stats[9].config(text="0.00s")
         self.stats[10].config(text="{}".format(self.raidfinder.tweetQueue.qsize()))
         self.stats[11].config(text="{}".format(self.raidfinder.stats['skip']))
+        self.stats[12].config(text="{}s".format(self.raidfinder.stats['delay']))
         
         # update the time and online indicator
         self.timeLabel.config(text=strftime("%H:%M:%S"))

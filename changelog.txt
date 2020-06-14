@@ -1,3 +1,15 @@
+* 2.10
+- Removed an useless call to the twitter API, leftover from the pre-2.0 version
+- The Tweepy stream now use a default timeout of 4 seconds
+- Reworked the tweet processing threads
+- Mutexes are now used in a more pythonic way
+- More mutexes are now used to reduce threads blocking each others as much as possible
+- Added UTC when using the tweet timestamp
+- Added a stat showing the delay between a tweet creation and its processing
+- Fixed the wrong number of processing threads being started
+- Fixed the connection timer increasing even when disconnected
+- Minor changes
+
 * 2.9
 - Fixed an error making impossible to change the advanced settings
 - Added a setting to skip 'old tweets' (currently set to 3 minutes or older)
