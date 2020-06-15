@@ -1,3 +1,9 @@
+* 2.15
+- Removed the stream timeout
+- Removed the skip settings for tweet older than 3 minutes (and the corresponding stat)
+- Added a new setting causing an automatic stream restart when reaching a specific twitter delay (which can also be modified in the advanced settings). The delay between each restart will increase by 10 seconds, capping at 120 seconds. The setting is turned off by default. (If the doesn't work in a satisfying way, it will be rolled back)
+- Other minor changes
+
 * 2.14
 - Added a way to ping Granblue Fantasy and Mobage
 - All ping buttons will play the alert sounds when the ping process starts, if the setting is turned on
