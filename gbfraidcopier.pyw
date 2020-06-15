@@ -1,4 +1,4 @@
-version = "2.16" # raidfinder version
+version = "2.17" # raidfinder version
 
 #######################################################################
 # import
@@ -492,7 +492,8 @@ class Raidfinder(tweepy.StreamListener):
                                 d = datetime.datetime.utcnow() + datetime.timedelta(seconds=32400)
                                 t = d.strftime("%H:%M:%S JST")
                             else: t = strftime("%H:%M:%S")
-                        self.UI.log('[{}] {} : {} {} [@{}] {}'.format(t, r, code, lg, tweet['user']['screen_name'], comment))
+                        if self.settings['author']: self.UI.log('[{}] {} : {} {} [@{}] {}'.format(t, r, code, lg, tweet['user']['screen_name'], comment))
+                        else: self.UI.log('[{}] {} : {} {} {}'.format(t, r, code, lg, comment))
                         with self.tweetLock5: # stat + dupe cleanup
                             self.stats['last filter'] = time.time()
                             self.dupes.append(code)

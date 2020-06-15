@@ -1,3 +1,6 @@
+* 2.17
+- Fixed the twitter author handle settings doing NOTHING (dumb me)
+
 * 2.16
 - Fixed the raid reception time showing with the wrong timezone in the log box
 - "Use Tweet Timestamp" setting renamed "Tweet Creation Time"
