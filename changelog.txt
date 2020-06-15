@@ -1,3 +1,8 @@
+* 2.16
+- Fixed the raid reception time showing with the wrong timezone in the log box
+- "Use Tweet Timestamp" setting renamed "Tweet Creation Time"
+- Added an option to force all timestamps/clocks to JST
+
 * 2.15
 - Removed the stream timeout
 - Removed the skip settings for tweet older than 3 minutes (and the corresponding stat)

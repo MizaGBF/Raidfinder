@@ -1,4 +1,4 @@
-version = "2.15" # raidfinder version
+version = "2.16" # raidfinder version
 
 #######################################################################
 # import
@@ -49,7 +49,7 @@ else:
 class Raidfinder(tweepy.StreamListener):
     def __init__(self):
         # class variables
-        self.settings = {'jp':1, 'en':1, 'sound':1, 'copy':1, 'author':1, 'blacklist':1, 'dupe':1, 'delay':0, 'delay_limit':180, 'time_mode':0, 'max_thread':4}
+        self.settings = {'jp':1, 'en':1, 'sound':1, 'copy':1, 'author':1, 'blacklist':1, 'dupe':1, 'delay':0, 'delay_limit':180, 'time_mode':0, 'max_thread':4, 'jst':0}
         self.tweetQueue = queue.Queue()
         self.tweetDaemon = []
         self.THREAD_LIMIT = 50 # const
@@ -78,7 +78,7 @@ class Raidfinder(tweepy.StreamListener):
         self.high_delay_count = 0
 
         # tweepy stuff
-        self.keys = {'consumer_key': '', 'consumer_secret': '', 'access_token_secret': '', 'access_token' : ''}
+        self.keys = {'consumer_key': '', 'consumer_secret': '', 'access_token' : '', 'access_token_secret': ''}
         self.auth = None
         self.stream = None
 
@@ -146,6 +146,8 @@ class Raidfinder(tweepy.StreamListener):
             elif self.settings['delay_limit'] > 3600: self.settings['delay_limit'] = 3600
             try: self.settings['time_mode'] = int(config['Settings']['time_mode'])
             except: pass
+            try: self.settings['jst'] = int(config['Settings']['jst'])
+            except: pass
             try: self.lasttab = int(config['Settings']['lasttab'])
             except: pass
             try: self.settings['max_thread'] = int(config['Settings']['maxthread'])
@@ -184,7 +186,8 @@ class Raidfinder(tweepy.StreamListener):
             'delay_limit': str(self.settings['delay_limit']),
             'time_mode': str(self.settings['time_mode']),
             'lasttab':str(self.lasttab),
-            'maxthread':str(self.settings['max_thread'])
+            'maxthread':str(self.settings['max_thread']),
+            'jst':str(self.settings['jst'])
         }
 
         config['Keys'] = self.keys
@@ -479,8 +482,16 @@ class Raidfinder(tweepy.StreamListener):
                             if ord(st[c]) in range(65536):
                                 comment += st[c]
                         # write to the log
-                        if self.settings['time_mode'] == 1: t = tweet_creation.strftime("%H:%M:%S") + " UTC"
-                        else: t = current_time.strftime("%H:%M:%S")
+                        if self.settings['time_mode'] == 1:
+                            if self.settings['jst']:
+                                d = tweet_creation + datetime.timedelta(seconds=32400)
+                                t = d.strftime("%H:%M:%S JST")
+                            else: t = tweet_creation.strftime("%H:%M:%S UTC")
+                        else:
+                            if self.settings['jst']:
+                                d = datetime.datetime.utcnow() + datetime.timedelta(seconds=32400)
+                                t = d.strftime("%H:%M:%S JST")
+                            else: t = strftime("%H:%M:%S")
                         self.UI.log('[{}] {} : {} {} [@{}] {}'.format(t, r, code, lg, tweet['user']['screen_name'], comment))
                         with self.tweetLock5: # stat + dupe cleanup
                             self.stats['last filter'] = time.time()
@@ -548,7 +559,8 @@ class RaidfinderUI(Tk.Tk):
         Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Show Twitter Handle", variable=self.newIntVar(self.advsett, self.raidfinder.settings['author']), command=lambda n=1: self.toggleAdvSetting(n)).grid(row=1, column=0, stick=Tk.W)
         Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Enable Author Blacklist", variable=self.newIntVar(self.advsett, self.raidfinder.settings['blacklist']), command=lambda n=2: self.toggleAdvSetting(n)).grid(row=2, column=0, stick=Tk.W)
         Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Restart stream on high delay", variable=self.newIntVar(self.advsett, self.raidfinder.settings['delay']), command=lambda n=3: self.toggleAdvSetting(n)).grid(row=3, column=0, stick=Tk.W)
-        Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Use Tweet Timestamp", variable=self.newIntVar(self.advsett, self.raidfinder.settings['time_mode']), command=lambda n=4: self.toggleAdvSetting(n)).grid(row=0, column=1, stick=Tk.W)
+        Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Tweet Creation Time", variable=self.newIntVar(self.advsett, self.raidfinder.settings['time_mode']), command=lambda n=4: self.toggleAdvSetting(n)).grid(row=0, column=1, stick=Tk.W)
+        Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Force JST Timezone", variable=self.newIntVar(self.advsett, self.raidfinder.settings['jst']), command=lambda n=5: self.toggleAdvSetting(n)).grid(row=1, column=1, stick=Tk.W)
 
         Tk.Button(self.subtabs[-1], text="Reload Blacklist", command=self.reloadBlacklist).grid(row=0, column=2, sticky="ews") # reload blacklist button
         Tk.Button(self.subtabs[-1], text="Reload Raid List", command=self.reloadRaidList).grid(row=1, column=2, sticky="ews") # reload raid list button
@@ -663,6 +675,7 @@ class RaidfinderUI(Tk.Tk):
         elif n == 2: self.raidfinder.settings['blacklist'] = state
         elif n == 3: self.raidfinder.settings['delay'] = state
         elif n == 4: self.raidfinder.settings['time_mode'] = state
+        elif n == 5: self.raidfinder.settings['jst'] = state
 
     def editCustom(self, i): # called when editing a custom raid
         self.inputting = True # to disable the keyboard shortcuts
@@ -817,7 +830,10 @@ class RaidfinderUI(Tk.Tk):
         self.stats[11].config(text="{}s".format(self.raidfinder.stats['delay']))
         
         # update the time and online indicator
-        self.timeLabel.config(text=strftime("%H:%M:%S"))
+        if self.raidfinder.settings['jst']:
+            d = datetime.datetime.utcnow() + datetime.timedelta(seconds=32400)
+            self.timeLabel.config(text=d.strftime("%H:%M:%S JST"))
+        else: self.timeLabel.config(text=strftime("%H:%M:%S"))
         if self.raidfinder.connected: self.statusLabel.config(text="Online", background='#c7edcd')
         else: self.statusLabel.config(text="Offline", background='#edc7c7')
 
