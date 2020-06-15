@@ -1,3 +1,7 @@
+* 2.14
+- Added a way to ping Granblue Fantasy and Mobage
+- All ping buttons will play the alert sounds when the ping process starts, if the setting is turned on
+
 * 2.13
 - Minor changes and fixed a typo in the ping system
 

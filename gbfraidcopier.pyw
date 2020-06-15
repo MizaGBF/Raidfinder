@@ -1,4 +1,4 @@
-version = "2.13" # raidfinder version
+version = "2.14" # raidfinder version
 
 #######################################################################
 # import
@@ -332,9 +332,9 @@ class Raidfinder(tweepy.StreamListener):
                 if self.stats['runtime'] is None: self.stats['runtime'] = self.elapsed
                 else: self.stats['runtime'] += self.elapsed
             if self.ping is not None:
-                msg = ""
-                if self.ping[0] > 0: msg += "Minimum {}ms, Average {}ms, Maximum {}ms\n".format(self.ping[3], self.ping[2], self.ping[4])
-                if self.ping[1] > 0: msg += "{:.2f}% Packet Loss".format(100*self.ping[1]/(self.ping[0]+self.ping[1]))
+                msg = "Ping to {}".format(self.ping[5])
+                if self.ping[0] > 0: msg += "\nMinimum {}ms, Average {}ms, Maximum {}ms".format(self.ping[3], self.ping[2], self.ping[4])
+                if self.ping[1] > 0: msg += "\n{:.2f}% Packet Loss".format(100*self.ping[1]/(self.ping[0]+self.ping[1]))
                 messagebox.showinfo("Ping Results", msg)
                 self.UI.log("[Info] Ping Results\n" + msg)
                 self.ping = None
@@ -345,16 +345,17 @@ class Raidfinder(tweepy.StreamListener):
         for t in range(0, self.THREAD_LIMIT): # for each possible thread
             self.tweetQueue.put(None) # putting dummies to unblock the threads
 
-    def pingTwitter(self, n=1): # update the ping stat
+    def pingServer(self, host, n): # update the ping stat
         if n < 1: return
         with self.pingLock:
             if self.ping is not None:
                 return
-            self.UI.log("[Info] Sending 10 pings to stream.twitter.com ...")
+            if self.settings['sound']: playsound()
+            self.UI.log("[Info] Sending 10 pings to {} ...".format(host))
             regex = re.compile('\d+ms')
             param = '-n' if platform.system().lower()=='windows' else '-c' # param
-            command = ['ping', param, '1', "stream.twitter.com"] # command
-            result = [0, 0, 0, 0, 0]
+            command = ['ping', param, '1', host] # command
+            result = [0, 0, 0, 0, 0, '']
             pings = []
             for i in range(0, n):
                 p = subprocess.Popen(command, stdout = subprocess.PIPE) # call ping
@@ -375,6 +376,7 @@ class Raidfinder(tweepy.StreamListener):
                 result[2] = sum(pings) // len(pings)
                 result[3] = min(pings)
                 result[4] = max(pings)
+            result[5] = host
             self.ping = result
 
     def runDaemon(self): # tweepy listener thread
@@ -539,7 +541,9 @@ class RaidfinderUI(Tk.Tk):
 
         Tk.Button(self.subtabs[-1], text="Reload Blacklist", command=self.reloadBlacklist).grid(row=0, column=2, sticky="ews") # reload blacklist button
         Tk.Button(self.subtabs[-1], text="Reload Raid List", command=self.reloadRaidList).grid(row=1, column=2, sticky="ews") # reload raid list button
-        Tk.Button(self.subtabs[-1], text="Ping Twitter", command=self.startPing).grid(row=2, column=2, sticky="ews") # reload raid list button
+        Tk.Button(self.subtabs[-1], text="Ping Twitter", command=lambda n=0 : self.startPing(n)).grid(row=2, column=2, sticky="ews") # reload raid list button
+        Tk.Button(self.subtabs[-1], text="Ping GBF", command=lambda n=1 : self.startPing(n)).grid(row=2, column=3, sticky="ews") # reload raid list button
+        Tk.Button(self.subtabs[-1], text="Ping Mobage", command=lambda n=2 : self.startPing(n)).grid(row=3, column=2, sticky="ews") # reload raid list button
         Tk.Button(self.subtabs[-1], text="Latest Version", command=lambda n=0 : self.openBrowser(n)).grid(row=0, column=3, sticky="ews") # download link button
         Tk.Button(self.subtabs[-1], text="Latest raid.json", command=lambda n=1 : self.openBrowser(n)).grid(row=1, column=3, sticky="ews") # download link button
 
@@ -739,8 +743,11 @@ class RaidfinderUI(Tk.Tk):
         if n == 0: webbrowser.open('https://drive.google.com/file/d/0B9YhZA7dWJUsY1lKMXY4bV9nZUE/view?usp=sharing', new=2)
         elif n == 1: webbrowser.open('https://drive.google.com/file/d/1mq0zkMwqf6Uvem12gdoUIvSJhC_u7jDT/view?usp=sharing', new=2)
 
-    def startPing(self): # open the user web browser
-        thread = threading.Thread(target=self.raidfinder.pingTwitter, args=[10])
+    def startPing(self, n): # open the user web browser
+        if n == 0: thread = threading.Thread(target=self.raidfinder.pingServer, args=["stream.twitter.com", 10])
+        elif n == 1: thread = threading.Thread(target=self.raidfinder.pingServer, args=["game.granbluefantasy.jp", 10])
+        elif n == 2: thread = threading.Thread(target=self.raidfinder.pingServer, args=["connect.mobage.jp", 10])
+        else: return
         thread.setDaemon(True)
         thread.start()
 
