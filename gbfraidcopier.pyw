@@ -1,4 +1,4 @@
-version = "2.12" # raidfinder version
+version = "2.13" # raidfinder version
 
 #######################################################################
 # import
@@ -333,7 +333,7 @@ class Raidfinder(tweepy.StreamListener):
                 else: self.stats['runtime'] += self.elapsed
             if self.ping is not None:
                 msg = ""
-                if self.ping[0] > 0: msg += "Minimum {}ms, Average {}ms, Maximum {}ms\n".format(self.ping[2], self.ping[3], self.ping[4])
+                if self.ping[0] > 0: msg += "Minimum {}ms, Average {}ms, Maximum {}ms\n".format(self.ping[3], self.ping[2], self.ping[4])
                 if self.ping[1] > 0: msg += "{:.2f}% Packet Loss".format(100*self.ping[1]/(self.ping[0]+self.ping[1]))
                 messagebox.showinfo("Ping Results", msg)
                 self.UI.log("[Info] Ping Results\n" + msg)
@@ -369,8 +369,10 @@ class Raidfinder(tweepy.StreamListener):
                         pass
                 else:
                     result[1] += 1
-            if result[0] > 0:
-                result[2] = sum(pings) // result[0]
+            result[1] = n - len(pings)
+            if len(pings) > 0:
+                result[0] = len(pings)
+                result[2] = sum(pings) // len(pings)
                 result[3] = min(pings)
                 result[4] = max(pings)
             self.ping = result

@@ -1,3 +1,6 @@
+* 2.13
+- Minor changes and fixed a typo in the ping system
+
 * 2.12
 - The ping to twitter isn't automatic anymore (I didn't like making a system call every second) and the corresponding stat has been removed
 - Added a ping button under advanced settings. It will be done in the background and a window will pop up with the results
