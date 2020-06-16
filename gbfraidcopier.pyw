@@ -1,4 +1,4 @@
-version = "2.17" # raidfinder version
+version = "2.18" # raidfinder version
 
 #######################################################################
 # import
@@ -281,7 +281,7 @@ class Raidfinder(tweepy.StreamListener):
         elif str(exception) == "High Delay":
             self.UI.log("[Error] High delay detected.") 
             self.connected = False
-            self.retry_delay = self.high_delay_count * 10
+            self.retry_delay = self.high_delay_count * 5
         elif self.connected: # exception happened while being connected
             self.UI.log("[Error] An exception occurred: {}".format(exception))
             self.connected = False
@@ -302,7 +302,7 @@ class Raidfinder(tweepy.StreamListener):
         elif status >= 500 and status < 600:
             self.UI.log("[Error] HTTP Error {}: Server error, Twitter might be overloaded".format(status))
             self.connected = False
-            self.retry_delay = 90
+            self.retry_delay = 60
         elif not self.connected:
             self.UI.log("[Error] Invalid Twitter keys. Check them at https://developer.twitter.com/en/apps")
             self.connected = False
@@ -504,6 +504,35 @@ class Raidfinder(tweepy.StreamListener):
                 else: print('thread', i, ':', e)
 
 #######################################################################
+# Custom UI ToolTip class
+#######################################################################
+class Tooltip():
+    def __init__(self, parent, text): # create a tooltip for the parent widget, with the associated text
+        self.parent = parent
+        self.tip = None
+        self.text = text
+        if parent:
+            self.parent.bind('<Enter>', self.show) # bind to hover
+            self.parent.bind('<Leave>', self.hide) # bind to not-hover
+
+    def show(self, event): # called by the enter event, show the text
+        if self.tip or not self.text: # don't show twice or if no text
+            return
+        x, y, cx, cy = self.parent.bbox("insert") # bound box
+        x = x + self.parent.winfo_rootx() + 20 # make our tip 20px on the right
+        y = y + cy + self.parent.winfo_rooty() + 20 # and 20px lower
+        self.tip = Tk.Toplevel(self.parent)
+        self.tip.wm_overrideredirect(1)
+        self.tip.wm_geometry("+%d+%d" % (x, y))
+        label = Tk.Label(self.tip, text=self.text, justify=Tk.LEFT, background="#ffffe0", relief=Tk.SOLID, borderwidth=1)
+        label.pack(ipadx=1)
+
+    def hide(self, event): # called by the leave event, destroy the label
+        tmp = self.tip
+        self.tip = None
+        if tmp: tmp.destroy()
+
+#######################################################################
 # UI class
 #######################################################################
 class RaidfinderUI(Tk.Tk):
@@ -535,10 +564,11 @@ class RaidfinderUI(Tk.Tk):
         self.mainframes[-1].grid(row=1, column=0, columnspan=8, sticky="we")
         self.mainsett_b = []
         self.mainsett_tag = ["Pause","Japanese","English","Sound","Auto Copy"]
-        convert = {"Pause":"", "Japanese":"jp", "English":"en", "Sound":"sound", "Auto Copy":"copy"}
+        convert = {"Pause":["", "If enabled, tweets will be discarded instead of being processed."], "Japanese":["jp", "If disabled, japanese tweets will be discarded."], "English":["en", "If disabled, english tweets will be discarded."], "Sound":["sound", "If enabled, a sound will play when a new code is available."], "Auto Copy":["copy", "If enabled, the latest code will be copied to your clipboard."]} # convert to the setting dict key + the tooltip text
         for x in self.mainsett_tag: # adding the buttons
-            self.mainsett_b.append(Tk.Checkbutton(self.mainframes[-1], text="[{}] {}".format(len(self.mainsett_b), x), variable=self.newIntVar(self.mainsett, self.raidfinder.settings.get(convert[x], 0)), command=lambda n=len(self.mainsett_b): self.toggleMainSetting(n)))
+            self.mainsett_b.append(Tk.Checkbutton(self.mainframes[-1], text="[{}] {}".format(len(self.mainsett_b), x), variable=self.newIntVar(self.mainsett, self.raidfinder.settings.get(convert[x][0], 0)), command=lambda n=len(self.mainsett_b): self.toggleMainSetting(n)))
             self.mainsett_b[-1].grid(row=0, column=len(self.mainsett_b)-1)
+            Tooltip(self.mainsett_b[-1], convert[x][1])
 
         ## bottomn (log / advanced setting / stats)
         self.mainframes.append(ttk.Notebook(self))
@@ -554,32 +584,62 @@ class RaidfinderUI(Tk.Tk):
         self.logtext.pack(fill=Tk.BOTH, expand=1, side=Tk.LEFT)
         scrollbar.config(command=self.logtext.yview)
         ### advanced settings
-        self.subtabs.append(Tk.Frame(self.mainframes[-1], bg='#dfe5d7'))
-        self.mainframes[-1].add(self.subtabs[-1], text="Advanced")
-        Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Ignore Duplicate Codes", variable=self.newIntVar(self.advsett, self.raidfinder.settings['dupe']), command=lambda n=0: self.toggleAdvSetting(n)).grid(row=0, column=0, stick=Tk.W)
-        Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Show Twitter Handle", variable=self.newIntVar(self.advsett, self.raidfinder.settings['author']), command=lambda n=1: self.toggleAdvSetting(n)).grid(row=1, column=0, stick=Tk.W)
-        Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Enable Author Blacklist", variable=self.newIntVar(self.advsett, self.raidfinder.settings['blacklist']), command=lambda n=2: self.toggleAdvSetting(n)).grid(row=2, column=0, stick=Tk.W)
-        Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Restart stream on high delay", variable=self.newIntVar(self.advsett, self.raidfinder.settings['delay']), command=lambda n=3: self.toggleAdvSetting(n)).grid(row=3, column=0, stick=Tk.W)
-        Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Tweet Creation Time", variable=self.newIntVar(self.advsett, self.raidfinder.settings['time_mode']), command=lambda n=4: self.toggleAdvSetting(n)).grid(row=0, column=1, stick=Tk.W)
-        Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Force JST Timezone", variable=self.newIntVar(self.advsett, self.raidfinder.settings['jst']), command=lambda n=5: self.toggleAdvSetting(n)).grid(row=1, column=1, stick=Tk.W)
+        self.subtabs.append(Tk.Frame(self.mainframes[-1], bg='#dfe5d7')) # setting frame
+        self.mainframes[-1].add(self.subtabs[-1], text="Advanced") # tab
+        b = Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Ignore Duplicate Codes", variable=self.newIntVar(self.advsett, self.raidfinder.settings['dupe']), command=lambda n=0: self.toggleAdvSetting(n))
+        b.grid(row=0, column=0, stick=Tk.W)
+        Tooltip(b, "If enabled, codes already in memory will be skipped.\nA code is added to the memory only if the corresponding raid is selected.\nUp to 200 codes are stored in memory. Once reached, the 50 oldests are discarded.")
+        b = Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Show Twitter Handle", variable=self.newIntVar(self.advsett, self.raidfinder.settings['author']), command=lambda n=1: self.toggleAdvSetting(n))
+        b.grid(row=1, column=0, stick=Tk.W)
+        Tooltip(b, "If enabled, the tweet author handle will be added to the log.")
+        b = Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Enable Author Blacklist", variable=self.newIntVar(self.advsett, self.raidfinder.settings['blacklist']), command=lambda n=2: self.toggleAdvSetting(n))
+        b.grid(row=2, column=0, stick=Tk.W)
+        Tooltip(b, "If enabled, tweets from the authors whose handles are in blacklist.txt will be ignored.")
+        b = Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Restart stream on high delay", variable=self.newIntVar(self.advsett, self.raidfinder.settings['delay']), command=lambda n=3: self.toggleAdvSetting(n))
+        b.grid(row=3, column=0, stick=Tk.W)
+        Tooltip(b, "If enabled, the tweet stream will automatically restart once the delay limit is reached.\nIt's useful when twitter has server issues and the tweet delay starts building up over time.")
+        b = Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Tweet Creation Time", variable=self.newIntVar(self.advsett, self.raidfinder.settings['time_mode']), command=lambda n=4: self.toggleAdvSetting(n))
+        b.grid(row=0, column=1, stick=Tk.W)
+        Tooltip(b, "If enabled, all new timestamps in the log will be using the tweet creation time, in UTC, instead of the current time.")
+        b = Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Force JST Timezone", variable=self.newIntVar(self.advsett, self.raidfinder.settings['jst']), command=lambda n=5: self.toggleAdvSetting(n))
+        b.grid(row=1, column=1, stick=Tk.W)
+        Tooltip(b, "If enabled, the clock and all timestamps will be converted to JST.")
 
-        Tk.Button(self.subtabs[-1], text="Reload Blacklist", command=self.reloadBlacklist).grid(row=0, column=2, sticky="ews") # reload blacklist button
-        Tk.Button(self.subtabs[-1], text="Reload Raid List", command=self.reloadRaidList).grid(row=1, column=2, sticky="ews") # reload raid list button
-        Tk.Button(self.subtabs[-1], text="Ping Twitter", command=lambda n=0 : self.startPing(n)).grid(row=2, column=2, sticky="ews") # reload raid list button
-        Tk.Button(self.subtabs[-1], text="Ping GBF", command=lambda n=1 : self.startPing(n)).grid(row=2, column=3, sticky="ews") # reload raid list button
-        Tk.Button(self.subtabs[-1], text="Ping Mobage", command=lambda n=2 : self.startPing(n)).grid(row=3, column=2, sticky="ews") # reload raid list button
-        Tk.Button(self.subtabs[-1], text="Latest Version", command=lambda n=0 : self.openBrowser(n)).grid(row=0, column=3, sticky="ews") # download link button
-        Tk.Button(self.subtabs[-1], text="Latest raid.json", command=lambda n=1 : self.openBrowser(n)).grid(row=1, column=3, sticky="ews") # download link button
+        b = Tk.Button(self.subtabs[-1], text="Reload Blacklist", command=self.reloadBlacklist) # reload blacklist button
+        b.grid(row=0, column=2, sticky="ews")
+        Tooltip(b, "Reload the content of blacklist.txt.")
+        b = Tk.Button(self.subtabs[-1], text="Reload Raid List", command=self.reloadRaidList) # reload raid list button
+        b.grid(row=1, column=2, sticky="ews")
+        Tooltip(b, "Reload the content of raid.json.\nCurrent selected raids will be discarded.")
+        b = Tk.Button(self.subtabs[-1], text="Ping Twitter", command=lambda n=0 : self.startPing(n)) # ping twitter
+        b.grid(row=2, column=2, sticky="ews")
+        Tooltip(b, "Send 10 pings to stream.twitter.com.\nIf the values are high or you notice packet loss, your connection or twitter might have issues")
+        b = Tk.Button(self.subtabs[-1], text="Ping GBF", command=lambda n=1 : self.startPing(n)) # ping granblue fantasy
+        b.grid(row=2, column=3, sticky="ews")
+        Tooltip(b, "Send 10 pings to game.granbluefantasy.jp.\nIf the values are high or you notice packet loss, your connection or GBF might have issues")
+        b = Tk.Button(self.subtabs[-1], text="Ping Mobage", command=lambda n=2 : self.startPing(n)) # ping mobage
+        b.grid(row=3, column=2, sticky="ews")
+        Tooltip(b, "Send 10 pings to connect.mobage.jp.\nIf the values are high or you notice packet loss, your connection or Mobage might have issues.\nUseless if you use another service provider such as Gree or DMM.")
+        b = Tk.Button(self.subtabs[-1], text="Latest Version", command=lambda n=0 : self.openBrowser(n)) # download link button
+        b.grid(row=0, column=3, sticky="ews")
+        Tooltip(b, "Open up the download link to the latest version in your browser.")
+        b = Tk.Button(self.subtabs[-1], text="Latest raid.json", command=lambda n=1 : self.openBrowser(n)) # download raid list button
+        b.grid(row=1, column=3, sticky="ews")
+        Tooltip(b, "Open up the download link to the latest raid.json in your browser.")
 
         # thread count spinbox
-        Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Tweet Processing Threads").grid(row=0, column=4, sticky="ws")
+        l = Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Tweet Processing Threads")
+        l.grid(row=0, column=4, sticky="ws")
+        Tooltip(l, "Number of threads used to process the incoming tweets.")
         threadSpinBox = Tk.Spinbox(self.subtabs[-1], from_=1, to=self.raidfinder.THREAD_LIMIT, textvariable=Tk.StringVar(value=str(self.raidfinder.settings['max_thread'])), validate='all', validatecommand=(self.subtabs[-1].register(self.updateTweetThreadCount), '%P'))
         threadSpinBox.grid(row=1, column=4, sticky="ews")
         threadSpinBox.bind("<FocusIn>", self.focusin)
         threadSpinBox.bind("<FocusOut>", self.focusout)
 
         # delay limit spinbox
-        Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Delay Limit").grid(row=2, column=4, sticky="ws")
+        l = Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Delay Limit")
+        l.grid(row=2, column=4, sticky="ws")
+        Tooltip(l, "Delay limit, in seconds, before an automatic restart (if enabled).")
         delaySpinBox = Tk.Spinbox(self.subtabs[-1], from_=60, to=3600, textvariable=Tk.StringVar(value=str(self.raidfinder.settings['delay_limit'])), validate='all', validatecommand=(self.subtabs[-1].register(self.updateDelayLimit), '%P'))
         delaySpinBox.grid(row=3, column=4, sticky="ews")
         delaySpinBox.bind("<FocusIn>", self.focusin)
@@ -591,18 +651,24 @@ class RaidfinderUI(Tk.Tk):
         self.mainframes[-1].add(self.subtabs[-1], text="Statistics")
         self.stats = []
         Tk.Button(self.subtabs[-1], text="Reset", command=self.resetStats).grid(row=4, column=0, sticky="ews") # reset button
-        labels = [["Connection Time:", 0, 0, "0:00:00"],["Received tweets:", 0, 1, "0"],["Filtered tweets:", 0, 2, "0"],["Filtered/Received:", 0, 3, "0.00%"],["Received rate:", 1, 1, "0/s"],["Filtered rate:", 1, 2, "0/s"],["Blacklisted:", 1, 0, "0"],["Dupes:", 2, 0, "0"],["Last Received:", 2, 1, "?"],["Last Filtered:", 2, 2, "?"],["Queued Tweets:", 1, 3, "0"],["Twitter Delay:", 2, 3, "0s"]
+        # all stats to be displayed (Label Text, Position X, Position Y, Default Text, Tooltip Text)
+        labels = [["Connection Time:", 0, 0, "0:00:00", "Duration of your connection to twitter.\nPauses are ignored."],["Received tweets:", 0, 1, "0", "Number of tweets received by the listener."],["Filtered tweets:", 0, 2, "0", "Number of received tweets correponding to the user selected raid(s)."],["Filtered/Received:", 0, 3, "0.00%", "Ratio of selected raid tweets by all received tweets."],["Received rate:", 1, 1, "0/s", "Average reception speed."],["Filtered rate:", 1, 2, "0/s", "Average reception speed for the selected raids."],["Blacklisted:", 1, 0, "0", "Numbed of tweets blocked by the blacklist."],["Dupes:", 2, 0, "0", "Numbed of blocked duplicate codes."],["Last Received:", 2, 1, "?", "When was received the last tweet."],["Last Filtered:", 2, 2, "?", "When was received the last tweet corresponding to a selected raid."],["Queued Tweets:", 1, 3, "0", "Number of tweets waiting to be processed."],["Twitter Delay:", 2, 3, "0s", "Delay between the tweet creation and its reception by the listener."]
         ]
         for l in labels:
-            Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=l[0]).grid(row=l[2], column=l[1]*2, sticky="ws")
+            b = Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=l[0])
+            b.grid(row=l[2], column=l[1]*2, sticky="ws")
+            Tooltip(b, l[4])
             self.stats.append(Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=l[3]))
             self.stats[-1].grid(row=l[2], column=l[1]*2+1, sticky="nw")
+            Tooltip(self.stats[-1], l[4])
 
         # others
         self.statusLabel = Tk.Label(self, text="Offline", bg='#edc7c7') # for the offline/online text
         self.statusLabel.grid(row=0, column=9, sticky="ne")
+        Tooltip(self.statusLabel, "Indicate if the Twitter Stream is connected.")
         self.timeLabel = Tk.Label(self, text="") # for the current time
         self.timeLabel.grid(row=1, column=9, sticky="ne")
+        Tooltip(self.timeLabel, "Current time.")
 
         # make the window and bind the keyboard
         self.title('Raid ID copier v{}'.format(version))
@@ -645,6 +711,7 @@ class RaidfinderUI(Tk.Tk):
             for i in range(0, len(custom)): # same thing, with an extra Edit button
                 self.raidchilds.append(Tk.Button(self.raids[-1], text="Edit", command=lambda i=i: self.editCustom(i)))
                 self.raidchilds[-1].grid(row=i%6, column=(i//6)*2, sticky='ews')
+                Tooltip(self.raidchilds[-1], "Edit this raid entry.")
                 self.custom.append(Tk.Checkbutton(self.raids[-1], bg=raids['custom color'], text=custom[i][0], variable=self.newTrackingVar(custom[i][0]), command=lambda r=custom[i][0]: self.toggleRaid(r)))
                 self.custom[-1].grid(row=i%6, column=1+(i//6)*2, stick=Tk.W)
             # select the last tab used
