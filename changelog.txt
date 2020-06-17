@@ -1,3 +1,6 @@
+* 2.19
+- Added a setting to toggle the tooltips
+
 * 2.18
 - Added Tool Tips for the various settings and statistics.
 - Lowered HTTP 500 error reconnection delays to 60 seconds

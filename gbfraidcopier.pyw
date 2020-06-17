@@ -1,4 +1,4 @@
-version = "2.18" # raidfinder version
+version = "2.19" # raidfinder version
 
 #######################################################################
 # import
@@ -42,6 +42,9 @@ else:
     def playsound(): # run winsound.PlaySound() in a thread to not block (SND_ASYNC doesn't work when playing a sound from the memory)
         if soundLoaded:
             threading.Thread(target=winsound.PlaySound, args=(soundFile, winsound.SND_MEMORY)).start()
+
+# global variables
+enableTooltip = 1
 
 #######################################################################
 # Main class and tweepy listener
@@ -94,6 +97,7 @@ class Raidfinder(tweepy.StreamListener):
         self.runRaidfinder()
 
     def loadConfig(self, tmpLog): # call it once at the start
+        global enableTooltip
         # load the .cfg with the Twitter API keys
         config = configparser.ConfigParser()
         config.read('gbfraidcopier.cfg')
@@ -150,6 +154,8 @@ class Raidfinder(tweepy.StreamListener):
             except: pass
             try: self.lasttab = int(config['Settings']['lasttab'])
             except: pass
+            try: enableTooltip = int(config['Settings']['tooltip'])
+            except: pass
             try: self.settings['max_thread'] = int(config['Settings']['maxthread'])
             except: pass
             if self.settings['max_thread'] < 1: self.settings['max_thread'] = 1
@@ -187,7 +193,8 @@ class Raidfinder(tweepy.StreamListener):
             'time_mode': str(self.settings['time_mode']),
             'lasttab':str(self.lasttab),
             'maxthread':str(self.settings['max_thread']),
-            'jst':str(self.settings['jst'])
+            'jst':str(self.settings['jst']),
+            'tooltip':str(enableTooltip)
         }
 
         config['Keys'] = self.keys
@@ -516,7 +523,7 @@ class Tooltip():
             self.parent.bind('<Leave>', self.hide) # bind to not-hover
 
     def show(self, event): # called by the enter event, show the text
-        if self.tip or not self.text: # don't show twice or if no text
+        if not enableTooltip or self.tip or not self.text: # don't show twice or if no text
             return
         x, y, cx, cy = self.parent.bbox("insert") # bound box
         x = x + self.parent.winfo_rootx() + 20 # make our tip 20px on the right
@@ -604,6 +611,9 @@ class RaidfinderUI(Tk.Tk):
         b = Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Force JST Timezone", variable=self.newIntVar(self.advsett, self.raidfinder.settings['jst']), command=lambda n=5: self.toggleAdvSetting(n))
         b.grid(row=1, column=1, stick=Tk.W)
         Tooltip(b, "If enabled, the clock and all timestamps will be converted to JST.")
+        b = Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Enable tooltips", variable=self.newIntVar(self.advsett, enableTooltip), command=lambda n=6: self.toggleAdvSetting(n))
+        b.grid(row=2, column=1, stick=Tk.W)
+        Tooltip(b, "If disabled, tooltips such as this one will not show up.")
 
         b = Tk.Button(self.subtabs[-1], text="Reload Blacklist", command=self.reloadBlacklist) # reload blacklist button
         b.grid(row=0, column=2, sticky="ews")
@@ -737,6 +747,7 @@ class RaidfinderUI(Tk.Tk):
         else:  self.log("[Settings] '{}' is disabled".format(self.mainsett_tag[n]))
 
     def toggleAdvSetting(self, n): # called when un/checking an advanced setting
+        global enableTooltip
         state = self.advsett[n].get()
         if n == 0: self.raidfinder.settings['dupe'] = state
         elif n == 1: self.raidfinder.settings['author'] = state
@@ -744,6 +755,7 @@ class RaidfinderUI(Tk.Tk):
         elif n == 3: self.raidfinder.settings['delay'] = state
         elif n == 4: self.raidfinder.settings['time_mode'] = state
         elif n == 5: self.raidfinder.settings['jst'] = state
+        elif n == 6: enableTooltip = state
 
     def editCustom(self, i): # called when editing a custom raid
         self.inputting = True # to disable the keyboard shortcuts
