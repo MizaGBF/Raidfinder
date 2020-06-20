@@ -1,4 +1,4 @@
-version = "2.19" # raidfinder version
+version = "2.20" # raidfinder version
 
 #######################################################################
 # import
@@ -79,6 +79,8 @@ class Raidfinder(tweepy.StreamListener):
         self.pingLock = threading.Lock()
         self.high_delay = False
         self.high_delay_count = 0
+        self.si = subprocess.STARTUPINFO()
+        self.si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
 
         # tweepy stuff
         self.keys = {'consumer_key': '', 'consumer_secret': '', 'access_token' : '', 'access_token_secret': ''}
@@ -380,7 +382,7 @@ class Raidfinder(tweepy.StreamListener):
             result = [0, 0, 0, 0, 0, '']
             pings = []
             for i in range(0, n):
-                p = subprocess.Popen(command, stdout = subprocess.PIPE) # call ping
+                p = subprocess.Popen(command, stdout=subprocess.PIPE, startupinfo=self.si) # call ping
                 strout = str(p.communicate()[0]) # get output
 
                 m = regex.search(strout) # search result
@@ -611,7 +613,7 @@ class RaidfinderUI(Tk.Tk):
         b = Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Force JST Timezone", variable=self.newIntVar(self.advsett, self.raidfinder.settings['jst']), command=lambda n=5: self.toggleAdvSetting(n))
         b.grid(row=1, column=1, stick=Tk.W)
         Tooltip(b, "If enabled, the clock and all timestamps will be converted to JST.")
-        b = Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Enable tooltips", variable=self.newIntVar(self.advsett, enableTooltip), command=lambda n=6: self.toggleAdvSetting(n))
+        b = Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Enable Tool Tips", variable=self.newIntVar(self.advsett, enableTooltip), command=lambda n=6: self.toggleAdvSetting(n))
         b.grid(row=2, column=1, stick=Tk.W)
         Tooltip(b, "If disabled, tooltips such as this one will not show up.")
 
