@@ -539,6 +539,13 @@
                     "posY":0
                 },
                 {
+                    "name": "Wilnas",
+                    "en": "Lvl 200 Wilnas",
+                    "jp": "Lv200 ウィルナス",
+                    "posX":5,
+                    "posY":0
+                },
+                {
                     "name": "Leviathan HL",
                     "en": "Lvl 100 Leviathan Omega",
                     "jp": "Lv100 リヴァイアサン・マグナ",
@@ -574,6 +581,13 @@
                     "posY":1
                 },
                 {
+                    "name": "Wamdus",
+                    "en": "Lvl 200 Wamdus",
+                    "jp": "Lv200 ワムデュス",
+                    "posX":5,
+                    "posY":1
+                },
+                {
                     "name": "Yggdrasil HL",
                     "en": "Lvl 100 Yggdrasil Omega",
                     "jp": "Lv100 ユグドラシル・マグナ",
@@ -599,6 +613,20 @@
                     "en": "Lvl 120 Gilgamesh",
                     "jp": "Lv120 ギルガメッシュ",
                     "posX":3,
+                    "posY":2
+                },
+                {
+                    "name": "Phronesis ",
+                    "en": "Lvl 150 Phronesis",
+                    "jp": "Lv150 フロネシス",
+                    "posX":4,
+                    "posY":2
+                },
+                {
+                    "name": "Galleon",
+                    "en": "Lvl 200 Galleon",
+                    "jp": "Lv200 ガレヲン",
+                    "posX":5,
                     "posY":2
                 },
                 {
@@ -637,6 +665,13 @@
                     "posY":3
                 },
                 {
+                    "name": "Ewiyar",
+                    "en": "Lvl 200 Ewiyar",
+                    "jp": "Lv200 イーウィヤ",
+                    "posX":5,
+                    "posY":3
+                },
+                {
                     "name": "Luminiera HL",
                     "en": "Lvl 100 Luminiera Omega",
                     "jp": "Lv100 シュヴァリエ・マグナ",
@@ -665,6 +700,13 @@
                     "posY":4
                 },
                 {
+                    "name": "Lu Woh",
+                    "en": "Lvl 200 Lu Woh",
+                    "jp": "Lv200 ル・オー",
+                    "posX":5,
+                    "posY":4
+                },
+                {
                     "name": "Celeste HL",
                     "en": "Lvl 100 Celeste Omega",
                     "jp": "Lv100 セレスト・マグナ",
@@ -690,6 +732,13 @@
                     "en": "Lvl 120 Anubis",
                     "jp": "Lv120 アヌビス",
                     "posX":3,
+                    "posY":5
+                },
+                {
+                    "name": "Fediel",
+                    "en": "Lvl 200 Fediel",
+                    "jp": "Lv200 フェディエル",
+                    "posX":5,
                     "posY":5
                 }
             ]
