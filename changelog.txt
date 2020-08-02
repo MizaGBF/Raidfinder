@@ -1,3 +1,6 @@
+* 2.21
+- Fixed STARTUPINFO causing a crash on non-windows OS
+
 * 2.20
 - Pinging won't open command prompts anymore
 

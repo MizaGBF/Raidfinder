@@ -1,4 +1,4 @@
-version = "2.20" # raidfinder version
+version = "2.21" # raidfinder version
 
 #######################################################################
 # import
@@ -79,8 +79,11 @@ class Raidfinder(tweepy.StreamListener):
         self.pingLock = threading.Lock()
         self.high_delay = False
         self.high_delay_count = 0
-        self.si = subprocess.STARTUPINFO()
-        self.si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        try:
+            self.si = subprocess.STARTUPINFO()
+            self.si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        except:
+            self.si = None
 
         # tweepy stuff
         self.keys = {'consumer_key': '', 'consumer_secret': '', 'access_token' : '', 'access_token_secret': ''}
