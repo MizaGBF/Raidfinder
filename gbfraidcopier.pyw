@@ -1,4 +1,4 @@
-version = "2.21" # raidfinder version
+version = "2.22" # raidfinder version
 
 #######################################################################
 # import
@@ -99,7 +99,6 @@ class Raidfinder(tweepy.StreamListener):
         self.configLoaded = self.loadConfig(tmpLog)
         self.UI = RaidfinderUI(self)
         for msg in tmpLog: self.UI.log(msg)
-        self.runRaidfinder()
 
     def loadConfig(self, tmpLog): # call it once at the start
         global enableTooltip
@@ -339,7 +338,7 @@ class Raidfinder(tweepy.StreamListener):
                 self.auth.set_access_token(self.keys['access_token'], self.keys['access_token_secret'])
                 # prepare and start the threads
                 while len(self.tweetDaemon) < self.settings['max_thread']:
-                    self.tweetDaemon.append(threading.Thread(target=self.processTweet, args=[len(self.tweetDeamon)]))
+                    self.tweetDaemon.append(threading.Thread(target=self.processTweet, args=[len(self.tweetDaemon)]))
                     self.tweetDaemon[-1].setDaemon(True)
                     self.tweetDaemon[-1].start()
 
@@ -411,7 +410,7 @@ class Raidfinder(tweepy.StreamListener):
         stream = tweepy.Stream(auth=self.auth, listener=self)
         while self.running:
             try: # starting tweepy
-                stream.filter(track=["参加者募集！\n", u"I need backup!\n"]) # this thread will block here until an issue occur
+                stream.filter(track=[" :参戦ID\n参加者募集！\n", " :Battle ID\nI need backup!\nLvl"]) # this thread will block here until an issue occur
             except:
                 pass
             if not self.running or self.retry_delay == -1:
@@ -926,4 +925,6 @@ class RaidfinderUI(Tk.Tk):
         self.update()
 
 # entry point
-Raidfinder()
+if __name__ == "__main__":
+    r = Raidfinder()
+    r.runRaidfinder()

@@ -1,3 +1,7 @@
+* 2.22
+- Changed the filters
+- Fixed a small typo causing issues with the multi threading
+
 * 2.21
 - Fixed STARTUPINFO causing a crash on non-windows OS
 
