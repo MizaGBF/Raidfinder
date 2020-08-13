@@ -11,8 +11,6 @@ You might want to uninstall python2 before installing python 3, as coexisting py
 3) now install the required modules (use the full path if needed):
 python -m pip install pyperclip
 python -m pip install tweepy
-3a) If you are on windows:
-python -m pip install winsound
 
 bonus: The command to update pip is:
 python -m pip install --upgrade pip
