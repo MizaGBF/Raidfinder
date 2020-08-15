@@ -490,6 +490,13 @@
                     "posY":3
                 },
                 {
+                    "name": "Shenxian",
+                    "en": "Lvl 100 Shenxian",
+                    "jp": "Lv100 四象瑞神",
+                    "posX":1,
+                    "posY":4
+                },
+                {
                     "name": "Xeno Corow",
                     "en": "Lvl 100 Xeno Corow",
                     "jp": "Lv100 ゼノ・コロゥ",
