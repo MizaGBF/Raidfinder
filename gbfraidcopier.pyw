@@ -1,4 +1,4 @@
-version = "2.22" # raidfinder version
+version = "2.23" # raidfinder version
 
 #######################################################################
 # import
@@ -61,7 +61,7 @@ class Raidfinder(tweepy.StreamListener):
         self.tweetLock3 = threading.Lock()
         self.tweetLock4 = threading.Lock()
         self.tweetLock5 = threading.Lock()
-        self.running = True
+        self.apprunning = True
         self.pause = False
         self.connected = False
         self.retry_delay = 0
@@ -262,12 +262,21 @@ class Raidfinder(tweepy.StreamListener):
 
         return ""
 
-    def on_data(self, data): # when Twitter data is received
-        self.tweetQueue.put_nowait((data, datetime.datetime.now(datetime.timezone.utc))) # queue the data and reception time
-        if self.high_delay:
+    def on_data(self, data):
+        if self.high_delay: # trigger high delay restart
             self.high_delay = False
             self.high_delay_count = min(self.high_delay_count+1, 12)
             raise Exception("High Delay")
+
+        try: return self.on_status(tweepy.Status.parse(self.api, json.loads(data)))
+        except: return True
+
+    def on_status(self, status):
+        try:
+            if status.source == "グランブルー ファンタジー": # filter non gbf tweet
+                self.tweetQueue.put_nowait((status, datetime.datetime.utcnow()))
+        except:
+            pass
         return True
 
     def on_connect(self): # when the Twitter stream connects
@@ -282,32 +291,28 @@ class Raidfinder(tweepy.StreamListener):
 
     def on_exception(self, exception): # when a problem occurs
         print("on_exception():", exception)
-        if str(exception) == "('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))":
-            self.retry_delay = 0
-            return True
-        elif str(exception) == "HTTPSConnectionPool(host='stream.twitter.com', port=443): Read timed out.":
-            self.UI.log("[Error] Read timeout. Check your internet connection or Twitter server status.") 
-            self.connected = False
-            self.retry_delay = 10
-        elif str(exception) == "High Delay":
-            self.UI.log("[Error] High delay detected.") 
+        s = str(exception)
+        if s == "High Delay": # high delay restart triggered
+            self.UI.log("[Error] High delay detected") 
             self.connected = False
             self.retry_delay = self.high_delay_count * 5
         elif self.connected: # exception happened while being connected
-            self.UI.log("[Error] An exception occurred: {}".format(exception))
+            if s.lower().find("timed out") != -1 or s.lower().find("connection broken") != -1:
+                self.UI.log("[Error] Communication issue, check your internet connection or Twitter server status")
+            else:
+                self.UI.log("[Error] An exception occurred: {}".format(exception))
             self.connected = False
-            self.retry_delay = 60
+            self.retry_delay = 10
         else: # else, unknown error
-            self.UI.log("[Error] Twitter keys might be invalid or your Internet is down.") 
+            self.UI.log("[Error] Twitter keys might be invalid or your Internet is down") 
             self.UI.log("Exception: {}".format(exception)) 
             self.connected = False
             self.retry_delay = -1
-        return False
  
     def on_error(self, status): # for error stuff
         print("on_error():", status)
         if status == 420:
-            self.UI.log("[Error] Rate limited by Twitter, restarting might be needed")
+            self.UI.log("[Error] Rate limited by Twitter, restarting the application might be needed")
             self.connected = False
             self.retry_delay = 90
         elif status >= 500 and status < 600:
@@ -351,7 +356,7 @@ class Raidfinder(tweepy.StreamListener):
                 self.UI.log("Exception: {}".format(e))
 
         # main loop
-        while self.running:
+        while self.apprunning:
             self.elapsed = time.time() - self.time # measure elapsed time
             self.time = time.time()
             if not self.paused and self.connected:
@@ -406,14 +411,15 @@ class Raidfinder(tweepy.StreamListener):
             self.ping = result
 
     def runDaemon(self): # tweepy listener thread
-        self.UI.log("[System] Connecting to Twitter...")
-        stream = tweepy.Stream(auth=self.auth, listener=self)
-        while self.running:
+        while self.apprunning:
             try: # starting tweepy
+                if not self.connected:
+                    self.UI.log("[System] Connecting to Twitter...")
+                    stream = tweepy.Stream(auth=self.auth, listener=self)
                 stream.filter(track=[" :参戦ID\n参加者募集！\n", " :Battle ID\nI need backup!\nLvl"]) # this thread will block here until an issue occur
             except:
                 pass
-            if not self.running or self.retry_delay == -1:
+            if not self.apprunning or self.retry_delay == -1:
                 return
             elif self.connected:
                 continue
@@ -421,40 +427,35 @@ class Raidfinder(tweepy.StreamListener):
                 if self.retry_delay > 3:
                     self.UI.log("[System] Attempting a new connection in {} seconds".format(self.retry_delay))
                 time.sleep(self.retry_delay)
-                self.UI.log("[System] Connecting to Twitter...")
-                stream = tweepy.Stream(auth=self.auth, listener=self)
+                self.high_delay = False
 
     def processTweet(self, i = -1): # tweet processing thread (can be run in parallel)
-        while self.running:
+        while self.apprunning:
             try:
                 if i >= len(self.tweetDaemon): # quit the thread if the number of threads got reduced
                     return
                 try:
-                    data, current_time = self.tweetQueue.get(block=True, timeout=0.01) # retrieve next tweet data
+                    tweet, current_time = self.tweetQueue.get(block=True, timeout=0.01) # retrieve next tweet and its reception time
                 except:
                     continue
-                if not self.running: # app stopped, we quit
+                if not self.apprunning: # app stopped, we quit
                     return
                 if self.paused: # app paused, we skip
                     continue
-                tweet = json.loads(data) # convert the json
-                if tweet['source'] != u"<a href=\"http://granbluefantasy.jp/\" rel=\"nofollow\">グランブルー ファンタジー</a>":
-                    continue # not a GBF tweet, we skip
                 # timestamp check
-                tweet_creation = datetime.datetime.strptime(tweet['created_at'], '%a %b %d %H:%M:%S %z %Y')
-                delay = current_time - tweet_creation
+                delay = current_time - tweet.created_at
                 with self.tweetLock1:
                     self.stats['delay'] = delay.seconds
 
                 if self.settings['delay'] and delay.seconds >= self.settings['delay_limit']:
                     self.high_delay = True
-                    continue # tweet is considered old, skip
+                    continue # we raise the high delay flag
                 # blacklist check
-                if self.settings['blacklist'] and tweet['user']['screen_name'] in self.blacklist:
+                if self.settings['blacklist'] and tweet.user.screen_name in self.blacklist:
                     with self.tweetLock2:
                         self.stats['blacklist'] += 1
                     continue # author is blacklisted, we skip
-                st = html.unescape(tweet['text']) # tweet content
+                st = html.unescape(tweet.text) # tweet content
                 # search the ID in this string
                 m = self.idregex.search(st)
                 if not m:
@@ -480,7 +481,7 @@ class Raidfinder(tweepy.StreamListener):
                     self.stats['all tweet'] += 1
                     self.stats['last'] = time.time()
                 for r in self.raids.get(raidName, []): # get the corresponding raids
-                    if r in self.UI.readonly and self.UI.readonly[r]: # check if enabled on the UI
+                    if self.UI.readonly.get(r, False): # check if enabled on the UI
                         with self.tweetLock4:
                             self.stats['tweet'] += 1
                             if self.settings['dupe'] and code in self.dupes:
@@ -503,7 +504,7 @@ class Raidfinder(tweepy.StreamListener):
                                 d = datetime.datetime.utcnow() + datetime.timedelta(seconds=32400)
                                 t = d.strftime("%H:%M:%S JST")
                             else: t = strftime("%H:%M:%S")
-                        if self.settings['author']: self.UI.log('[{}] {} : {} {} [@{}] {}'.format(t, r, code, lg, tweet['user']['screen_name'], comment))
+                        if self.settings['author']: self.UI.log('[{}] {} : {} {} [@{}] {}'.format(t, r, code, lg, tweet.user.screen_name, comment))
                         else: self.UI.log('[{}] {} : {} {} {}'.format(t, r, code, lg, comment))
                         with self.tweetLock5: # stat + dupe cleanup
                             self.stats['last filter'] = time.time()
@@ -796,7 +797,7 @@ class RaidfinderUI(Tk.Tk):
         self.raidfinder.paused = tmp # restore the pause setting
 
     def key(self, event): # key event for setting shortcuts
-        if not self.raidfinder.running or event.type != '2' or self.inputting: # 2 is KeyPress
+        if not self.raidfinder.apprunning or event.type != '2' or self.inputting: # 2 is KeyPress
             return
         numKey = event.keycode - 48 # 48 is the 0 key
         if numKey < 0 or numKey > 4:
@@ -809,7 +810,7 @@ class RaidfinderUI(Tk.Tk):
     def close(self): # called by the app when closed
         if self.raidfinder.configLoaded:
             self.raidfinder.saveConfig() # update config file
-        self.raidfinder.running = False
+        self.raidfinder.apprunning = False
         self.destroy() # destroy the window
 
     def log(self, msg):
