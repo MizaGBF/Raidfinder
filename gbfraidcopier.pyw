@@ -336,7 +336,6 @@ class Raidfinder(tweepy.StreamListener):
                 self.auth = tweepy.OAuthHandler(self.keys['consumer_key'], self.keys['consumer_secret'])
                 self.auth.secure = True
                 self.auth.set_access_token(self.keys['access_token'], self.keys['access_token_secret'])
-                self.auth.get_username() # check account validity
                 if tweepy.API(self.auth).verify_credentials() is None: raise Exception()
             except: # ask for authentification
                 self.UI.log("[Error] Authentification is required")
