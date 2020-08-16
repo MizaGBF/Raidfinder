@@ -1,4 +1,4 @@
-version = "2.23" # raidfinder version
+version = "2.24" # raidfinder version
 
 #######################################################################
 # import
@@ -96,37 +96,29 @@ class Raidfinder(tweepy.StreamListener):
 
         # START
         tmpLog = []
-        self.configLoaded = self.loadConfig(tmpLog)
+        self.loadConfig(tmpLog)
         self.UI = RaidfinderUI(self)
         for msg in tmpLog: self.UI.log(msg)
 
     def loadConfig(self, tmpLog): # call it once at the start
         global enableTooltip
-        # load the .cfg with the Twitter API keys
+        # load the .cfg with the Twitter API keys and settings
         config = configparser.ConfigParser()
         config.read('gbfraidcopier.cfg')
-        if len(config) == 0 or 'Keys' not in config: # create a file if empty
+
+        # create a file if it didn't exist
+        if len(config) == 0:
             try:
                 config['Keys'] = self.keys
                 with open('gbfraidcopier.cfg', 'w') as configfile:
                     config.write(configfile)
-                tmpLog.append("[Info] 'gbfraidcopier.cfg' file has been created")
-                tmpLog.append("Get your personal keys at https://developer.twitter.com/en/apps")
-                tmpLog.append("and fill in 'gbfraidcopier.cfg'")
-                tmpLog.append("Consult the README for more informations")
             except:
-                tmpLog.append("[Error] Something went wrong, couldn't create 'gbfraidcopier.cfg'")
-            return False
+                pass
+            return
 
-        # storing the keys
-        try:
-            self.keys = config['Keys']
-        except:
-            tmpLog.append("[Error] your 'gbfraidcopier.cfg' file is missing one or multiple Twitter keys")
-            tmpLog.append("Get your personal keys at https://developer.twitter.com/en/apps")
-            tmpLog.append("and fill in 'gbfraidcopier.cfg'")
-            tmpLog.append("Consult the README for more informations")
-            return False
+        # twitter access keys
+        try: self.keys = config['Keys']
+        except: pass
 
         # check if last used settings are here. if yes, read them
         if 'Settings' in config:
@@ -175,8 +167,6 @@ class Raidfinder(tweepy.StreamListener):
                     self.custom[i][2] = base64.b64decode(config['Raids']['savedJP' + str(i)]).decode('utf-8')
                 except:
                     pass
-
-        return True
 
     def saveConfig(self): # called when quitting
         # update the values
@@ -319,8 +309,12 @@ class Raidfinder(tweepy.StreamListener):
             self.UI.log("[Error] HTTP Error {}: Server error, Twitter might be overloaded".format(status))
             self.connected = False
             self.retry_delay = 60
+        elif status == 401:
+            self.UI.log("[Error] HTTP Error {}: Authentification failed. If the problem persists, delete the keys in 'gbfraidcopier.cfg'.".format(status))
+            self.connected = False
+            self.retry_delay = -1
         elif not self.connected:
-            self.UI.log("[Error] Invalid Twitter keys. Check them at https://developer.twitter.com/en/apps")
+            self.UI.log("[Error] Unknown issue, please restart the application")
             self.connected = False
             self.retry_delay = -1
         else:
@@ -335,25 +329,45 @@ class Raidfinder(tweepy.StreamListener):
         if err != "":
             self.UI.log(err)
         self.loadBlacklist() # load blacklist.txt
-        if self.configLoaded: # don't bother starting the threads if our config file didn't load
-            try:
-                # Twitter authentification
+
+        try:
+            # Twitter authentification
+            try: # user dev account
                 self.auth = tweepy.OAuthHandler(self.keys['consumer_key'], self.keys['consumer_secret'])
                 self.auth.secure = True
                 self.auth.set_access_token(self.keys['access_token'], self.keys['access_token_secret'])
-                # prepare and start the threads
-                while len(self.tweetDaemon) < self.settings['max_thread']:
-                    self.tweetDaemon.append(threading.Thread(target=self.processTweet, args=[len(self.tweetDaemon)]))
-                    self.tweetDaemon[-1].setDaemon(True)
-                    self.tweetDaemon[-1].start()
+                self.auth.get_username() # check account validity
+                if tweepy.API(self.auth).verify_credentials() is None: raise Exception()
+            except: # ask for authentification
+                self.UI.log("[Error] Authentification is required")
+                self.auth = tweepy.OAuthHandler("ZTd48q7C3F13HmcmE6RxMuyiq", "YFz1Tq5njkM1zo165K3Zw0Rye9s2fC2d6kn2tCwfMc4XkjLjjb")
+                try:
+                    redirect_url = self.auth.get_authorization_url()
+                    webbrowser.open(redirect_url, new=2)
+                    verifier = simpledialog.askstring("Authorize this application", "enter the PIN code", initialvalue="")
+                    self.auth.get_access_token(verifier)
+                    if tweepy.API(self.auth).verify_credentials() is None: raise Exception("Authentification failed")
+                    self.keys = {
+                        'consumer_key': 'ZTd48q7C3F13HmcmE6RxMuyiq',
+                        'consumer_secret': 'YFz1Tq5njkM1zo165K3Zw0Rye9s2fC2d6kn2tCwfMc4XkjLjjb',
+                        'access_token': self.auth.access_token,
+                        'access_token_secret': self.auth.access_token_secret
+                    }
+                except Exception as x:
+                    raise x
+            # prepare and start the threads
+            while len(self.tweetDaemon) < self.settings['max_thread']:
+                self.tweetDaemon.append(threading.Thread(target=self.processTweet, args=[len(self.tweetDaemon)]))
+                self.tweetDaemon[-1].setDaemon(True)
+                self.tweetDaemon[-1].start()
 
-                listenerDaemon = threading.Thread(target=self.runDaemon) # start the Twitter listener
-                listenerDaemon.setDaemon(True)
-                listenerDaemon.start()
-            except Exception as e:
-                self.UI.log("[Error] Failed to start the raidfinder, check your Twitter keys.")
-                self.UI.log("Check them at https://developer.twitter.com/en/apps")
-                self.UI.log("Exception: {}".format(e))
+            listenerDaemon = threading.Thread(target=self.runDaemon) # start the Twitter listener
+            listenerDaemon.setDaemon(True)
+            listenerDaemon.start()
+        except Exception as e:
+            self.UI.log("[Error] Failed to start the raidfinder, authentification failed.")
+            self.UI.log("If the problem persists, try to delete the keys in 'gbfraidcopier.cfg'.")
+            self.UI.log("Exception: {}".format(e))
 
         # main loop
         while self.apprunning:
@@ -808,8 +822,7 @@ class RaidfinderUI(Tk.Tk):
         self.toggleMainSetting(numKey) # call the event
 
     def close(self): # called by the app when closed
-        if self.raidfinder.configLoaded:
-            self.raidfinder.saveConfig() # update config file
+        self.raidfinder.saveConfig() # update config file
         self.raidfinder.apprunning = False
         self.destroy() # destroy the window
 

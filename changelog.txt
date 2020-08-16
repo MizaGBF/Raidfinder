@@ -1,3 +1,6 @@
+* 2.24
+- A developper Twitter account isn't required anymore
+
 * 2.23
 - Reworked the Stream Listener
 

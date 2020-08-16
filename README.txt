@@ -1,36 +1,28 @@
-﻿== PYTHON 2 USERS ==
-If you were using the previous python 2 version, this one is now using python 3.
-You might want to uninstall python2 before installing python 3, as coexisting python installations can be a big pain in the butt.
-(It will also fix your file association in windows explorer)
-
-== INSTALLATION ==
-1) Download and Install Python 3.7 https://www.python.org/ (I haven't tested on a further version)
-2) Open a command prompt and type: python --version
-2a) If it doesn't work, you might have to replace "python" with the full path (example for me: C:\Python36\python.exe --version )
+﻿== INSTALLATION ==
+1) Download and Install Python 3.8 https://www.python.org/ or newer.
+2) Open a command prompt in the raidfinder folder (shift+right click > "Open a command prompt here") and type: python --version
+2a) If it doesn't work, you might have to replace "python" with the full path (example for me: C:\Python\python.exe --version )
 2b) If it doesn't show version 3-something but 2 instead, another version is causing conflict so use the full path as above, too.
-3) now install the required modules (use the full path if needed):
-python -m pip install pyperclip
-python -m pip install tweepy
+3) now install the required modules, with the command:
+python -m pip install -r requirements.txt
+(again, as above, replace python by the full path if needed)
 
 bonus: The command to update pip is:
 python -m pip install --upgrade pip
 
 == UPDATE THE PACKAGES ==
-Same commands as during the installation process
+Just rerun the
+python -m pip install -r requirements.txt
+command on a newer version, I'll update the file if needed.
 
-== TWITTER KEYS ==
-1) Go to https://developer.twitter.com/en/apply/account to apply for a Developper account.
-You'll need a phone number linked to your account like in the past, but they also request a bit more informations to be sure you won't be misusing the API. You don't need to give personal informations.
-2) Go to https://developer.twitter.com/en/apps to create a new App.
-For the website URL, just put whatever you want (i.e. google.com), it doesn't matter.
-Just ignore what isn't required.
-3) In your app details, "Keys and tokens" tab, you'll find your consumer keys and access tokens (you may have to click create for these ones).
-4) Put them into the 'gbfraidcopier.cfg' file
-If you need to find your key later, the application you created should be listed at https://developer.twitter.com/en/apps
+== AUTHENTIFICATION ==
+A Twitter account is required to use this application. Two ways exist:
+1) If you are registered as a developper, go to https://developer.twitter.com/, create an app and fill 'gbfraidcopier.cfg' with the consumer and access tokens. You can also apply here: https://developer.twitter.com/en/apply/account
+2) If not, your Web Browser will open, asking you to authorize the application. Give the PIN code to the raidfinder it will generate your tokens for future uses.
 
 == USAGE ==
 Just double click on 'gbfraidcopier.pyw', assuming you installed everything properly
-Alternatively on Windows, shift+right click in the folder > "Open a command prompt here" > type the command "python gbfraidcopier.pyw" without the quotes. If python isn't in your PATH, you need to write its full path instead of just "python".
+Alternatively on Windows, shift+right click in the folder > "Open a command prompt here" > type the command "python gbfraidcopier.pyw" without the quotes. If python isn't in your PATH, you need to write its full path instead of just "python", like during the installation process.
 
 == BLACKLIST ==
 If you need to blacklist twitter users, open blacklist.txt (create it if you deleted it or it's missing) and add the user twitter handle (without the @) in the file.
