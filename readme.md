@@ -10,6 +10,7 @@
 ```  
 pip install -r requirements.txt
 ```  
+Requirements will be installed by the application on startup, if the modules are missing.
   
 #### Questions?
 Check README.txt for user-friendly details.  

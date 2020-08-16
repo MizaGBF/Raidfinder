@@ -1,14 +1,10 @@
 ﻿== INSTALLATION ==
 1) Download and Install Python 3.8 https://www.python.org/ or newer.
-2) Open a command prompt in the raidfinder folder (shift+right click > "Open a command prompt here") and type: python --version
-2a) If it doesn't work, you might have to replace "python" with the full path (example for me: C:\Python\python.exe --version )
-2b) If it doesn't show version 3-something but 2 instead, another version is causing conflict so use the full path as above, too.
-3) now install the required modules, with the command:
-python -m pip install -r requirements.txt
-(again, as above, replace python by the full path if needed)
+2) During the installation, leave the "install tkinter/ttk" (or similar) enabled.
+3) You are done. Necessary packages will be installed the first time you launch the app.
 
-bonus: The command to update pip is:
-python -m pip install --upgrade pip
+If you want to do it manually, run in a command prompt this command:
+python -m pip install -r requirements.txt
 
 == UPDATE THE PACKAGES ==
 Just rerun the

@@ -1,3 +1,6 @@
+* 2.25
+- Automatic installation of pyperclip and tweepy
+
 * 2.24
 - A developper Twitter account isn't required anymore
 

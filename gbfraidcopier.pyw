@@ -1,11 +1,9 @@
-version = "2.24" # raidfinder version
+version = "2.25" # raidfinder version
 
 #######################################################################
 # import
 import json
 import queue
-import tweepy
-import pyperclip
 import configparser
 import threading
 import datetime
@@ -16,10 +14,19 @@ import re
 import base64
 import platform
 import subprocess
+import sys
 import tkinter as Tk
 import tkinter.ttk as ttk
 from tkinter import messagebox, simpledialog
 import webbrowser
+
+try:
+    import tweepy
+    import pyperclip
+except:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
+    import tweepy
+    import pyperclip
 
 #######################################################################
 # sound
