@@ -1,4 +1,4 @@
-version = "2.25" # raidfinder version
+version = "2.26" # raidfinder version
 
 #######################################################################
 # import
@@ -14,17 +14,40 @@ import re
 import base64
 import platform
 import subprocess
+import os
 import sys
 import tkinter as Tk
 import tkinter.ttk as ttk
 from tkinter import messagebox, simpledialog
 import webbrowser
 
-try:
-    import tweepy
-    import pyperclip
-except:
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
+if __name__ == "__main__": # module check
+    try: # try to import
+        import tweepy
+        import pyperclip
+    except: # failed, call pip to install
+        root = Tk.Tk() # dummy window
+        root.withdraw()
+        messagebox.showinfo("Missing modules", "Missing modules will be installed")
+        try:
+            subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
+            import tweepy
+            import pyperclip
+        except: # failed again, we exit
+            messagebox.showerror("Installation failed", "Failed to install the missing modules, check your internet connection")
+            exit(0)
+        root.destroy()
+
+    # version check
+    if tweepy.__version__ != "3.9.0" or pyperclip.__version__ != "1.8.0":
+        root = Tk.Tk() # dummy window
+        root.withdraw()
+        if messagebox.askquestion ('Exit Application',"Module versions don't match the requirements, do you want to attempt an update?", icon='question') == "yes":
+            subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
+            os.execv(sys.executable, [sys.executable] + sys.argv)
+            exit(0)
+        root.destroy()
+else:
     import tweepy
     import pyperclip
 
@@ -95,6 +118,7 @@ class Raidfinder(tweepy.StreamListener):
         # tweepy stuff
         self.keys = {'consumer_key': '', 'consumer_secret': '', 'access_token' : '', 'access_token_secret': ''}
         self.auth = None
+        self.twitter_api = None
         self.stream = None
 
         # tweet streaming
@@ -265,16 +289,7 @@ class Raidfinder(tweepy.StreamListener):
             self.high_delay_count = min(self.high_delay_count+1, 12)
             raise Exception("High Delay")
 
-        try: return self.on_status(tweepy.Status.parse(self.api, json.loads(data)))
-        except: return True
-
-    def on_status(self, status):
-        try:
-            if status.source == "グランブルー ファンタジー": # filter non gbf tweet
-                self.tweetQueue.put_nowait((status, datetime.datetime.utcnow()))
-        except:
-            pass
-        return True
+        self.tweetQueue.put_nowait((data, datetime.datetime.utcnow()))
 
     def on_connect(self): # when the Twitter stream connects
         if not self.connected:
@@ -339,11 +354,11 @@ class Raidfinder(tweepy.StreamListener):
 
         try:
             # Twitter authentification
-            try: # user dev account
+            try: # test registered keys (if any)
                 self.auth = tweepy.OAuthHandler(self.keys['consumer_key'], self.keys['consumer_secret'])
-                self.auth.secure = True
                 self.auth.set_access_token(self.keys['access_token'], self.keys['access_token_secret'])
-                if tweepy.API(self.auth).verify_credentials() is None: raise Exception()
+                self.twitter_api = tweepy.API(self.auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
+                if self.twitter_api.verify_credentials() is None: raise Exception()
             except: # ask for authentification
                 self.UI.log("[Error] Authentification is required")
                 self.auth = tweepy.OAuthHandler("ZTd48q7C3F13HmcmE6RxMuyiq", "YFz1Tq5njkM1zo165K3Zw0Rye9s2fC2d6kn2tCwfMc4XkjLjjb")
@@ -352,7 +367,8 @@ class Raidfinder(tweepy.StreamListener):
                     webbrowser.open(redirect_url, new=2)
                     verifier = simpledialog.askstring("Authorize this application", "enter the PIN code", initialvalue="")
                     self.auth.get_access_token(verifier)
-                    if tweepy.API(self.auth).verify_credentials() is None: raise Exception("Authentification failed")
+                    self.twitter_api = tweepy.API(self.auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
+                    if self.twitter_api.verify_credentials() is None: raise Exception("Authentification failed")
                     self.keys = {
                         'consumer_key': 'ZTd48q7C3F13HmcmE6RxMuyiq',
                         'consumer_secret': 'YFz1Tq5njkM1zo165K3Zw0Rye9s2fC2d6kn2tCwfMc4XkjLjjb',
@@ -435,7 +451,7 @@ class Raidfinder(tweepy.StreamListener):
             try: # starting tweepy
                 if not self.connected:
                     self.UI.log("[System] Connecting to Twitter...")
-                    stream = tweepy.Stream(auth=self.auth, listener=self)
+                    stream = tweepy.Stream(auth=self.twitter_api.auth, listener=self)
                 stream.filter(track=[" :参戦ID\n参加者募集！\n", " :Battle ID\nI need backup!\nLvl"]) # this thread will block here until an issue occur
             except:
                 pass
@@ -455,12 +471,18 @@ class Raidfinder(tweepy.StreamListener):
                 if i >= len(self.tweetDaemon): # quit the thread if the number of threads got reduced
                     return
                 try:
-                    tweet, current_time = self.tweetQueue.get(block=True, timeout=0.01) # retrieve next tweet and its reception time
+                    data, current_time = self.tweetQueue.get(block=True, timeout=0.01) # retrieve next tweet and its reception time
                 except:
                     continue
                 if not self.apprunning: # app stopped, we quit
                     return
                 if self.paused: # app paused, we skip
+                    continue
+
+                # convert
+                try: tweet = tweepy.Status.parse(self.api, json.loads(data))
+                except: continue
+                if tweet.source != "グランブルー ファンタジー": # filter non gbf tweet
                     continue
                 # timestamp check
                 delay = current_time - tweet.created_at
@@ -661,6 +683,9 @@ class RaidfinderUI(Tk.Tk):
         b = Tk.Button(self.subtabs[-1], text="Latest raid.json", command=lambda n=1 : self.openBrowser(n)) # download raid list button
         b.grid(row=1, column=3, sticky="ews")
         Tooltip(b, "Open up the download link to the latest raid.json in your browser.")
+        b = Tk.Button(self.subtabs[-1], text="Github", command=lambda n=2 : self.openBrowser(n)) # github
+        b.grid(row=3, column=3, sticky="ews")
+        Tooltip(b, "Open up the link to the project Github.")
 
         # thread count spinbox
         l = Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Tweet Processing Threads")
@@ -706,7 +731,7 @@ class RaidfinderUI(Tk.Tk):
         Tooltip(self.timeLabel, "Current time.")
 
         # make the window and bind the keyboard
-        self.title('Raid ID copier v{}'.format(version))
+        self.title("Miza's Raidfinder v{}".format(version))
         self.resizable(width=False, height=False) # not resizable
         self.protocol("WM_DELETE_WINDOW", self.close) # call close() if we close the window
         self.bind_all("<Key>", self.key)
@@ -887,6 +912,7 @@ class RaidfinderUI(Tk.Tk):
     def openBrowser(self, n): # open the user web browser
         if n == 0: webbrowser.open('https://drive.google.com/file/d/0B9YhZA7dWJUsY1lKMXY4bV9nZUE/view?usp=sharing', new=2)
         elif n == 1: webbrowser.open('https://drive.google.com/file/d/1mq0zkMwqf6Uvem12gdoUIvSJhC_u7jDT/view?usp=sharing', new=2)
+        elif n == 2: webbrowser.open('https://github.com/MizaGBF/Raidfinder', new=2)
 
     def startPing(self, n): # open the user web browser
         if n == 0: thread = threading.Thread(target=self.raidfinder.pingServer, args=["stream.twitter.com", 10])

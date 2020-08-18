@@ -1,3 +1,9 @@
+* 2.26
+- minor changes on how Tweepy is used
+- improved the auto install
+- added a link to the github
+- changed the application name (I haven't changed it since the original mod)
+
 * 2.25
 - Automatic installation of pyperclip and tweepy
 
