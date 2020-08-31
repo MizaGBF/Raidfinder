@@ -1,3 +1,6 @@
+* 2.27
+- auto install now offers you to restart as admin if it fails (windows only)
+
 * 2.26
 - minor changes on how Tweepy is used
 - improved the auto install

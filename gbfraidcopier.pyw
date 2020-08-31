@@ -1,4 +1,4 @@
-version = "2.26" # raidfinder version
+version = "2.27" # raidfinder version
 
 #######################################################################
 # import
@@ -34,7 +34,16 @@ if __name__ == "__main__": # module check
             import tweepy
             import pyperclip
         except: # failed again, we exit
-            messagebox.showerror("Installation failed", "Failed to install the missing modules, check your internet connection")
+            if sys.platform == "win32":
+                import ctypes
+                try: is_admin = ctypes.windll.shell32.IsUserAnAdmin()
+                except: is_admin = False
+                if is_admin:
+                    messagebox.showerror("Installation failed", "Failed to install the missing modules, check your internet connection\nAlternatively, try to run this application as administrator to force the installation.\nOr try to run the command pip install -r requirements.txt")
+                elif messagebox.askquestion ("Installation failed","Restart the application as an administrator to try again?") == "yes":
+                    ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
+            else:
+                messagebox.showerror("Installation failed", "Failed to install the missing modules, check your internet connection\nAlternatively, try to run this application as a sudo user.\nOr try to run the command pip install -r requirements.txt")
             exit(0)
         root.destroy()
 
@@ -42,7 +51,7 @@ if __name__ == "__main__": # module check
     if tweepy.__version__ != "3.9.0" or pyperclip.__version__ != "1.8.0":
         root = Tk.Tk() # dummy window
         root.withdraw()
-        if messagebox.askquestion ('Exit Application',"Module versions don't match the requirements, do you want to attempt an update?", icon='question') == "yes":
+        if messagebox.askquestion ('Exit Application',"Module versions don't match the requirements, do you want to attempt an update?") == "yes":
             subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
             os.execv(sys.executable, [sys.executable] + sys.argv)
             exit(0)
@@ -451,7 +460,7 @@ class Raidfinder(tweepy.StreamListener):
             try: # starting tweepy
                 if not self.connected:
                     self.UI.log("[System] Connecting to Twitter...")
-                    stream = tweepy.Stream(auth=self.twitter_api.auth, listener=self)
+                    stream = tweepy.Stream(auth=self.twitter_api.auth, listener=self, chunk_size=3900)
                 stream.filter(track=[" :参戦ID\n参加者募集！\n", " :Battle ID\nI need backup!\nLvl"]) # this thread will block here until an issue occur
             except:
                 pass
