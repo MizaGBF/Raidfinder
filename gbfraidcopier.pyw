@@ -1,4 +1,4 @@
-version = "2.27" # raidfinder version
+version = "2.28" # raidfinder version
 
 #######################################################################
 # import
@@ -460,7 +460,7 @@ class Raidfinder(tweepy.StreamListener):
             try: # starting tweepy
                 if not self.connected:
                     self.UI.log("[System] Connecting to Twitter...")
-                    stream = tweepy.Stream(auth=self.twitter_api.auth, listener=self, chunk_size=3900)
+                    stream = tweepy.Stream(auth=self.twitter_api.auth, listener=self)
                 stream.filter(track=[" :参戦ID\n参加者募集！\n", " :Battle ID\nI need backup!\nLvl"]) # this thread will block here until an issue occur
             except:
                 pass

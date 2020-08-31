@@ -1,3 +1,6 @@
+* 2.28
+- Removed the custom chunk_size (This was a test I forgot to remove)
+
 * 2.27
 - auto install now offers you to restart as admin if it fails (windows only)
 
