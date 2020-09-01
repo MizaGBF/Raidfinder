@@ -1,4 +1,4 @@
-version = "2.28" # raidfinder version
+version = "2.29" # raidfinder version
 
 #######################################################################
 # import
@@ -118,6 +118,7 @@ class Raidfinder(tweepy.StreamListener):
         self.pingLock = threading.Lock()
         self.high_delay = False
         self.high_delay_count = 0
+        self.filters = [" :参戦ID\n参加者募集！\n", " :Battle ID\nI need backup!\nLvl"]
         try:
             self.si = subprocess.STARTUPINFO()
             self.si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
@@ -268,9 +269,10 @@ class Raidfinder(tweepy.StreamListener):
         except Exception as e:
             return "[JSON Error] Missing or invalid file\nPlease check if 'raid.json' is beside this python script\nAlternatively, please reinstall\n(Exception: {})".format(e)
 
+        self.filters = raidData.get('filters', self.filters)
+
         # build the raid dictionnary
         x = {}
-
         try:
             for p in raidData['pages']: # for each page
                 for r in p['list']: # read this page raid list
@@ -461,7 +463,7 @@ class Raidfinder(tweepy.StreamListener):
                 if not self.connected:
                     self.UI.log("[System] Connecting to Twitter...")
                     stream = tweepy.Stream(auth=self.twitter_api.auth, listener=self)
-                stream.filter(track=[" :参戦ID\n参加者募集！\n", " :Battle ID\nI need backup!\nLvl"]) # this thread will block here until an issue occur
+                stream.filter(track=self.filters) # this thread will block here until an issue occur
             except:
                 pass
             if not self.apprunning or self.retry_delay == -1:
