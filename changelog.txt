@@ -1,3 +1,6 @@
+* 2.30
+- Minor change in the auto update sequence
+
 * 2.29
 - You can change the tweet stream filters directly from raid.json (Advanced Users only)
 

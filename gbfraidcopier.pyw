@@ -1,4 +1,4 @@
-version = "2.29" # raidfinder version
+version = "2.30" # raidfinder version
 
 #######################################################################
 # import
@@ -25,10 +25,13 @@ if __name__ == "__main__": # module check
     try: # try to import
         import tweepy
         import pyperclip
-    except: # failed, call pip to install
+        if tweepy.__version__ != "3.9.0" or pyperclip.__version__ != "1.8.0": # version check
+            raise Exception("outdated")
+    except Exception as e: # failed, call pip to install
         root = Tk.Tk() # dummy window
         root.withdraw()
-        messagebox.showinfo("Missing modules", "Missing modules will be installed")
+        if str(e) == "outdated": messagebox.showinfo("Outdated modules", "Modules will be updated")
+        else: messagebox.showinfo("Missing modules", "Missing modules will be installed")
         try:
             subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
             import tweepy
@@ -44,16 +47,6 @@ if __name__ == "__main__": # module check
                     ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
             else:
                 messagebox.showerror("Installation failed", "Failed to install the missing modules, check your internet connection\nAlternatively, try to run this application as a sudo user.\nOr try to run the command pip install -r requirements.txt")
-            exit(0)
-        root.destroy()
-
-    # version check
-    if tweepy.__version__ != "3.9.0" or pyperclip.__version__ != "1.8.0":
-        root = Tk.Tk() # dummy window
-        root.withdraw()
-        if messagebox.askquestion ('Exit Application',"Module versions don't match the requirements, do you want to attempt an update?") == "yes":
-            subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
-            os.execv(sys.executable, [sys.executable] + sys.argv)
             exit(0)
         root.destroy()
 else:
