@@ -184,7 +184,7 @@ class Raidfinder(tweepy.StreamListener):
             except: pass
             try: enableTooltip = int(config['Settings']['tooltip'])
             except: pass
-            try: self.filtervar = config['Settings']['filter']
+            try: self.filtervar = base64.b64decode(config['Settings']['filter']).decode('utf-8')
             except: pass
             try: self.settings['max_thread'] = int(config['Settings']['maxthread'])
             except: pass
@@ -223,7 +223,7 @@ class Raidfinder(tweepy.StreamListener):
             'maxthread':str(self.settings['max_thread']),
             'jst':str(self.settings['jst']),
             'tooltip':str(enableTooltip),
-            'filter':self.filtervar.replace('%', '%%')
+            'filter':base64.b64encode(self.filtervar.encode('utf-8')).decode('ascii') 
         }
 
         config['Keys'] = self.keys
