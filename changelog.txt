@@ -1,3 +1,10 @@
+* 2.31
+- Bumped required Tweepy and Pyperclip versions
+- Added a filter to only show codes matching it (For example, you can type 100% to only show the raids where the author put "100%" in the tweet message)
+- Renamed some stats on the stat tab (From "Filtered" to "Matched")
+- Added a "Filtered" stat showing how many tweets got ignored thanks to the filter
+- Some stats are now formatted after certain threshold (1000 will show as 1K, 1000000 as 1M)
+
 * 2.30
 - Minor change in the auto update sequence
 

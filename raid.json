@@ -627,7 +627,7 @@
                     "posY":2
                 },
                 {
-                    "name": "Phronesis ",
+                    "name": "Phronesis",
                     "en": "Lvl 150 Phronesis",
                     "jp": "Lv150 フロネシス",
                     "posX":4,
@@ -708,6 +708,13 @@
                     "en": "Lvl 120 Hector",
                     "jp": "Lv120 ヘクトル",
                     "posX":3,
+                    "posY":4
+                },
+                {
+                    "name": "Luminiera Malice",
+                    "en": "Lvl 150 Luminiera Malice",
+                    "jp": "Lv150 シュヴァリエ・マリス",
+                    "posX":4,
                     "posY":4
                 },
                 {

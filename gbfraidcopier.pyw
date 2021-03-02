@@ -1,4 +1,4 @@
-version = "2.30" # raidfinder version
+version = "2.31" # raidfinder version
 
 #######################################################################
 # import
@@ -25,7 +25,7 @@ if __name__ == "__main__": # module check
     try: # try to import
         import tweepy
         import pyperclip
-        if tweepy.__version__ != "3.9.0" or pyperclip.__version__ != "1.8.0": # version check
+        if tweepy.__version__ != "3.10.0" or pyperclip.__version__ != "1.8.2": # version check
             raise Exception("outdated")
     except Exception as e: # failed, call pip to install
         root = Tk.Tk() # dummy window
@@ -88,22 +88,20 @@ class Raidfinder(tweepy.StreamListener):
         self.tweetQueue = queue.Queue()
         self.tweetDaemon = []
         self.THREAD_LIMIT = 50 # const
-        self.tweetLock1 = threading.Lock()
-        self.tweetLock2 = threading.Lock()
-        self.tweetLock3 = threading.Lock()
-        self.tweetLock4 = threading.Lock()
-        self.tweetLock5 = threading.Lock()
+        self.tweetLock = []
+        for i in range(6): self.tweetLock.append(threading.Lock())
         self.apprunning = True
         self.pause = False
         self.connected = False
         self.retry_delay = 0
         self.blacklist = []
         self.dupes = []
+        self.filtervar = ""
         self.idregex = re.compile('([A-F0-9]{8}) :')
         self.dupes = []
         self.raids = {}
         self.custom = []
-        self.stats = {'runtime':None, 'tweet':0, 'all tweet':0, 'dupe':0, 'blacklist':0, 'last':None, 'last filter':None, 'delay':0}
+        self.stats = {'runtime':None, 'tweet':0, 'all tweet':0, 'dupe':0, 'blacklist':0, 'last':None, 'last tweet':None, 'delay':0, 'filtered':0}
         self.time = time.time()
         self.elapsed = 0
         self.lasttab = 0
@@ -186,6 +184,8 @@ class Raidfinder(tweepy.StreamListener):
             except: pass
             try: enableTooltip = int(config['Settings']['tooltip'])
             except: pass
+            try: self.filtervar = config['Settings']['filter']
+            except: pass
             try: self.settings['max_thread'] = int(config['Settings']['maxthread'])
             except: pass
             if self.settings['max_thread'] < 1: self.settings['max_thread'] = 1
@@ -222,7 +222,8 @@ class Raidfinder(tweepy.StreamListener):
             'lasttab':str(self.lasttab),
             'maxthread':str(self.settings['max_thread']),
             'jst':str(self.settings['jst']),
-            'tooltip':str(enableTooltip)
+            'tooltip':str(enableTooltip),
+            'filter':self.filtervar.replace('%', '%%')
         }
 
         config['Keys'] = self.keys
@@ -490,7 +491,7 @@ class Raidfinder(tweepy.StreamListener):
                     continue
                 # timestamp check
                 delay = current_time - tweet.created_at
-                with self.tweetLock1:
+                with self.tweetLock[0]:
                     self.stats['delay'] = delay.seconds
 
                 if self.settings['delay'] and delay.seconds >= self.settings['delay_limit']:
@@ -498,7 +499,7 @@ class Raidfinder(tweepy.StreamListener):
                     continue # we raise the high delay flag
                 # blacklist check
                 if self.settings['blacklist'] and tweet.user.screen_name in self.blacklist:
-                    with self.tweetLock2:
+                    with self.tweetLock[1]:
                         self.stats['blacklist'] += 1
                     continue # author is blacklisted, we skip
                 st = html.unescape(tweet.text) # tweet content
@@ -522,23 +523,29 @@ class Raidfinder(tweepy.StreamListener):
                     mp = 35
                     lg = '(EN)'
 
-                raidName = st[p:].rsplit('\nhttp', 1)[0] # retrieve the raid name
-                with self.tweetLock3:
+                with self.tweetLock[2]:
                     self.stats['all tweet'] += 1
                     self.stats['last'] = time.time()
+
+                comment = "" # build the author comment
+                for c in range(0, p-mp): # ignoring out of range characters
+                    if ord(st[c]) in range(65536):
+                        comment += st[c]
+                if self.filtervar != "" and self.filtervar.lower() not in comment.lower():
+                    with self.tweetLock[3]:
+                        self.stats['filtered'] += 1
+                    continue
+
+                raidName = st[p:].rsplit('\nhttp', 1)[0] # retrieve the raid name
                 for r in self.raids.get(raidName, []): # get the corresponding raids
                     if self.UI.readonly.get(r, False): # check if enabled on the UI
-                        with self.tweetLock4:
+                        with self.tweetLock[4]:
                             self.stats['tweet'] += 1
                             if self.settings['dupe'] and code in self.dupes:
                                 self.stats['dupe'] += 1
                                 break
                         if self.settings['copy']: pyperclip.copy(code) # copy if enabled (note: is this thread safe?)
                         if self.settings['sound']: playsound() # play a sound if enabled
-                        comment = "" # build the author comment
-                        for c in range(0, p-mp): # ignoring out of range characters
-                            if ord(st[c]) in range(65536):
-                                comment += st[c]
                         # write to the log
                         if self.settings['time_mode'] == 1:
                             if self.settings['jst']:
@@ -552,8 +559,8 @@ class Raidfinder(tweepy.StreamListener):
                             else: t = strftime("%H:%M:%S")
                         if self.settings['author']: self.UI.log('[{}] {} : {} {} [@{}] {}'.format(t, r, code, lg, tweet.user.screen_name, comment))
                         else: self.UI.log('[{}] {} : {} {} {}'.format(t, r, code, lg, comment))
-                        with self.tweetLock5: # stat + dupe cleanup
-                            self.stats['last filter'] = time.time()
+                        with self.tweetLock[5]: # stat + dupe cleanup
+                            self.stats['last tweet'] = time.time()
                             self.dupes.append(code)
                             if len(self.dupes) > 200: self.dupes = self.dupes[50:] # removing 50 oldest if 200 dupes
                         break
@@ -617,9 +624,23 @@ class RaidfinderUI(Tk.Tk):
         self.raidchilds = []
         self.custom = []
 
+        ## tweet filter
+        self.mainframes.append(ttk.Notebook(self))
+        self.mainframes[-1].grid(row=1, column=0, rowspan=1, columnspan=10, sticky="we")
+        l = Tk.Label(self.mainframes[-1], text="Filter by Messages")
+        l.grid(row=0, column=0)
+        Tooltip(l, "Only the tweets containing this string will be processed")
+        self.filter=Tk.Text(self.mainframes[-1], height=1)
+        self.filter.grid(row=0, column=1, columnspan=5, sticky="we")
+        self.filter.insert(Tk.END, self.raidfinder.filtervar)
+        self.filter.bind("<FocusIn>", self.focusin)
+        self.filter.bind("<FocusOut>", self.focusout)
+        self.filter.bind('<<Modified>>', self.updateFilter)
+        self.filterModified = False
+
         ## main settings
         self.mainframes.append(ttk.Frame(self))
-        self.mainframes[-1].grid(row=1, column=0, columnspan=8, sticky="we")
+        self.mainframes[-1].grid(row=2, column=0, columnspan=8, sticky="we")
         self.mainsett_b = []
         self.mainsett_tag = ["Pause","Japanese","English","Sound","Auto Copy"]
         convert = {"Pause":["", "If enabled, tweets will be discarded instead of being processed."], "Japanese":["jp", "If disabled, japanese tweets will be discarded."], "English":["en", "If disabled, english tweets will be discarded."], "Sound":["sound", "If enabled, a sound will play when a new code is available."], "Auto Copy":["copy", "If enabled, the latest code will be copied to your clipboard."]} # convert to the setting dict key + the tooltip text
@@ -630,7 +651,7 @@ class RaidfinderUI(Tk.Tk):
 
         ## bottomn (log / advanced setting / stats)
         self.mainframes.append(ttk.Notebook(self))
-        self.mainframes[-1].grid(row=2, column=0, columnspan=10, sticky="we")
+        self.mainframes[-1].grid(row=3, column=0, columnspan=10, sticky="we")
         self.subtabs = []
         ### log
         self.subtabs.append(ttk.Frame(self.mainframes[-1]))
@@ -716,7 +737,7 @@ class RaidfinderUI(Tk.Tk):
         self.stats = []
         Tk.Button(self.subtabs[-1], text="Reset", command=self.resetStats).grid(row=4, column=0, sticky="ews") # reset button
         # all stats to be displayed (Label Text, Position X, Position Y, Default Text, Tooltip Text)
-        labels = [["Connection Time:", 0, 0, "0:00:00", "Duration of your connection to twitter.\nPauses are ignored."],["Received tweets:", 0, 1, "0", "Number of tweets received by the listener."],["Filtered tweets:", 0, 2, "0", "Number of received tweets correponding to the user selected raid(s)."],["Filtered/Received:", 0, 3, "0.00%", "Ratio of selected raid tweets by all received tweets."],["Received rate:", 1, 1, "0/s", "Average reception speed."],["Filtered rate:", 1, 2, "0/s", "Average reception speed for the selected raids."],["Blacklisted:", 1, 0, "0", "Numbed of tweets blocked by the blacklist."],["Dupes:", 2, 0, "0", "Numbed of blocked duplicate codes."],["Last Received:", 2, 1, "?", "When was received the last tweet."],["Last Filtered:", 2, 2, "?", "When was received the last tweet corresponding to a selected raid."],["Queued Tweets:", 1, 3, "0", "Number of tweets waiting to be processed."],["Twitter Delay:", 2, 3, "0s", "Delay between the tweet creation and its reception by the listener."]
+        labels = [["Connection Time:", 0, 0, "0:00:00", "Duration of your connection to twitter.\nPauses are ignored."],["Received tweets:", 0, 1, "0", "Number of tweets received by the listener."],["Matched tweets:", 0, 2, "0", "Number of received tweets correponding to the user selected raid(s)."],["Matched/Received:", 0, 3, "0.00%", "Ratio of selected raid tweets by all received tweets."],["Received rate:", 1, 1, "0/s", "Average reception speed."],["Match rate:", 1, 2, "0/s", "Average reception speed for the selected raids."],["Blacklisted:", 1, 0, "0", "Numbed of tweets blocked by the blacklist."],["Dupes:", 2, 0, "0", "Numbed of blocked duplicate codes."],["Last Received:", 2, 1, "?", "When was received the last tweet."],["Last Matched:", 2, 2, "?", "When was received the last tweet corresponding to a selected raid."],["Queued Tweets:", 1, 3, "0", "Number of tweets waiting to be processed."],["Twitter Delay:", 2, 3, "0s", "Delay between the tweet creation and its reception by the listener."],["Filtered:", 3, 0, "0", "Numbed of tweets blocked by the filter."]
         ]
         for l in labels:
             b = Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=l[0])
@@ -731,7 +752,7 @@ class RaidfinderUI(Tk.Tk):
         self.statusLabel.grid(row=0, column=9, sticky="ne")
         Tooltip(self.statusLabel, "Indicate if the Twitter Stream is connected.")
         self.timeLabel = Tk.Label(self, text="") # for the current time
-        self.timeLabel.grid(row=1, column=9, sticky="ne")
+        self.timeLabel.grid(row=2, column=9, sticky="ne")
         Tooltip(self.timeLabel, "Current time.")
 
         # make the window and bind the keyboard
@@ -894,6 +915,12 @@ class RaidfinderUI(Tk.Tk):
                 self.raidfinder.tweetDaemon[-1].start()
         return valid
 
+    def updateFilter(self, event):
+        if not self.filterModified:
+            self.raidfinder.filtervar = self.filter.get('0.0', 'end')[:-1]
+        self.filterModified = not self.filterModified
+        self.tk.call(self.filter, 'edit', 'modified', 0)
+
     def updateDelayLimit(self, entry):
         try: # validate the spinbox value
             n = int(entry)
@@ -911,7 +938,7 @@ class RaidfinderUI(Tk.Tk):
         self.inputting = False
 
     def resetStats(self): # simply reset the stats
-        self.raidfinder.stats = {'runtime':None, 'tweet':0, 'all tweet':0, 'dupe':0, 'blacklist':0, 'last':None, 'last filter':None, 'delay':0}
+        self.raidfinder.stats = {'runtime':None, 'tweet':0, 'all tweet':0, 'dupe':0, 'blacklist':0, 'last':None, 'last tweet':None, 'delay':0, 'filtered':0}
 
     def openBrowser(self, n): # open the user web browser
         if n == 0: webbrowser.open('https://drive.google.com/file/d/0B9YhZA7dWJUsY1lKMXY4bV9nZUE/view?usp=sharing', new=2)
@@ -925,6 +952,11 @@ class RaidfinderUI(Tk.Tk):
         else: return
         thread.setDaemon(True)
         thread.start()
+
+    def formatStat(self, v):
+        if v > 1000000: return str(v // 1000000) + "M"
+        elif v > 1000: return str(v // 1000) + "K"
+        return v
 
     def updateAll(self): # update the UI
         # update the log
@@ -942,26 +974,27 @@ class RaidfinderUI(Tk.Tk):
             self.stats[0].config(text="{}".format(datetime.timedelta(seconds=round(self.raidfinder.stats['runtime'], 0))))
         else:
             self.stats[0].config(text="0:00:00")
-        self.stats[1].config(text="{}".format(self.raidfinder.stats['all tweet']))
-        self.stats[2].config(text="{}".format(self.raidfinder.stats['tweet']))
+        self.stats[1].config(text="{}".format(self.formatStat(self.raidfinder.stats['all tweet'])))
+        self.stats[2].config(text="{}".format(self.formatStat(self.raidfinder.stats['tweet'])))
         if self.raidfinder.stats['all tweet'] == 0: self.stats[3].config(text="0%")
         else: self.stats[3].config(text="{:.2f}%".format(100*self.raidfinder.stats['tweet']/self.raidfinder.stats['all tweet']))
         try: self.stats[4].config(text="{:.2f}/s".format(self.raidfinder.stats['all tweet']/self.raidfinder.stats['runtime']))
         except: self.stats[4].config(text="0/s")
         try: self.stats[5].config(text="{:.2f}/s".format(self.raidfinder.stats['tweet']/self.raidfinder.stats['runtime']))
         except: self.stats[5].config(text="0/s")
-        self.stats[6].config(text="{}".format(self.raidfinder.stats['blacklist']))
-        self.stats[7].config(text="{}".format(self.raidfinder.stats['dupe']))
+        self.stats[6].config(text="{}".format(self.formatStat(self.raidfinder.stats['blacklist'])))
+        self.stats[7].config(text="{}".format(self.formatStat(self.raidfinder.stats['dupe'])))
         if self.raidfinder.stats['last'] is not None:
             self.stats[8].config(text="{:.2f}s".format(time.time() - self.raidfinder.stats['last']))
         else: 
             self.stats[8].config(text="0.00s")
-        if self.raidfinder.stats['last filter'] is not None:
-            self.stats[9].config(text="{:.2f}s".format(time.time() - self.raidfinder.stats['last filter']))
+        if self.raidfinder.stats['last tweet'] is not None:
+            self.stats[9].config(text="{:.2f}s".format(time.time() - self.raidfinder.stats['last tweet']))
         else: 
             self.stats[9].config(text="0.00s")
         self.stats[10].config(text="{}".format(self.raidfinder.tweetQueue.qsize()))
         self.stats[11].config(text="{}s".format(self.raidfinder.stats['delay']))
+        self.stats[12].config(text="{}".format(self.formatStat(self.raidfinder.stats['filtered'])))
         
         # update the time and online indicator
         if self.raidfinder.settings['jst']:
