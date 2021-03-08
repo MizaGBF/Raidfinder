@@ -1,3 +1,7 @@
+* 2.32
+- Filter label is now highlighted in green when the filter is active
+- raid.json has been cleaned up in preparation of the upcoming raid changes
+
 * 2.31
 - Bumped required Tweepy and Pyperclip versions
 - Added a filter to only show codes matching it (For example, you can type 100% to only show the raids where the author put "100%" in the tweet message)

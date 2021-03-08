@@ -6,407 +6,295 @@
     "custom color":"#c9bad4",
     "pages": [
         {
-            "name":"Omega",
+            "name":"Standard",
             "color":"#badbba",
             "list":
             [
                 {
-                    "name":"Zarchnal F.", 
-                    "en":"Lvl 20 Zarchnal Flame", 
-                    "jp":"Lv20 ザリチュナルフレイム",
-                    "posX":0,
-                    "posY":0
-                }, 
-                {
-                    "name":"Zarchnal F. (H)", 
-                    "en":"Lvl 30 Zarchnal Flame", 
-                    "jp":"Lv30 ザリチュナルフレイム",
-                    "posX":1,
-                    "posY":0
-                }, 
-                {
                     "name":"Colossus", 
                     "en":"Lvl 30 Colossus", 
                     "jp":"Lv30 コロッサス",
-                    "posX":2,
+                    "posX":0,
                     "posY":0
                 }, 
                 {
                     "name":"Colossus (H)", 
                     "en":"Lvl 50 Colossus", 
                     "jp":"Lv50 コロッサス",
-                    "posX":3,
+                    "posX":1,
                     "posY":0
                 }, 
                 {
                     "name":"Colossus (H+)", 
                     "en":"Lvl 60 Colossus", 
                     "jp":"Lv60 コロッサス",
-                    "posX":4,
+                    "posX":2,
                     "posY":0
                 }, 
                 {
                     "name":"Colossus Ω", 
                     "en":"Lvl 70 Colossus Omega", 
                     "jp":"Lv70 コロッサス・マグナ",
-                    "posX":5,
+                    "posX":3,
                     "posY":0
                 }, 
                 {
                     "name":"Colossus Ω+", 
                     "en":"Lvl 80 Colossus Omega", 
                     "jp":"Lv80 コロッサス・マグナ",
-                    "posX":6,
+                    "posX":4,
                     "posY":0
-                }, 
-                {
-                    "name":"Imperial G.", 
-                    "en":"Lvl 20 Imperial Guard", 
-                    "jp":"Lv20 インペリアルガード",
-                    "posX":0,
-                    "posY":1
-                }, 
-                {
-                    "name":"Imperial G. (H)", 
-                    "en":"Lvl 30 Imperial Guard", 
-                    "jp":"Lv30 インペリアルガード",
-                    "posX":1,
-                    "posY":1
-                }, 
-                {
-                    "name":"Leviathan", 
-                    "en":"Lvl 30 Leviathan", 
-                    "jp":"Lv30 リヴァイアサン",
-                    "posX":2,
-                    "posY":1
-                }, 
-                {
-                    "name":"Leviathan (H)", 
-                    "en":"Lvl 50 Leviathan", 
-                    "jp":"Lv50 リヴァイアサン",
-                    "posX":3,
-                    "posY":1
-                }, 
-                {
-                    "name":"Leviathan (H+)", 
-                    "en":"Lvl 60 Leviathan", 
-                    "jp":"Lv60 リヴァイアサン",
-                    "posX":4,
-                    "posY":1
-                }, 
-                {
-                    "name":"Leviathan Ω", 
-                    "en":"Lvl 60 Leviathan Omega", 
-                    "jp":"Lv60 リヴァイアサン・マグナ",
-                    "posX":5,
-                    "posY":1
-                }, 
-                {
-                    "name":"Leviathan Ω+", 
-                    "en":"Lvl 70 Leviathan Omega", 
-                    "jp":"Lv70 リヴァイアサン・マグナ",
-                    "posX":6,
-                    "posY":1
-                }, 
-                {
-                    "name":"Ancient Dragon", 
-                    "en":"Lvl 30 Ancient Dragon", 
-                    "jp":"Lv30 エンシェントドラゴン",
-                    "posX":0,
-                    "posY":2
-                }, 
-                {
-                    "name":"Yggdrasil", 
-                    "en":"Lvl 30 Yggdrasil", 
-                    "jp":"Lv30 ユグドラシル",
-                    "posX":2,
-                    "posY":2
-                }, 
-                {
-                    "name":"Yggdrasil (H)", 
-                    "en":"Lvl 50 Yggdrasil", 
-                    "jp":"Lv50 ユグドラシル",
-                    "posX":3,
-                    "posY":2
-                }, 
-                {
-                    "name":"Yggdrasil (H+)", 
-                    "en":"Lvl 60 Yggdrasil", 
-                    "jp":"Lv60 ユグドラシル",
-                    "posX":4,
-                    "posY":2
-                }, 
-                {
-                    "name":"Yggdrasil Ω", 
-                    "en":"Lvl 60 Yggdrasil Omega", 
-                    "jp":"Lv60 ユグドラシル・マグナ",
-                    "posX":5,
-                    "posY":2
-                }, 
-                {
-                    "name":"Yggdrasil Ω+", 
-                    "en":"Lvl 70 Yggdrasil Omega", 
-                    "jp":"Lv70 ユグドラシル・マグナ",
-                    "posX":6,
-                    "posY":2
-                }, 
-                {
-                    "name":"Griffin", 
-                    "en":"Lvl 20 Griffin", 
-                    "jp":"Lv20 グリフォン",
-                    "posX":0,
-                    "posY":3
-                }, 
-                {
-                    "name":"Griffin (H)", 
-                    "en":"Lvl 30 Griffin", 
-                    "jp":"Lv30 グリフォン",
-                    "posX":1,
-                    "posY":3
-                }, 
-                {
-                    "name":"Tiamat", 
-                    "en":"Lvl 30 Tiamat", 
-                    "jp":"Lv30 ティアマト",
-                    "posX":2,
-                    "posY":3
-                }, 
-                {
-                    "name":"Tiamat (H)", 
-                    "en":"Lvl 50 Tiamat", 
-                    "jp":"Lv50 ティアマト",
-                    "posX":3,
-                    "posY":3
-                }, 
-                {
-                    "name":"Tiamat (H+)", 
-                    "en":"Lvl 60 Tiamat", 
-                    "jp":"Lv60 ティアマト",
-                    "posX":4,
-                    "posY":3
-                }, 
-                {
-                    "name":"Tiamat Ω", 
-                    "en":"Lvl 50 Tiamat Omega", 
-                    "jp":"Lv50 ティアマト・マグナ",
-                    "posX":5,
-                    "posY":3
-                }, 
-                {
-                    "name":"Tiamat Ω+", 
-                    "en":"Lvl 60 Tiamat Omega", 
-                    "jp":"Lv60 ティアマト・マグナ",
-                    "posX":6,
-                    "posY":3
-                }, 
-                {
-                    "name":"Will-o'-Wisp", 
-                    "en":"Lvl 30 Will-o'-Wisp", 
-                    "jp":"Lv30 ウィル･オ･ウィスプ",
-                    "posX":0,
-                    "posY":4
-                }, 
-                {
-                    "name":"Adversa", 
-                    "en":"Lvl 30 Adversa", 
-                    "jp":"Lv30 アドウェルサ",
-                    "posX":2,
-                    "posY":4
-                }, 
-                {
-                    "name":"Adversa (H)", 
-                    "en":"Lvl 50 Adversa", 
-                    "jp":"Lv50 アドウェルサ",
-                    "posX":3,
-                    "posY":4
-                }, 
-                {
-                    "name":"Adversa (H+)", 
-                    "en":"Lvl 60 Adversa", 
-                    "jp":"Lv60 アドウェルサ",
-                    "posX":4,
-                    "posY":4
-                }, 
-                {
-                    "name":"Luminiera Ω", 
-                    "en":"Lvl 75 Luminiera Omega", 
-                    "jp":"Lv75 シュヴァリエ・マグナ",
-                    "posX":5,
-                    "posY":4
-                }, 
-                {
-                    "name":"Luminiera Ω+", 
-                    "en":"Lvl 85 Luminiera Omega", 
-                    "jp":"Lv85 シュヴァリエ・マグナ",
-                    "posX":6,
-                    "posY":4
-                }, 
-                {
-                    "name":"Evil Eye", 
-                    "en":"Lvl 30 Evil Eye", 
-                    "jp":"Lv30 イービルアイ",
-                    "posX":0,
-                    "posY":5
-                },
-                {
-                    "name":"Celeste", 
-                    "en":"Lvl 30 Celeste", 
-                    "jp":"Lv30 セレスト",
-                    "posX":2,
-                    "posY":5
-                },
-                {
-                    "name":"Celeste (H)", 
-                    "en":"Lvl 50 Celeste", 
-                    "jp":"Lv50 セレスト",
-                    "posX":3,
-                    "posY":5
-                },
-                {
-                    "name":"Celeste (H+)", 
-                    "en":"Lvl 60 Celeste", 
-                    "jp":"Lv60 セレスト",
-                    "posX":4,
-                    "posY":5
-                },
-                {
-                    "name":"Celeste Ω", 
-                    "en":"Lvl 75 Celeste Omega", 
-                    "jp":"Lv75 セレスト・マグナ",
-                    "posX":5,
-                    "posY":5
-                },
-                {
-                    "name":"Celeste Ω+", 
-                    "en":"Lvl 85 Celeste Omega", 
-                    "jp":"Lv85 セレスト・マグナ",
-                    "posX":6,
-                    "posY":5
-                }
-            ]
-        },
-        {
-            "name":"Primal",
-            "color":"#c1cedb",
-            "list":
-            [
-                {
-                    "name": "Twin Elements",
-                    "en": "Lvl 100 Twin Elements",
-                    "jp": "Lv100 フラム＝グラス",
-                    "posX":0,
-                    "posY":0
-                },
-                {
+                },  
+{
                     "name": "Athena",
                     "en": "Lvl 100 Athena",
                     "jp": "Lv100 アテナ",
-                    "posX":1,
+                    "posX":5,
                     "posY":0
                 },
                 {
                     "name": "Michael",
                     "en": "Lvl 100 Michael",
                     "jp": "Lv100 ミカエル",
-                    "posX":2,
+                    "posX":6,
                     "posY":0
                 },
                 {
-                    "name": "Macula",
-                    "en": "Lvl 100 Macula Marius",
-                    "jp": "Lv100 マキュラ・マリウス",
+                    "name":"Leviathan", 
+                    "en":"Lvl 30 Leviathan", 
+                    "jp":"Lv30 リヴァイアサン",
                     "posX":0,
                     "posY":1
-                },
+                }, 
+                {
+                    "name":"Leviathan (H)", 
+                    "en":"Lvl 50 Leviathan", 
+                    "jp":"Lv50 リヴァイアサン",
+                    "posX":1,
+                    "posY":1
+                }, 
+                {
+                    "name":"Leviathan (H+)", 
+                    "en":"Lvl 60 Leviathan", 
+                    "jp":"Lv60 リヴァイアサン",
+                    "posX":2,
+                    "posY":1
+                }, 
+                {
+                    "name":"Leviathan Ω", 
+                    "en":"Lvl 60 Leviathan Omega", 
+                    "jp":"Lv60 リヴァイアサン・マグナ",
+                    "posX":3,
+                    "posY":1
+                }, 
                 {
                     "name": "Grani",
                     "en": "Lvl 100 Grani",
                     "jp": "Lv100 グラニ",
-                    "posX":1,
+                    "posX":5,
                     "posY":1
                 },
                 {
                     "name": "Gabriel",
                     "en": "Lvl 100 Gabriel",
                     "jp": "Lv100 ガブリエル",
-                    "posX":2,
+                    "posX":6,
                     "posY":1
                 },
                 {
-                    "name": "Medusa",
-                    "en": "Lvl 100 Medusa",
-                    "jp": "Lv100 メドゥーサ",
+                    "name":"Leviathan Ω+", 
+                    "en":"Lvl 70 Leviathan Omega", 
+                    "jp":"Lv70 リヴァイアサン・マグナ",
+                    "posX":4,
+                    "posY":1
+                }, 
+                {
+                    "name":"Yggdrasil", 
+                    "en":"Lvl 30 Yggdrasil", 
+                    "jp":"Lv30 ユグドラシル",
                     "posX":0,
                     "posY":2
-                },
+                }, 
+                {
+                    "name":"Yggdrasil (H)", 
+                    "en":"Lvl 50 Yggdrasil", 
+                    "jp":"Lv50 ユグドラシル",
+                    "posX":1,
+                    "posY":2
+                }, 
+                {
+                    "name":"Yggdrasil (H+)", 
+                    "en":"Lvl 60 Yggdrasil", 
+                    "jp":"Lv60 ユグドラシル",
+                    "posX":2,
+                    "posY":2
+                }, 
+                {
+                    "name":"Yggdrasil Ω", 
+                    "en":"Lvl 60 Yggdrasil Omega", 
+                    "jp":"Lv60 ユグドラシル・マグナ",
+                    "posX":3,
+                    "posY":2
+                }, 
+                {
+                    "name":"Yggdrasil Ω+", 
+                    "en":"Lvl 70 Yggdrasil Omega", 
+                    "jp":"Lv70 ユグドラシル・マグナ",
+                    "posX":4,
+                    "posY":2
+                }, 
                 {
                     "name": "Baal",
                     "en": "Lvl 100 Baal",
                     "jp": "Lv100 バアル",
-                    "posX":1,
+                    "posX":5,
                     "posY":2
                 },
                 {
                     "name": "Uriel",
                     "en": "Lvl 100 Uriel",
                     "jp": "Lv100 ウリエル",
-                    "posX":2,
+                    "posX":6,
                     "posY":2
                 },
                 {
-                    "name": "Nezha",
-                    "en": "Lvl 100 Nezha",
-                    "jp": "Lv100 ナタク",
+                    "name":"Tiamat", 
+                    "en":"Lvl 30 Tiamat", 
+                    "jp":"Lv30 ティアマト",
                     "posX":0,
                     "posY":3
-                },
+                }, 
+                {
+                    "name":"Tiamat (H)", 
+                    "en":"Lvl 50 Tiamat", 
+                    "jp":"Lv50 ティアマト",
+                    "posX":1,
+                    "posY":3
+                }, 
+                {
+                    "name":"Tiamat (H+)", 
+                    "en":"Lvl 60 Tiamat", 
+                    "jp":"Lv60 ティアマト",
+                    "posX":2,
+                    "posY":3
+                }, 
+                {
+                    "name":"Tiamat Ω", 
+                    "en":"Lvl 50 Tiamat Omega", 
+                    "jp":"Lv50 ティアマト・マグナ",
+                    "posX":3,
+                    "posY":3
+                }, 
+                {
+                    "name":"Tiamat Ω+", 
+                    "en":"Lvl 60 Tiamat Omega", 
+                    "jp":"Lv60 ティアマト・マグナ",
+                    "posX":4,
+                    "posY":3
+                }, 
                 {
                     "name": "Garuda",
                     "en": "Lvl 100 Garuda",
                     "jp": "Lv100 ガルーダ",
-                    "posX":1,
+                    "posX":5,
                     "posY":3
                 },
                 {
                     "name": "Raphael",
                     "en": "Lvl 100 Raphael",
                     "jp": "Lv100 ラファエル",
-                    "posX":2,
+                    "posX":4,
                     "posY":3
                 },
                 {
-                    "name": "Apollo",
-                    "en": "Lvl 100 Apollo",
-                    "jp": "Lv100 アポロン",
+                    "name":"Adversa", 
+                    "en":"Lvl 30 Adversa", 
+                    "jp":"Lv30 アドウェルサ",
                     "posX":0,
                     "posY":4
-                },
+                }, 
+                {
+                    "name":"Adversa (H)", 
+                    "en":"Lvl 50 Adversa", 
+                    "jp":"Lv50 アドウェルサ",
+                    "posX":1,
+                    "posY":4
+                }, 
+                {
+                    "name":"Adversa (H+)", 
+                    "en":"Lvl 60 Adversa", 
+                    "jp":"Lv60 アドウェルサ",
+                    "posX":2,
+                    "posY":4
+                }, 
+                {
+                    "name":"Luminiera Ω", 
+                    "en":"Lvl 75 Luminiera Omega", 
+                    "jp":"Lv75 シュヴァリエ・マグナ",
+                    "posX":3,
+                    "posY":4
+                }, 
+                {
+                    "name":"Luminiera Ω+", 
+                    "en":"Lvl 85 Luminiera Omega", 
+                    "jp":"Lv85 シュヴァリエ・マグナ",
+                    "posX":4,
+                    "posY":4
+                }, 
                 {
                     "name": "Odin",
                     "en": "Lvl 100 Odin",
                     "jp": "Lv100 オーディン",
-                    "posX":1,
+                    "posX":5,
                     "posY":4
                 },
                 {
-                    "name": "Olivia",
-                    "en": "Lvl 100 Dark Angel Olivia",
-                    "jp": "Lv100 Dエンジェル・オリヴィエ",
+                    "name":"Celeste", 
+                    "en":"Lvl 30 Celeste", 
+                    "jp":"Lv30 セレスト",
                     "posX":0,
+                    "posY":5
+                },
+                {
+                    "name":"Celeste (H)", 
+                    "en":"Lvl 50 Celeste", 
+                    "jp":"Lv50 セレスト",
+                    "posX":1,
+                    "posY":5
+                },
+                {
+                    "name":"Celeste (H+)", 
+                    "en":"Lvl 60 Celeste", 
+                    "jp":"Lv60 セレスト",
+                    "posX":2,
+                    "posY":5
+                },
+                {
+                    "name":"Celeste Ω", 
+                    "en":"Lvl 75 Celeste Omega", 
+                    "jp":"Lv75 セレスト・マグナ",
+                    "posX":3,
+                    "posY":5
+                },
+                {
+                    "name":"Celeste Ω+", 
+                    "en":"Lvl 85 Celeste Omega", 
+                    "jp":"Lv85 セレスト・マグナ",
+                    "posX":4,
                     "posY":5
                 },
                 {
                     "name": "Lich",
                     "en": "Lvl 100 Lich",
                     "jp": "Lv100 リッチ",
-                    "posX":1,
+                    "posX":5,
                     "posY":5
                 }
             ]
         },
         {
             "name":"Event",
-            "color":"#d6d1b2",
+            "color":"#c1cedb",
             "list":
             [
                 {
@@ -529,13 +417,6 @@
                     "posY":0
                 },
                 {
-                    "name": "Twin Elements HL",
-                    "en": "Lvl 120 Twin Elements",
-                    "jp": "Lv120 フラム＝グラス",
-                    "posX":1,
-                    "posY":0
-                },
-                {
                     "name": "Shiva",
                     "en": "Lvl 120 Shiva",
                     "jp": "Lv120 シヴァ",
@@ -561,13 +442,6 @@
                     "en": "Lvl 100 Leviathan Omega",
                     "jp": "Lv100 リヴァイアサン・マグナ",
                     "posX":0,
-                    "posY":1
-                },
-                {
-                    "name": "Macula HL",
-                    "en": "Lvl 120 Macula Marius",
-                    "jp": "Lv120 マキュラ・マリウス",
-                    "posX":1,
                     "posY":1
                 },
                 {
@@ -606,13 +480,6 @@
                     "posY":2
                 },
                 {
-                    "name": "Medusa HL",
-                    "en": "Lvl 120 Medusa",
-                    "jp": "Lv120 メドゥーサ",
-                    "posX":1,
-                    "posY":2
-                },
-                {
                     "name": "Alexiel",
                     "en": "Lvl 120 Godsworn Alexiel",
                     "jp": "Lv120 ゴッドガード・ブローディア",
@@ -645,13 +512,6 @@
                     "en": "Lvl 100 Tiamat Omega Ayr",
                     "jp": "Lv100 ティアマト・マグナ＝エア",
                     "posX":0,
-                    "posY":3
-                },
-                {
-                    "name": "Nezha HL",
-                    "en": "Lvl 120 Nezha",
-                    "jp": "Lv120 ナタク",
-                    "posX":1,
                     "posY":3
                 },
                 {
@@ -690,13 +550,6 @@
                     "posY":4
                 },
                 {
-                    "name": "Apollo HL",
-                    "en": "Lvl 120 Apollo",
-                    "jp": "Lv120 アポロン",
-                    "posX":1,
-                    "posY":4
-                },
-                {
                     "name": "Metatron",
                     "en": "Lvl 120 Metatron",
                     "jp": "Lv120 メタトロン",
@@ -729,13 +582,6 @@
                     "en": "Lvl 100 Celeste Omega",
                     "jp": "Lv100 セレスト・マグナ",
                     "posX":0,
-                    "posY":5
-                },
-                {
-                    "name": "Olivia HL",
-                    "en": "Lvl 120 Dark Angel Olivia",
-                    "jp": "Lv120 Dエンジェル・オリヴィエ",
-                    "posX":1,
                     "posY":5
                 },
                 {

@@ -1,4 +1,4 @@
-version = "2.31" # raidfinder version
+version = "2.32" # raidfinder version
 
 #######################################################################
 # import
@@ -627,9 +627,10 @@ class RaidfinderUI(Tk.Tk):
         ## tweet filter
         self.mainframes.append(ttk.Notebook(self))
         self.mainframes[-1].grid(row=1, column=0, rowspan=1, columnspan=10, sticky="we")
-        l = Tk.Label(self.mainframes[-1], text="Filter by Messages")
-        l.grid(row=0, column=0)
-        Tooltip(l, "Only the tweets containing this string will be processed")
+        self.filterlabel = Tk.Label(self.mainframes[-1], text="Filter by Messages")
+        self.filterlabel.grid(row=0, column=0)
+        Tooltip(self.filterlabel, "Only the tweets containing this string will be processed")
+        self.filterlabeloriginal = self.filterlabel.cget("background")
         self.filter=Tk.Text(self.mainframes[-1], height=1)
         self.filter.grid(row=0, column=1, columnspan=5, sticky="we")
         self.filter.insert(Tk.END, self.raidfinder.filtervar)
@@ -1003,6 +1004,11 @@ class RaidfinderUI(Tk.Tk):
         else: self.timeLabel.config(text=strftime("%H:%M:%S"))
         if self.raidfinder.connected: self.statusLabel.config(text="Online", background='#c7edcd')
         else: self.statusLabel.config(text="Offline", background='#edc7c7')
+
+        if len(self.raidfinder.filtervar) > 0:
+            self.filterlabel.config(background='#c7edcd')
+        else:
+            self.filterlabel.config(background=self.filterlabeloriginal)
 
         # update tkinter
         self.update()
