@@ -1,3 +1,6 @@
+* 2.33
+- Added the "Copy Latest" button, it can also be triggered with the keyboard num keys.
+
 * 2.32
 - Filter label is now highlighted in green when the filter is active
 - raid.json has been cleaned up in preparation of the upcoming raid changes

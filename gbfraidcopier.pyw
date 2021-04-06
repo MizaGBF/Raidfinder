@@ -1,4 +1,4 @@
-version = "2.32" # raidfinder version
+version = "2.33" # raidfinder version
 
 #######################################################################
 # import
@@ -544,7 +544,9 @@ class Raidfinder(tweepy.StreamListener):
                             if self.settings['dupe'] and code in self.dupes:
                                 self.stats['dupe'] += 1
                                 break
-                        if self.settings['copy']: pyperclip.copy(code) # copy if enabled (note: is this thread safe?)
+                            self.UI.lastCode = code
+                        if self.settings['copy']:
+                            pyperclip.copy(code) # copy if enabled (note: is this thread safe?)
                         if self.settings['sound']: playsound() # play a sound if enabled
                         # write to the log
                         if self.settings['time_mode'] == 1:
@@ -614,6 +616,8 @@ class RaidfinderUI(Tk.Tk):
         self.logSize = 0
         self.iconbitmap('favicon.ico')
         self.inputting = False
+        self.lastCode = None
+        self.lastSettingNum = None
 
         # building the UI
         ## raid part
@@ -649,6 +653,10 @@ class RaidfinderUI(Tk.Tk):
             self.mainsett_b.append(Tk.Checkbutton(self.mainframes[-1], text="[{}] {}".format(len(self.mainsett_b), x), variable=self.newIntVar(self.mainsett, self.raidfinder.settings.get(convert[x][0], 0)), command=lambda n=len(self.mainsett_b): self.toggleMainSetting(n)))
             self.mainsett_b[-1].grid(row=0, column=len(self.mainsett_b)-1)
             Tooltip(self.mainsett_b[-1], convert[x][1])
+        b = Tk.Button(self.mainframes[-1], text="[{}] Copy Latest".format(len(self.mainsett_b)), command=self.copyLatest) # ping mobage
+        b.grid(row=0, column=len(self.mainsett_b), sticky="ews")
+        self.lastSettingNum = len(self.mainsett_b)
+        Tooltip(b, "Put the latest raid code in the clipboard.")
 
         ## bottomn (log / advanced setting / stats)
         self.mainframes.append(ttk.Notebook(self))
@@ -820,7 +828,7 @@ class RaidfinderUI(Tk.Tk):
         elif n == 3: self.raidfinder.settings['sound'] = state
         elif n == 4: self.raidfinder.settings['copy'] = state
         if state: self.log("[Settings] '{}' is enabled".format(self.mainsett_tag[n]))
-        else:  self.log("[Settings] '{}' is disabled".format(self.mainsett_tag[n]))
+        else: self.log("[Settings] '{}' is disabled".format(self.mainsett_tag[n]))
 
     def toggleAdvSetting(self, n): # called when un/checking an advanced setting
         global enableTooltip
@@ -871,12 +879,15 @@ class RaidfinderUI(Tk.Tk):
         if not self.raidfinder.apprunning or event.type != '2' or self.inputting: # 2 is KeyPress
             return
         numKey = event.keycode - 48 # 48 is the 0 key
-        if numKey < 0 or numKey > 4:
+        if numKey < 0 or numKey > self.lastSettingNum:
             numKey = event.keycode - 96 # 96 is the 0 numpad key
-        if numKey < 0 or numKey > 4:
+        if numKey < 0 or numKey > self.lastSettingNum:
             return # not a number, so return
-        self.mainsett_b[numKey].toggle() # toggle the checkbox
-        self.toggleMainSetting(numKey) # call the event
+        if numKey == self.lastSettingNum:
+            self.copyLatest() # copy last button
+        else:
+            self.mainsett_b[numKey].toggle() # toggle the checkbox
+            self.toggleMainSetting(numKey) # call the event
 
     def close(self): # called by the app when closed
         self.raidfinder.saveConfig() # update config file
@@ -953,6 +964,11 @@ class RaidfinderUI(Tk.Tk):
         else: return
         thread.setDaemon(True)
         thread.start()
+
+    def copyLatest(self):
+        if self.lastCode != None:
+            pyperclip.copy(self.lastCode)
+            self.log("[System] Code {} has been put in the clipboard".format(self.lastCode))
 
     def formatStat(self, v):
         if v > 1000000: return str(v // 1000000) + "M"
