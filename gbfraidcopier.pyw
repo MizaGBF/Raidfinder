@@ -1,4 +1,4 @@
-version = "2.33" # raidfinder version
+version = "2.34" # raidfinder version
 
 #######################################################################
 # import
@@ -708,9 +708,6 @@ class RaidfinderUI(Tk.Tk):
         b = Tk.Button(self.subtabs[-1], text="Ping GBF", command=lambda n=1 : self.startPing(n)) # ping granblue fantasy
         b.grid(row=2, column=3, sticky="ews")
         Tooltip(b, "Send 10 pings to game.granbluefantasy.jp.\nIf the values are high or you notice packet loss, your connection or GBF might have issues")
-        b = Tk.Button(self.subtabs[-1], text="Ping Mobage", command=lambda n=2 : self.startPing(n)) # ping mobage
-        b.grid(row=3, column=2, sticky="ews")
-        Tooltip(b, "Send 10 pings to connect.mobage.jp.\nIf the values are high or you notice packet loss, your connection or Mobage might have issues.\nUseless if you use another service provider such as Gree or DMM.")
         b = Tk.Button(self.subtabs[-1], text="Latest Version", command=lambda n=0 : self.openBrowser(n)) # download link button
         b.grid(row=0, column=3, sticky="ews")
         Tooltip(b, "Open up the download link to the latest version in your browser.")
@@ -960,7 +957,6 @@ class RaidfinderUI(Tk.Tk):
     def startPing(self, n): # open the user web browser
         if n == 0: thread = threading.Thread(target=self.raidfinder.pingServer, args=["stream.twitter.com", 10])
         elif n == 1: thread = threading.Thread(target=self.raidfinder.pingServer, args=["game.granbluefantasy.jp", 10])
-        elif n == 2: thread = threading.Thread(target=self.raidfinder.pingServer, args=["connect.mobage.jp", 10])
         else: return
         thread.setDaemon(True)
         thread.start()

@@ -1,3 +1,6 @@
+* 2.34
+- Removed the "Ping Mobage" button, connect.mobage.jp doesn't accept pings anymore.
+
 * 2.33
 - Added the "Copy Latest" button, it can also be triggered with the keyboard num keys.
 
@@ -136,7 +139,7 @@
 - Minor changes and fixes
 
 * 2.0
-- Major rewrite of the raidfinder and changed the way the version number if incremented, as a result
+- Major rewrite of the raidfinder and changed the way the version number is incremented, as a result
 - Removed the Show, Copy and Alert individual buttons, the raid list is more compact as a result
 - Tweepy filter is now way smaller, which should result in better performance
 - Moved the most import settings under the raid list
