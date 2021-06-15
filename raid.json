@@ -704,6 +704,13 @@
                     "posY":3
                 },
                 {
+                    "name": "Belial HL",
+                    "en": "Lvl 250 Belial",
+                    "jp": "Lv250 ベリアル",
+                    "posX":2,
+                    "posY":3
+                },
+                {
                     "name": "Huanglong",
                     "en": "Lvl 100 Huanglong",
                     "jp": "Lv100 黄龍",

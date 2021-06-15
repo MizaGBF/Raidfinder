@@ -1,4 +1,4 @@
-version = "2.34" # raidfinder version
+version = "2.35" # raidfinder version
 
 #######################################################################
 # import
@@ -20,6 +20,7 @@ import tkinter as Tk
 import tkinter.ttk as ttk
 from tkinter import messagebox, simpledialog
 import webbrowser
+import traceback
 
 if __name__ == "__main__": # module check
     try: # try to import
@@ -307,7 +308,7 @@ class Raidfinder(tweepy.StreamListener):
         self.connected = False
 
     def on_exception(self, exception): # when a problem occurs
-        print("on_exception():", exception)
+        print("on_exception():", traceback.format_exception(type(exception), exception, exception.__traceback__))
         s = str(exception)
         if s == "High Delay": # high delay restart triggered
             self.UI.log("[Error] High delay detected") 
@@ -317,7 +318,7 @@ class Raidfinder(tweepy.StreamListener):
             if s.lower().find("timed out") != -1 or s.lower().find("connection broken") != -1:
                 self.UI.log("[Error] Communication issue, check your internet connection or Twitter server status")
             else:
-                self.UI.log("[Error] An exception occurred: {}".format(exception))
+                self.UI.log("[Error] An exception occurred: {}".format(traceback.format_exception(type(exception), exception, exception.__traceback__)))
             self.connected = False
             self.retry_delay = 10
         else: # else, unknown error
@@ -394,8 +395,10 @@ class Raidfinder(tweepy.StreamListener):
         except Exception as e:
             self.UI.log("[Error] Failed to start the raidfinder, authentification failed.")
             self.UI.log("If the problem persists, try to delete the keys in 'gbfraidcopier.cfg'.")
-            self.UI.log("Exception: {}".format(e))
+            self.UI.log("Exception: {}".format(traceback.format_exception(type(e), e, e.__traceback__)))
 
+        # information message
+        self.UI.log("[Info] The raidfinder will switch to the Twitter API V2 in the upcoming months, expect an update by then.")
         # main loop
         while self.apprunning:
             self.elapsed = time.time() - self.time # measure elapsed time
@@ -567,8 +570,8 @@ class Raidfinder(tweepy.StreamListener):
                             if len(self.dupes) > 200: self.dupes = self.dupes[50:] # removing 50 oldest if 200 dupes
                         break
             except Exception as e:
-                if i == -1: print(e)
-                else: print('thread', i, ':', e)
+                if i == -1: print(traceback.format_exception(type(e), e, e.__traceback__))
+                else: print('thread', i, ':', traceback.format_exception(type(e), e, e.__traceback__))
 
 #######################################################################
 # Custom UI ToolTip class

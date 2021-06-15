@@ -1,3 +1,8 @@
+* 2.35
+- Added the traceback for some exceptions
+- Added Belial HL
+- Added an information message on startup about the upcoming API V2 change
+
 * 2.34
 - Removed the "Ping Mobage" button, connect.mobage.jp doesn't accept pings anymore.
 
