@@ -599,6 +599,13 @@
                     "posY":5
                 },
                 {
+                    "name": "Animus Core",
+                    "en": "Lvl 150 Anima-Animus Core",
+                    "jp": "Lv150 アニマ・アニムス・コア",
+                    "posX":4,
+                    "posY":5
+                },
+                {
                     "name": "Fediel",
                     "en": "Lvl 200 Fediel",
                     "jp": "Lv200 フェディエル",
