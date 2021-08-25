@@ -45,18 +45,25 @@
                     "posX":4,
                     "posY":0
                 },  
+                {
+                    "name":"Twin Elements", 
+                    "en":"Lvl 100 Twin Elements", 
+                    "jp":"Lv100 フラム＝グラス",
+                    "posX":5,
+                    "posY":0
+                },  
 {
                     "name": "Athena",
                     "en": "Lvl 100 Athena",
                     "jp": "Lv100 アテナ",
-                    "posX":5,
+                    "posX":6,
                     "posY":0
                 },
                 {
                     "name": "Michael",
                     "en": "Lvl 100 Michael",
                     "jp": "Lv100 ミカエル",
-                    "posX":6,
+                    "posX":7,
                     "posY":0
                 },
                 {
@@ -88,26 +95,33 @@
                     "posY":1
                 }, 
                 {
-                    "name": "Grani",
-                    "en": "Lvl 100 Grani",
-                    "jp": "Lv100 グラニ",
-                    "posX":5,
-                    "posY":1
-                },
-                {
-                    "name": "Gabriel",
-                    "en": "Lvl 100 Gabriel",
-                    "jp": "Lv100 ガブリエル",
-                    "posX":6,
-                    "posY":1
-                },
-                {
                     "name":"Leviathan Ω+", 
                     "en":"Lvl 70 Leviathan Omega", 
                     "jp":"Lv70 リヴァイアサン・マグナ",
                     "posX":4,
                     "posY":1
                 }, 
+                {
+                    "name":"Macula Marius", 
+                    "en":"Lvl 100 Macula Marius", 
+                    "jp":"Lv100 マキュラ・マリウス",
+                    "posX":5,
+                    "posY":1
+                }, 
+                {
+                    "name": "Grani",
+                    "en": "Lvl 100 Grani",
+                    "jp": "Lv100 グラニ",
+                    "posX":6,
+                    "posY":1
+                },
+                {
+                    "name": "Gabriel",
+                    "en": "Lvl 100 Gabriel",
+                    "jp": "Lv100 ガブリエル",
+                    "posX":7,
+                    "posY":1
+                },
                 {
                     "name":"Yggdrasil", 
                     "en":"Lvl 30 Yggdrasil", 
@@ -144,17 +158,24 @@
                     "posY":2
                 }, 
                 {
+                    "name":"Medusa", 
+                    "en":"Lvl 100 Medusa", 
+                    "jp":"Lv100 メドゥーサ",
+                    "posX":5,
+                    "posY":2
+                }, 
+                {
                     "name": "Baal",
                     "en": "Lvl 100 Baal",
                     "jp": "Lv100 バアル",
-                    "posX":5,
+                    "posX":6,
                     "posY":2
                 },
                 {
                     "name": "Uriel",
                     "en": "Lvl 100 Uriel",
                     "jp": "Lv100 ウリエル",
-                    "posX":6,
+                    "posX":7,
                     "posY":2
                 },
                 {
@@ -193,17 +214,24 @@
                     "posY":3
                 }, 
                 {
+                    "name":"Nezha", 
+                    "en":"Lvl 100 Nezha", 
+                    "jp":"Lv100 ナタク",
+                    "posX":5,
+                    "posY":3
+                }, 
+                {
                     "name": "Garuda",
                     "en": "Lvl 100 Garuda",
                     "jp": "Lv100 ガルーダ",
-                    "posX":5,
+                    "posX":6,
                     "posY":3
                 },
                 {
                     "name": "Raphael",
                     "en": "Lvl 100 Raphael",
                     "jp": "Lv100 ラファエル",
-                    "posX":4,
+                    "posX":7,
                     "posY":3
                 },
                 {
@@ -242,10 +270,17 @@
                     "posY":4
                 }, 
                 {
+                    "name":"Apollo", 
+                    "en":"Lvl 100 Apollo", 
+                    "jp":"Lv100 アポロン",
+                    "posX":5,
+                    "posY":4
+                }, 
+                {
                     "name": "Odin",
                     "en": "Lvl 100 Odin",
                     "jp": "Lv100 オーディン",
-                    "posX":5,
+                    "posX":6,
                     "posY":4
                 },
                 {
@@ -284,10 +319,17 @@
                     "posY":5
                 },
                 {
+                    "name":"DA. Olivia", 
+                    "en":"Lvl 100 Dark Angel Olivia", 
+                    "jp":"Lv100 Dエンジェル・オリヴィエ",
+                    "posX":5,
+                    "posY":5
+                },
+                {
                     "name": "Lich",
                     "en": "Lvl 100 Lich",
                     "jp": "Lv100 リッチ",
-                    "posX":5,
+                    "posX":6,
                     "posY":5
                 }
             ]
@@ -417,6 +459,13 @@
                     "posY":0
                 },
                 {
+                    "name": "Twin Elements HL",
+                    "en": "Lvl 120 Twin Elements",
+                    "jp": "Lv120 フラム＝グラス",
+                    "posX":1,
+                    "posY":0
+                },
+                {
                     "name": "Shiva",
                     "en": "Lvl 120 Shiva",
                     "jp": "Lv120 シヴァ",
@@ -442,6 +491,13 @@
                     "en": "Lvl 100 Leviathan Omega",
                     "jp": "Lv100 リヴァイアサン・マグナ",
                     "posX":0,
+                    "posY":1
+                },
+                {
+                    "name": "Macula Marius HL",
+                    "en": "Lvl 120 Macula Marius",
+                    "jp": "Lv120 マキュラ・マリウス",
+                    "posX":1,
                     "posY":1
                 },
                 {
@@ -480,6 +536,13 @@
                     "posY":2
                 },
                 {
+                    "name": "Medusa HL",
+                    "en": "Lvl 120 Medusa",
+                    "jp": "Lv120 メドゥーサ",
+                    "posX":1,
+                    "posY":2
+                },
+                {
                     "name": "Alexiel",
                     "en": "Lvl 120 Godsworn Alexiel",
                     "jp": "Lv120 ゴッドガード・ブローディア",
@@ -512,6 +575,13 @@
                     "en": "Lvl 100 Tiamat Omega Ayr",
                     "jp": "Lv100 ティアマト・マグナ＝エア",
                     "posX":0,
+                    "posY":3
+                },
+                {
+                    "name": "Nezha HL",
+                    "en": "Lvl 120 Nezha",
+                    "jp": "Lv120 ナタク",
+                    "posX":1,
                     "posY":3
                 },
                 {
@@ -550,6 +620,13 @@
                     "posY":4
                 },
                 {
+                    "name": "Apollo HL",
+                    "en": "Lvl 120 Apollo",
+                    "jp": "Lv120 アポロン",
+                    "posX":1,
+                    "posY":4
+                },
+                {
                     "name": "Metatron",
                     "en": "Lvl 120 Metatron",
                     "jp": "Lv120 メタトロン",
@@ -582,6 +659,13 @@
                     "en": "Lvl 100 Celeste Omega",
                     "jp": "Lv100 セレスト・マグナ",
                     "posX":0,
+                    "posY":5
+                },
+                {
+                    "name": "DA. Olivia HL",
+                    "en": "Lvl 120 Dark Angel Olivia",
+                    "jp": "Lv120 Dエンジェル・オリヴィエ",
+                    "posX":1,
                     "posY":5
                 },
                 {

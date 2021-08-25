@@ -1,3 +1,6 @@
+* 2.36
+- Put back the T1 raids
+
 * 2.35
 - Added the traceback for some exceptions
 - Added Belial HL
