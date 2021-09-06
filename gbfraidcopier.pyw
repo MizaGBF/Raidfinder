@@ -1,4 +1,4 @@
-version = "2.40" # raidfinder version
+version = "2.41" # raidfinder version
 
 #######################################################################
 # import
@@ -835,7 +835,7 @@ class RaidfinderUI(Tk.Tk):
             self.mainframes[0].add(self.raids[-1], text=self.raidfinder.translate("Custom"))
             self.custom = []
             for i in range(0, len(custom)): # same thing, with an extra Edit button
-                self.raidchilds.append(Tk.Button(self.raids[-1], text="Edit", command=lambda i=i: self.editCustom(i)))
+                self.raidchilds.append(Tk.Button(self.raids[-1], text=self.raidfinder.translate("Edit"), command=lambda i=i: self.editCustom(i)))
                 self.raidchilds[-1].grid(row=i%6, column=(i//6)*2, sticky='ews')
                 Tooltip(self.raidchilds[-1], self.raidfinder.translate("Edit this raid entry."))
                 self.custom.append(Tk.Checkbutton(self.raids[-1], bg=raids['custom color'], text=custom[i][0], variable=self.newTrackingVar(custom[i][0]), command=lambda r=custom[i][0]: self.toggleRaid(r)))

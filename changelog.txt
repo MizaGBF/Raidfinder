@@ -1,3 +1,7 @@
+* 2.41
+- Fixed a few typos
+- Forgot an untranslated string
+
 * 2.40
 - Some small UI adjustments
 - Fixed 日本 to 日本語
