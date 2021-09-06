@@ -1,4 +1,4 @@
-version = "2.39" # raidfinder version
+version = "2.40" # raidfinder version
 
 #######################################################################
 # import
@@ -666,7 +666,7 @@ class RaidfinderUI(Tk.Tk):
         Tooltip(self.filterlabel, self.raidfinder.translate("Only the tweets containing this string will be processed"))
         self.filterlabeloriginal = self.filterlabel.cget("background")
         self.filter=Tk.Text(self.mainframes[-1], height=1)
-        self.filter.pack(side=Tk.RIGHT, fill=Tk.X)
+        self.filter.pack(side=Tk.LEFT, fill=Tk.X)
         self.filter.insert(Tk.END, self.raidfinder.filtervar)
         self.filter.bind("<FocusIn>", self.focusin)
         self.filter.bind("<FocusOut>", self.focusout)
@@ -725,10 +725,6 @@ class RaidfinderUI(Tk.Tk):
         b = Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=self.raidfinder.translate("Enable Tool Tips"), variable=self.newIntVar(self.advsett, enableTooltip), command=lambda n=6: self.toggleAdvSetting(n))
         b.grid(row=2, column=1, stick=Tk.W)
         Tooltip(b, self.raidfinder.translate("If disabled, tooltips such as this one will not show up."))
-        # language choice
-        b = Tk.OptionMenu(self.subtabs[-1], self.lang_var, *self.raidfinder.lang_options, command=self.lang_changed)
-        b.grid(row=3, column=1, stick=Tk.W)
-        Tooltip(b, self.raidfinder.translate("Change the UI language."))
 
         b = Tk.Button(self.subtabs[-1], text=self.raidfinder.translate("Reload Blacklist"), command=self.reloadBlacklist) # reload blacklist button
         b.grid(row=0, column=2, sticky="ews")
@@ -749,8 +745,13 @@ class RaidfinderUI(Tk.Tk):
         b.grid(row=1, column=3, sticky="ews")
         Tooltip(b, self.raidfinder.translate("Open up the download link to the latest raid.json in your browser."))
         b = Tk.Button(self.subtabs[-1], text=self.raidfinder.translate("Github"), command=lambda n=2 : self.openBrowser(n)) # github
-        b.grid(row=3, column=3, sticky="ews")
+        b.grid(row=3, column=2, sticky="ews")
         Tooltip(b, self.raidfinder.translate("Open up the link to the project Github."))
+
+        # language choice
+        b = Tk.OptionMenu(self.subtabs[-1], self.lang_var, *self.raidfinder.lang_options, command=self.lang_changed)
+        b.grid(row=4, column=0, stick=Tk.W)
+        Tooltip(b, self.raidfinder.translate("Change the UI language."))
 
         # thread count spinbox
         l = Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=self.raidfinder.translate("Tweet Processing Threads"))

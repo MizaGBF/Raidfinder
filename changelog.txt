@@ -1,3 +1,8 @@
+* 2.40
+- Some small UI adjustments
+- Fixed 日本 to 日本語
+- Main setting available in japanese
+
 * 2.39
 - Fixed wrong type used by the filter frame
 - Fixed raid names not being translated
