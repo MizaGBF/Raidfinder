@@ -1,3 +1,7 @@
+* 2.38
+- Multilingual system for the UI added
+- French translation added
+
 * 2.37
 - Fixed the Tweet Creation Time setting causing an exception to occur
 

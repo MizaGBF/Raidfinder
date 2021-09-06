@@ -1,4 +1,4 @@
-version = "2.37" # raidfinder version
+version = "2.38" # raidfinder version
 
 #######################################################################
 # import
@@ -85,7 +85,7 @@ enableTooltip = 1
 class Raidfinder(tweepy.StreamListener):
     def __init__(self):
         # class variables
-        self.settings = {'jp':1, 'en':1, 'sound':1, 'copy':1, 'author':1, 'blacklist':1, 'dupe':1, 'delay':0, 'delay_limit':180, 'time_mode':0, 'max_thread':4, 'jst':0}
+        self.settings = {'jp':1, 'en':1, 'sound':1, 'copy':1, 'author':1, 'blacklist':1, 'dupe':1, 'delay':0, 'delay_limit':180, 'time_mode':0, 'max_thread':4, 'jst':0, 'lang':'English'}
         self.tweetQueue = queue.Queue()
         self.tweetDaemon = []
         self.THREAD_LIMIT = 50 # const
@@ -111,6 +111,8 @@ class Raidfinder(tweepy.StreamListener):
         self.high_delay = False
         self.high_delay_count = 0
         self.filters = [" :参戦ID\n参加者募集！\n", " :Battle ID\nI need backup!\nLvl"]
+        self.lang_options = ['English']
+        self.lang_replace = {}
         try:
             self.si = subprocess.STARTUPINFO()
             self.si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
@@ -130,8 +132,13 @@ class Raidfinder(tweepy.StreamListener):
         # START
         tmpLog = []
         self.loadConfig(tmpLog)
+        self.loadTranslation()
         self.UI = RaidfinderUI(self)
         for msg in tmpLog: self.UI.log(msg)
+
+    def translate(self, string):
+        if self.settings['lang'] == 'English': return string
+        return self.lang_replace.get(string, string)
 
     def loadConfig(self, tmpLog): # call it once at the start
         global enableTooltip
@@ -189,6 +196,8 @@ class Raidfinder(tweepy.StreamListener):
             except: pass
             try: self.settings['max_thread'] = int(config['Settings']['maxthread'])
             except: pass
+            try: self.settings['lang'] = base64.b64decode(config['Settings']['lang']).decode('utf-8')
+            except: pass
             if self.settings['max_thread'] < 1: self.settings['max_thread'] = 1
             elif self.settings['max_thread'] > self.THREAD_LIMIT: self.settings['max_thread'] = self.THREAD_LIMIT
 
@@ -224,7 +233,8 @@ class Raidfinder(tweepy.StreamListener):
             'maxthread':str(self.settings['max_thread']),
             'jst':str(self.settings['jst']),
             'tooltip':str(enableTooltip),
-            'filter':base64.b64encode(self.filtervar.encode('utf-8')).decode('ascii') 
+            'filter':base64.b64encode(self.filtervar.encode('utf-8')).decode('ascii'),
+            'lang':base64.b64encode(self.UI.lang_var.get().encode('utf-8')).decode('ascii'),
         }
 
         config['Keys'] = self.keys
@@ -257,12 +267,27 @@ class Raidfinder(tweepy.StreamListener):
             return
         f.close()
 
+    def loadTranslation(self): # load the raid.json, return an empty string on success
+        try: # open the fail and load the data
+            with open('translation.json', encoding='utf-8') as f:
+                translationData = json.load(f)
+            self.lang_options = ['English']
+            for k in translationData:
+                if k not in self.lang_options: self.lang_options.append(k)
+            if self.settings['lang'] not in self.lang_options: self.settings['lang'] = 'English'
+            self.lang_replace = translationData.get(self.settings['lang'], {})
+        except Exception as e:
+            print(e)
+            self.settings['lang'] = 'English'
+            self.lang_options = ['English']
+            self.lang_replace = {}
+
     def loadRaids(self): # load the raid.json, return an empty string on success
         try: # open the fail and load the data
             with open('raid.json', encoding='utf-8') as f:
                 raidData = json.load(f)
         except Exception as e:
-            return "[JSON Error] Missing or invalid file\nPlease check if 'raid.json' is beside this python script\nAlternatively, please reinstall\n(Exception: {})".format(e)
+            return self.translate("[JSON Error] Missing or invalid file\nPlease check if 'raid.json' is beside this python script\nAlternatively, please reinstall\n(Exception: {})").format(e)
 
         self.filters = raidData.get('filters', self.filters)
 
@@ -273,10 +298,10 @@ class Raidfinder(tweepy.StreamListener):
                 for r in p['list']: # read this page raid list
                     if 'en' in r: # retrieve english code
                        if r['en'] not in x: x[r['en']] = []
-                       x[r['en']].append(r.get('name', ''))
+                       x[r['en']].append(self.translate(r.get('name', '')))
                     if 'jp' in r: # retrieve japanese code
                        if r['jp'] not in x: x[r['jp']] = []
-                       x[r['jp']].append(r.get('name', ''))
+                       x[r['jp']].append(self.translate(r.get('name', '')))
             for r in self.custom: # for each custom raid
                 if r[1] not in x: x[r[1]] = [] # retrieve english code
                 x[r[1]].append(r[0])
@@ -285,7 +310,7 @@ class Raidfinder(tweepy.StreamListener):
             self.raids = x # overwrite our dictionnary with the new one
             self.UI.refreshRaids(raidData, self.custom) # update the UI
         except Exception as e:
-            return "[JSON Error] Invalid file\n(Exception: {})".format(e)
+            return self.translate("[JSON Error] Invalid file\n(Exception: {})").format(e)
 
         return ""
 
@@ -299,54 +324,54 @@ class Raidfinder(tweepy.StreamListener):
 
     def on_connect(self): # when the Twitter stream connects
         if not self.connected:
-            self.UI.log("[System] Twitter stream connected")
+            self.UI.log(self.translate("[System] Twitter stream connected"))
         self.connected = True
 
     def on_disconnect(self): # when the Twitter stream disconnects
         if self.connected:
-            self.UI.log("[System] Twitter stream disconnected")
+            self.UI.log(self.translate("[System] Twitter stream disconnected"))
         self.connected = False
 
     def on_exception(self, exception): # when a problem occurs
         print("on_exception():", traceback.format_exception(type(exception), exception, exception.__traceback__))
         s = str(exception)
         if s == "High Delay": # high delay restart triggered
-            self.UI.log("[Error] High delay detected") 
+            self.UI.log(self.translate("[Error] High delay detected"))
             self.connected = False
             self.retry_delay = self.high_delay_count * 5
         elif self.connected: # exception happened while being connected
             if s.lower().find("timed out") != -1 or s.lower().find("connection broken") != -1:
-                self.UI.log("[Error] Communication issue, check your internet connection or Twitter server status")
+                self.UI.log(self.translate("[Error] Communication issue, check your internet connection or Twitter server status"))
             else:
-                self.UI.log("[Error] An exception occurred: {}".format(traceback.format_exception(type(exception), exception, exception.__traceback__)))
+                self.UI.log(self.translate("[Error] An exception occurred: {}").format(traceback.format_exception(type(exception), exception, exception.__traceback__)))
             self.connected = False
             self.retry_delay = 10
         else: # else, unknown error
-            self.UI.log("[Error] Twitter keys might be invalid or your Internet is down") 
-            self.UI.log("Exception: {}".format(exception)) 
+            self.UI.log(self.translate("[Error] Twitter keys might be invalid or your Internet is down"))
+            self.UI.log(self.translate("Exception: {}".format(exception)))
             self.connected = False
             self.retry_delay = -1
  
     def on_error(self, status): # for error stuff
         print("on_error():", status)
         if status == 420:
-            self.UI.log("[Error] Rate limited by Twitter, restarting the application might be needed")
+            self.UI.log(self.translate("[Error] Rate limited by Twitter, restarting the application might be needed"))
             self.connected = False
             self.retry_delay = 90
         elif status >= 500 and status < 600:
-            self.UI.log("[Error] HTTP Error {}: Server error, Twitter might be overloaded".format(status))
+            self.UI.log(self.translate("[Error] HTTP Error {}: Server error, Twitter might be overloaded").format(status))
             self.connected = False
             self.retry_delay = 60
         elif status == 401:
-            self.UI.log("[Error] HTTP Error {}: Authentification failed. If the problem persists, delete the keys in 'gbfraidcopier.cfg'.".format(status))
+            self.UI.log(self.translate("[Error] HTTP Error {}: Authentification failed. If the problem persists, delete the keys in 'gbfraidcopier.cfg'.").format(status))
             self.connected = False
             self.retry_delay = -1
         elif not self.connected:
-            self.UI.log("[Error] Unknown issue, please restart the application")
+            self.UI.log(self.translate("[Error] Unknown issue, please restart the application"))
             self.connected = False
             self.retry_delay = -1
         else:
-            self.UI.log("[Error] HTTP Error {}: Check your internet connection or Twitter server status".format(status))
+            self.UI.log(self.translate("[Error] HTTP Error {}: Check your internet connection or Twitter server status").format(status))
             self.connected = False
             self.retry_delay = 60
         return False
@@ -366,7 +391,7 @@ class Raidfinder(tweepy.StreamListener):
                 self.twitter_api = tweepy.API(self.auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
                 if self.twitter_api.verify_credentials() is None: raise Exception()
             except: # ask for authentification
-                self.UI.log("[Error] Authentification is required")
+                self.UI.log(self.translate("[Error] Authentification is required"))
                 self.auth = tweepy.OAuthHandler("ZTd48q7C3F13HmcmE6RxMuyiq", "YFz1Tq5njkM1zo165K3Zw0Rye9s2fC2d6kn2tCwfMc4XkjLjjb")
                 try:
                     redirect_url = self.auth.get_authorization_url()
@@ -393,12 +418,12 @@ class Raidfinder(tweepy.StreamListener):
             listenerDaemon.setDaemon(True)
             listenerDaemon.start()
         except Exception as e:
-            self.UI.log("[Error] Failed to start the raidfinder, authentification failed.")
-            self.UI.log("If the problem persists, try to delete the keys in 'gbfraidcopier.cfg'.")
-            self.UI.log("Exception: {}".format(traceback.format_exception(type(e), e, e.__traceback__)))
+            self.UI.log(self.translate("[Error] Failed to start the raidfinder, authentification failed."))
+            self.UI.log(self.translate("If the problem persists, try to delete the keys in 'gbfraidcopier.cfg'."))
+            self.UI.log(self.translate("Exception: {}".format(traceback.format_exception(type(e), e, e.__traceback__))))
 
         # information message
-        self.UI.log("[Info] The raidfinder will switch to the Twitter API V2 in the upcoming months, expect an update by then.")
+        self.UI.log(self.translate("[Info] The raidfinder will switch to the Twitter API V2 in the upcoming months, expect an update by then."))
         # main loop
         while self.apprunning:
             self.elapsed = time.time() - self.time # measure elapsed time
@@ -407,11 +432,11 @@ class Raidfinder(tweepy.StreamListener):
                 if self.stats['runtime'] is None: self.stats['runtime'] = self.elapsed
                 else: self.stats['runtime'] += self.elapsed
             if self.ping is not None:
-                msg = "Ping to {}".format(self.ping[5])
-                if self.ping[0] > 0: msg += "\nMinimum {}ms, Average {}ms, Maximum {}ms".format(self.ping[3], self.ping[2], self.ping[4])
-                if self.ping[1] > 0: msg += "\n{:.2f}% Packet Loss".format(100*self.ping[1]/(self.ping[0]+self.ping[1]))
-                messagebox.showinfo("Ping Results", msg)
-                self.UI.log("[Info] Ping Results\n" + msg)
+                msg = self.translate("Ping to {}").format(self.ping[5])
+                if self.ping[0] > 0: msg += self.translate("\nMinimum {}ms, Average {}ms, Maximum {}ms").format(self.ping[3], self.ping[2], self.ping[4])
+                if self.ping[1] > 0: msg += self.translate("\n{:.2f}% Packet Loss").format(100*self.ping[1]/(self.ping[0]+self.ping[1]))
+                messagebox.showinfo(self.translate("Ping Results"), msg)
+                self.UI.log(self.translate("[Info] Ping Results\n") + msg)
                 self.ping = None
             self.UI.updateAll()
             time.sleep(0.02)
@@ -426,7 +451,7 @@ class Raidfinder(tweepy.StreamListener):
             if self.ping is not None:
                 return
             if self.settings['sound']: playsound()
-            self.UI.log("[Info] Sending 10 pings to {} ...".format(host))
+            self.UI.log(self.translate("[Info] Sending 10 pings to {} ...").format(host))
             regex = re.compile('\d+ms')
             param = '-n' if platform.system().lower()=='windows' else '-c' # param
             command = ['ping', param, '1', host] # command
@@ -458,7 +483,7 @@ class Raidfinder(tweepy.StreamListener):
         while self.apprunning:
             try: # starting tweepy
                 if not self.connected:
-                    self.UI.log("[System] Connecting to Twitter...")
+                    self.UI.log(self.translate("[System] Connecting to Twitter..."))
                     stream = tweepy.Stream(auth=self.twitter_api.auth, listener=self)
                 stream.filter(track=self.filters) # this thread will block here until an issue occur
             except:
@@ -469,7 +494,7 @@ class Raidfinder(tweepy.StreamListener):
                 continue
             elif self.retry_delay > 0:
                 if self.retry_delay > 3:
-                    self.UI.log("[System] Attempting a new connection in {} seconds".format(self.retry_delay))
+                    self.UI.log(self.translate("[System] Attempting a new connection in {} seconds").format(self.retry_delay))
                 time.sleep(self.retry_delay)
                 self.high_delay = False
 
@@ -621,6 +646,8 @@ class RaidfinderUI(Tk.Tk):
         self.inputting = False
         self.lastCode = None
         self.lastSettingNum = None
+        self.lang_var = Tk.StringVar()
+        self.lang_var.set(self.raidfinder.settings['lang'])
 
         # building the UI
         ## raid part
@@ -634,12 +661,13 @@ class RaidfinderUI(Tk.Tk):
         ## tweet filter
         self.mainframes.append(ttk.Notebook(self))
         self.mainframes[-1].grid(row=1, column=0, rowspan=1, columnspan=10, sticky="we")
-        self.filterlabel = Tk.Label(self.mainframes[-1], text="Filter by Messages")
+        self.mainframes[-1].grid_columnconfigure(0, weight=1)
+        self.filterlabel = Tk.Label(self.mainframes[-1], text=self.raidfinder.translate("Filter by Messages"))
         self.filterlabel.grid(row=0, column=0)
-        Tooltip(self.filterlabel, "Only the tweets containing this string will be processed")
+        Tooltip(self.filterlabel, self.raidfinder.translate("Only the tweets containing this string will be processed"))
         self.filterlabeloriginal = self.filterlabel.cget("background")
         self.filter=Tk.Text(self.mainframes[-1], height=1)
-        self.filter.grid(row=0, column=1, columnspan=5, sticky="we")
+        self.filter.grid(row=0, column=2, columnspan=5, sticky="we")
         self.filter.insert(Tk.END, self.raidfinder.filtervar)
         self.filter.bind("<FocusIn>", self.focusin)
         self.filter.bind("<FocusOut>", self.focusout)
@@ -648,18 +676,18 @@ class RaidfinderUI(Tk.Tk):
 
         ## main settings
         self.mainframes.append(ttk.Frame(self))
-        self.mainframes[-1].grid(row=2, column=0, columnspan=8, sticky="we")
+        self.mainframes[-1].grid(row=2, column=0, columnspan=10, sticky="we")
         self.mainsett_b = []
         self.mainsett_tag = ["Pause","Japanese","English","Sound","Auto Copy"]
         convert = {"Pause":["", "If enabled, tweets will be discarded instead of being processed."], "Japanese":["jp", "If disabled, japanese tweets will be discarded."], "English":["en", "If disabled, english tweets will be discarded."], "Sound":["sound", "If enabled, a sound will play when a new code is available."], "Auto Copy":["copy", "If enabled, the latest code will be copied to your clipboard."]} # convert to the setting dict key + the tooltip text
         for x in self.mainsett_tag: # adding the buttons
-            self.mainsett_b.append(Tk.Checkbutton(self.mainframes[-1], text="[{}] {}".format(len(self.mainsett_b), x), variable=self.newIntVar(self.mainsett, self.raidfinder.settings.get(convert[x][0], 0)), command=lambda n=len(self.mainsett_b): self.toggleMainSetting(n)))
+            self.mainsett_b.append(Tk.Checkbutton(self.mainframes[-1], text="[{}] {}".format(len(self.mainsett_b), self.raidfinder.translate(x)), variable=self.newIntVar(self.mainsett, self.raidfinder.settings.get(convert[x][0], 0)), command=lambda n=len(self.mainsett_b): self.toggleMainSetting(n)))
             self.mainsett_b[-1].grid(row=0, column=len(self.mainsett_b)-1)
-            Tooltip(self.mainsett_b[-1], convert[x][1])
-        b = Tk.Button(self.mainframes[-1], text="[{}] Copy Latest".format(len(self.mainsett_b)), command=self.copyLatest) # ping mobage
+            Tooltip(self.mainsett_b[-1], self.raidfinder.translate(convert[x][1]))
+        b = Tk.Button(self.mainframes[-1], text=self.raidfinder.translate("[{}] Copy Latest").format(len(self.mainsett_b)), command=self.copyLatest) # ping mobage
         b.grid(row=0, column=len(self.mainsett_b), sticky="ews")
         self.lastSettingNum = len(self.mainsett_b)
-        Tooltip(b, "Put the latest raid code in the clipboard.")
+        Tooltip(b, self.raidfinder.translate("Put the latest raid code in the clipboard."))
 
         ## bottomn (log / advanced setting / stats)
         self.mainframes.append(ttk.Notebook(self))
@@ -676,64 +704,68 @@ class RaidfinderUI(Tk.Tk):
         scrollbar.config(command=self.logtext.yview)
         ### advanced settings
         self.subtabs.append(Tk.Frame(self.mainframes[-1], bg='#dfe5d7')) # setting frame
-        self.mainframes[-1].add(self.subtabs[-1], text="Advanced") # tab
-        b = Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Ignore Duplicate Codes", variable=self.newIntVar(self.advsett, self.raidfinder.settings['dupe']), command=lambda n=0: self.toggleAdvSetting(n))
+        self.mainframes[-1].add(self.subtabs[-1], text=self.raidfinder.translate("Advanced")) # tab
+        b = Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=self.raidfinder.translate("Ignore Duplicate Codes"), variable=self.newIntVar(self.advsett, self.raidfinder.settings['dupe']), command=lambda n=0: self.toggleAdvSetting(n))
         b.grid(row=0, column=0, stick=Tk.W)
-        Tooltip(b, "If enabled, codes already in memory will be skipped.\nA code is added to the memory only if the corresponding raid is selected.\nUp to 200 codes are stored in memory. Once reached, the 50 oldests are discarded.")
-        b = Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Show Twitter Handle", variable=self.newIntVar(self.advsett, self.raidfinder.settings['author']), command=lambda n=1: self.toggleAdvSetting(n))
+        Tooltip(b, self.raidfinder.translate("If enabled, codes already in memory will be skipped.\nA code is added to the memory only if the corresponding raid is selected.\nUp to 200 codes are stored in memory. Once reached, the 50 oldests are discarded."))
+        b = Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=self.raidfinder.translate("Show Twitter Handle"), variable=self.newIntVar(self.advsett, self.raidfinder.settings['author']), command=lambda n=1: self.toggleAdvSetting(n))
         b.grid(row=1, column=0, stick=Tk.W)
-        Tooltip(b, "If enabled, the tweet author handle will be added to the log.")
-        b = Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Enable Author Blacklist", variable=self.newIntVar(self.advsett, self.raidfinder.settings['blacklist']), command=lambda n=2: self.toggleAdvSetting(n))
+        Tooltip(b, self.raidfinder.translate("If enabled, the tweet author handle will be added to the log."))
+        b = Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=self.raidfinder.translate("Enable Author Blacklist"), variable=self.newIntVar(self.advsett, self.raidfinder.settings['blacklist']), command=lambda n=2: self.toggleAdvSetting(n))
         b.grid(row=2, column=0, stick=Tk.W)
-        Tooltip(b, "If enabled, tweets from the authors whose handles are in blacklist.txt will be ignored.")
-        b = Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Restart stream on high delay", variable=self.newIntVar(self.advsett, self.raidfinder.settings['delay']), command=lambda n=3: self.toggleAdvSetting(n))
+        Tooltip(b, self.raidfinder.translate("If enabled, tweets from the authors whose handles are in blacklist.txt will be ignored."))
+        b = Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=self.raidfinder.translate("Restart stream on high delay"), variable=self.newIntVar(self.advsett, self.raidfinder.settings['delay']), command=lambda n=3: self.toggleAdvSetting(n))
         b.grid(row=3, column=0, stick=Tk.W)
-        Tooltip(b, "If enabled, the tweet stream will automatically restart once the delay limit is reached.\nIt's useful when twitter has server issues and the tweet delay starts building up over time.")
-        b = Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Tweet Creation Time", variable=self.newIntVar(self.advsett, self.raidfinder.settings['time_mode']), command=lambda n=4: self.toggleAdvSetting(n))
+        Tooltip(b, self.raidfinder.translate("If enabled, the tweet stream will automatically restart once the delay limit is reached.\nIt's useful when twitter has server issues and the tweet delay starts building up over time."))
+        b = Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=self.raidfinder.translate("Tweet Creation Time"), variable=self.newIntVar(self.advsett, self.raidfinder.settings['time_mode']), command=lambda n=4: self.toggleAdvSetting(n))
         b.grid(row=0, column=1, stick=Tk.W)
-        Tooltip(b, "If enabled, all new timestamps in the log will be using the tweet creation time, in UTC, instead of the current time.")
-        b = Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Force JST Timezone", variable=self.newIntVar(self.advsett, self.raidfinder.settings['jst']), command=lambda n=5: self.toggleAdvSetting(n))
+        Tooltip(b, self.raidfinder.translate("If enabled, all new timestamps in the log will be using the tweet creation time, in UTC, instead of the current time."))
+        b = Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=self.raidfinder.translate("Force JST Timezone"), variable=self.newIntVar(self.advsett, self.raidfinder.settings['jst']), command=lambda n=5: self.toggleAdvSetting(n))
         b.grid(row=1, column=1, stick=Tk.W)
-        Tooltip(b, "If enabled, the clock and all timestamps will be converted to JST.")
-        b = Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Enable Tool Tips", variable=self.newIntVar(self.advsett, enableTooltip), command=lambda n=6: self.toggleAdvSetting(n))
+        Tooltip(b, self.raidfinder.translate("If enabled, the clock and all timestamps will be converted to JST."))
+        b = Tk.Checkbutton(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=self.raidfinder.translate("Enable Tool Tips"), variable=self.newIntVar(self.advsett, enableTooltip), command=lambda n=6: self.toggleAdvSetting(n))
         b.grid(row=2, column=1, stick=Tk.W)
-        Tooltip(b, "If disabled, tooltips such as this one will not show up.")
+        Tooltip(b, self.raidfinder.translate("If disabled, tooltips such as this one will not show up."))
+        # language choice
+        b = Tk.OptionMenu(self.subtabs[-1], self.lang_var, *self.raidfinder.lang_options, command=self.lang_changed)
+        b.grid(row=3, column=1, stick=Tk.W)
+        Tooltip(b, self.raidfinder.translate("Change the UI language."))
 
-        b = Tk.Button(self.subtabs[-1], text="Reload Blacklist", command=self.reloadBlacklist) # reload blacklist button
+        b = Tk.Button(self.subtabs[-1], text=self.raidfinder.translate("Reload Blacklist"), command=self.reloadBlacklist) # reload blacklist button
         b.grid(row=0, column=2, sticky="ews")
-        Tooltip(b, "Reload the content of blacklist.txt.")
-        b = Tk.Button(self.subtabs[-1], text="Reload Raid List", command=self.reloadRaidList) # reload raid list button
+        Tooltip(b, self.raidfinder.translate("Reload the content of blacklist.txt."))
+        b = Tk.Button(self.subtabs[-1], text=self.raidfinder.translate("Reload Raid List"), command=self.reloadRaidList) # reload raid list button
         b.grid(row=1, column=2, sticky="ews")
-        Tooltip(b, "Reload the content of raid.json.\nCurrent selected raids will be discarded.")
+        Tooltip(b, self.raidfinder.translate("Reload the content of raid.json.\nCurrent selected raids will be discarded."))
         b = Tk.Button(self.subtabs[-1], text="Ping Twitter", command=lambda n=0 : self.startPing(n)) # ping twitter
         b.grid(row=2, column=2, sticky="ews")
-        Tooltip(b, "Send 10 pings to stream.twitter.com.\nIf the values are high or you notice packet loss, your connection or twitter might have issues")
-        b = Tk.Button(self.subtabs[-1], text="Ping GBF", command=lambda n=1 : self.startPing(n)) # ping granblue fantasy
+        Tooltip(b, self.raidfinder.translate("Send 10 pings to stream.twitter.com.\nIf the values are high or you notice packet loss, your connection or twitter might have issues"))
+        b = Tk.Button(self.subtabs[-1], text=self.raidfinder.translate("Ping GBF"), command=lambda n=1 : self.startPing(n)) # ping granblue fantasy
         b.grid(row=2, column=3, sticky="ews")
-        Tooltip(b, "Send 10 pings to game.granbluefantasy.jp.\nIf the values are high or you notice packet loss, your connection or GBF might have issues")
-        b = Tk.Button(self.subtabs[-1], text="Latest Version", command=lambda n=0 : self.openBrowser(n)) # download link button
+        Tooltip(b, self.raidfinder.translate("Send 10 pings to game.granbluefantasy.jp.\nIf the values are high or you notice packet loss, your connection or GBF might have issues"))
+        b = Tk.Button(self.subtabs[-1], text=self.raidfinder.translate("Latest Version"), command=lambda n=0 : self.openBrowser(n)) # download link button
         b.grid(row=0, column=3, sticky="ews")
-        Tooltip(b, "Open up the download link to the latest version in your browser.")
-        b = Tk.Button(self.subtabs[-1], text="Latest raid.json", command=lambda n=1 : self.openBrowser(n)) # download raid list button
+        Tooltip(b, self.raidfinder.translate("Open up the download link to the latest version in your browser."))
+        b = Tk.Button(self.subtabs[-1], text=self.raidfinder.translate("Latest raid.json"), command=lambda n=1 : self.openBrowser(n)) # download raid list button
         b.grid(row=1, column=3, sticky="ews")
-        Tooltip(b, "Open up the download link to the latest raid.json in your browser.")
-        b = Tk.Button(self.subtabs[-1], text="Github", command=lambda n=2 : self.openBrowser(n)) # github
+        Tooltip(b, self.raidfinder.translate("Open up the download link to the latest raid.json in your browser."))
+        b = Tk.Button(self.subtabs[-1], text=self.raidfinder.translate("Github"), command=lambda n=2 : self.openBrowser(n)) # github
         b.grid(row=3, column=3, sticky="ews")
-        Tooltip(b, "Open up the link to the project Github.")
+        Tooltip(b, self.raidfinder.translate("Open up the link to the project Github."))
 
         # thread count spinbox
-        l = Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Tweet Processing Threads")
+        l = Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=self.raidfinder.translate("Tweet Processing Threads"))
         l.grid(row=0, column=4, sticky="ws")
-        Tooltip(l, "Number of threads used to process the incoming tweets.")
+        Tooltip(l, self.raidfinder.translate("Number of threads used to process the incoming tweets."))
         threadSpinBox = Tk.Spinbox(self.subtabs[-1], from_=1, to=self.raidfinder.THREAD_LIMIT, textvariable=Tk.StringVar(value=str(self.raidfinder.settings['max_thread'])), validate='all', validatecommand=(self.subtabs[-1].register(self.updateTweetThreadCount), '%P'))
         threadSpinBox.grid(row=1, column=4, sticky="ews")
         threadSpinBox.bind("<FocusIn>", self.focusin)
         threadSpinBox.bind("<FocusOut>", self.focusout)
 
         # delay limit spinbox
-        l = Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text="Delay Limit")
+        l = Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=self.raidfinder.translate("Delay Limit"))
         l.grid(row=2, column=4, sticky="ws")
-        Tooltip(l, "Delay limit, in seconds, before an automatic restart (if enabled).")
+        Tooltip(l, self.raidfinder.translate("Delay limit, in seconds, before an automatic restart (if enabled)."))
         delaySpinBox = Tk.Spinbox(self.subtabs[-1], from_=60, to=3600, textvariable=Tk.StringVar(value=str(self.raidfinder.settings['delay_limit'])), validate='all', validatecommand=(self.subtabs[-1].register(self.updateDelayLimit), '%P'))
         delaySpinBox.grid(row=3, column=4, sticky="ews")
         delaySpinBox.bind("<FocusIn>", self.focusin)
@@ -742,30 +774,30 @@ class RaidfinderUI(Tk.Tk):
         ### stats
         # mostly text labels, you can skip over it
         self.subtabs.append(Tk.Frame(self.mainframes[-1], bg='#e5e0d7'))
-        self.mainframes[-1].add(self.subtabs[-1], text="Statistics")
+        self.mainframes[-1].add(self.subtabs[-1], text=self.raidfinder.translate("Statistics"))
         self.stats = []
-        Tk.Button(self.subtabs[-1], text="Reset", command=self.resetStats).grid(row=4, column=0, sticky="ews") # reset button
+        Tk.Button(self.subtabs[-1], text=self.raidfinder.translate("Reset"), command=self.resetStats).grid(row=4, column=0, sticky="ews") # reset button
         # all stats to be displayed (Label Text, Position X, Position Y, Default Text, Tooltip Text)
         labels = [["Connection Time:", 0, 0, "0:00:00", "Duration of your connection to twitter.\nPauses are ignored."],["Received tweets:", 0, 1, "0", "Number of tweets received by the listener."],["Matched tweets:", 0, 2, "0", "Number of received tweets correponding to the user selected raid(s)."],["Matched/Received:", 0, 3, "0.00%", "Ratio of selected raid tweets by all received tweets."],["Received rate:", 1, 1, "0/s", "Average reception speed."],["Match rate:", 1, 2, "0/s", "Average reception speed for the selected raids."],["Blacklisted:", 1, 0, "0", "Numbed of tweets blocked by the blacklist."],["Dupes:", 2, 0, "0", "Numbed of blocked duplicate codes."],["Last Received:", 2, 1, "?", "When was received the last tweet."],["Last Matched:", 2, 2, "?", "When was received the last tweet corresponding to a selected raid."],["Queued Tweets:", 1, 3, "0", "Number of tweets waiting to be processed."],["Twitter Delay:", 2, 3, "0s", "Delay between the tweet creation and its reception by the listener."],["Filtered:", 3, 0, "0", "Numbed of tweets blocked by the filter."]
         ]
         for l in labels:
-            b = Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=l[0])
+            b = Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=self.raidfinder.translate(l[0]))
             b.grid(row=l[2], column=l[1]*2, sticky="ws")
-            Tooltip(b, l[4])
+            Tooltip(b, self.raidfinder.translate(l[4]))
             self.stats.append(Tk.Label(self.subtabs[-1], bg=self.subtabs[-1]['bg'], text=l[3]))
             self.stats[-1].grid(row=l[2], column=l[1]*2+1, sticky="nw")
-            Tooltip(self.stats[-1], l[4])
+            Tooltip(self.stats[-1], self.raidfinder.translate(l[4]))
 
         # others
-        self.statusLabel = Tk.Label(self, text="Offline", bg='#edc7c7') # for the offline/online text
+        self.statusLabel = Tk.Label(self, text=self.raidfinder.translate("Offline"), bg='#edc7c7') # for the offline/online text
         self.statusLabel.grid(row=0, column=9, sticky="ne")
-        Tooltip(self.statusLabel, "Indicate if the Twitter Stream is connected.")
+        Tooltip(self.statusLabel, self.raidfinder.translate("Indicate if the Twitter Stream is connected."))
         self.timeLabel = Tk.Label(self, text="") # for the current time
         self.timeLabel.grid(row=2, column=9, sticky="ne")
-        Tooltip(self.timeLabel, "Current time.")
+        Tooltip(self.timeLabel, self.raidfinder.translate("Current time."))
 
         # make the window and bind the keyboard
-        self.title("Miza's Raidfinder v{}".format(version))
+        self.title(self.raidfinder.translate("Miza's Raidfinder v{}").format(version))
         self.resizable(width=False, height=False) # not resizable
         self.protocol("WM_DELETE_WINDOW", self.close) # call close() if we close the window
         self.bind_all("<Key>", self.key)
@@ -794,31 +826,31 @@ class RaidfinderUI(Tk.Tk):
             self.raids = []
             for p in raids['pages']: # for each page
                 self.raids.append(Tk.Frame(self.mainframes[0], background=p.get('color', ''))) # make a tab
-                self.mainframes[0].add(self.raids[-1], text=p.get('name', ''))
+                self.mainframes[0].add(self.raids[-1], text=self.raidfinder.translate(p.get('name', '')))
                 for r in p.get('list', []): # and add a checkbox for each raid
                     self.raidchilds.append(Tk.Checkbutton(self.raids[-1], bg=p.get('color', ''), text=r.get('name', ''), variable=self.newTrackingVar(r.get('name', '')), command=lambda r=r.get('name', ''): self.toggleRaid(r)))
                     self.raidchilds[-1].grid(row=r.get('posY', 0), column=r.get('posX', 0), stick=Tk.W)
             # add the custom tab
             self.raids.append(Tk.Frame(self.mainframes[0], background=raids['custom color']))
-            self.mainframes[0].add(self.raids[-1], text="Custom")
+            self.mainframes[0].add(self.raids[-1], text=self.raidfinder.translate("Custom"))
             self.custom = []
             for i in range(0, len(custom)): # same thing, with an extra Edit button
                 self.raidchilds.append(Tk.Button(self.raids[-1], text="Edit", command=lambda i=i: self.editCustom(i)))
                 self.raidchilds[-1].grid(row=i%6, column=(i//6)*2, sticky='ews')
-                Tooltip(self.raidchilds[-1], "Edit this raid entry.")
+                Tooltip(self.raidchilds[-1], self.raidfinder.translate("Edit this raid entry."))
                 self.custom.append(Tk.Checkbutton(self.raids[-1], bg=raids['custom color'], text=custom[i][0], variable=self.newTrackingVar(custom[i][0]), command=lambda r=custom[i][0]: self.toggleRaid(r)))
                 self.custom[-1].grid(row=i%6, column=1+(i//6)*2, stick=Tk.W)
             # select the last tab used
             self.mainframes[0].select(self.raidfinder.lasttab)
         except Exception as e:
-            self.log("[Error] Something went wrong while building the raid UI")
-            self.log("Exception: {}".format(e))
+            self.log(self.raidfinder.translate("[Error] Something went wrong while building the raid UI"))
+            self.log(self.raidfinder.translate("Exception: {}").format(e))
 
     def toggleRaid(self, r): # called when un/checking a raid
         state = self.tracking[r].get()
         self.readonly[r] = state
-        if state: self.log('[Raid] Now tracking {}'.format(r))
-        else: self.log('[Raid] Stopped tracking of {}'.format(r))
+        if state: self.log(self.raidfinder.translate('[Raid] Now tracking {}').format(r))
+        else: self.log(self.raidfinder.translate('[Raid] Stopped tracking of {}').format(r))
 
     def toggleMainSetting(self, n): # called when un/checking a main setting
         state = self.mainsett[n].get()
@@ -827,8 +859,8 @@ class RaidfinderUI(Tk.Tk):
         elif n == 2: self.raidfinder.settings['en'] = state
         elif n == 3: self.raidfinder.settings['sound'] = state
         elif n == 4: self.raidfinder.settings['copy'] = state
-        if state: self.log("[Settings] '{}' is enabled".format(self.mainsett_tag[n]))
-        else: self.log("[Settings] '{}' is disabled".format(self.mainsett_tag[n]))
+        if state: self.log(self.raidfinder.translate("[Settings] '{}' is enabled").format(self.mainsett_tag[n]))
+        else: self.log(self.raidfinder.translate("[Settings] '{}' is disabled").format(self.mainsett_tag[n]))
 
     def toggleAdvSetting(self, n): # called when un/checking an advanced setting
         global enableTooltip
@@ -841,22 +873,25 @@ class RaidfinderUI(Tk.Tk):
         elif n == 5: self.raidfinder.settings['jst'] = state
         elif n == 6: enableTooltip = state
 
+    def lang_changed(self, *args):
+        messagebox.showinfo("Info", self.raidfinder.translate("The Raidfinder language has been changed.\nPlease restart the application."))
+
     def editCustom(self, i): # called when editing a custom raid
         self.inputting = True # to disable the keyboard shortcuts
         tmp = self.raidfinder.paused # save the pause setting
         self.raidfinder.paused = True # pause the app
         customEntry = self.raidfinder.custom[i]
-        v1 = simpledialog.askstring("Edit custom raid", "input a name", initialvalue=customEntry[0]) # ask for user input
+        v1 = simpledialog.askstring(self.raidfinder.translate("Edit custom raid"), self.raidfinder.translate("input a name"), initialvalue=customEntry[0]) # ask for user input
         if v1 == None: # if the user cancelled
             self.inputting = False
             self.raidfinder.paused = tmp
             return # we return
-        v2 = simpledialog.askstring("Edit custom raid", "input the english code", initialvalue=customEntry[1])
+        v2 = simpledialog.askstring(self.raidfinder.translate("Edit custom raid"), self.raidfinder.translate("input the english code"), initialvalue=customEntry[1])
         if v2 == None: # same thing
             self.inputting = False
             self.raidfinder.paused = tmp
             return
-        v3 = simpledialog.askstring("Edit custom raid", "input the japanese code", initialvalue=customEntry[2])
+        v3 = simpledialog.askstring(self.raidfinder.translate("Edit custom raid"), self.raidfinder.translate("input the japanese code"), initialvalue=customEntry[2])
         if v3 == None: # same thing
             self.inputting = False
             self.raidfinder.paused = tmp
@@ -869,9 +904,9 @@ class RaidfinderUI(Tk.Tk):
         self.reloadRaidList(False)
 
         # log and end
-        self.log("[System] {} saved in slot {}".format(v1, i+1)) # logging for the user to check any mistake
-        self.log("code EN : {}".format(v2))
-        self.log("code JP : {}".format(v3))
+        self.log(self.raidfinder.translate("[System] {} saved in slot {}").format(v1, i+1)) # logging for the user to check any mistake
+        self.log(self.raidfinder.translate("code EN : {}").format(v2))
+        self.log(self.raidfinder.translate("code JP : {}").format(v3))
 
         self.raidfinder.paused = tmp # restore the pause setting
 
@@ -899,17 +934,17 @@ class RaidfinderUI(Tk.Tk):
 
     def reloadBlacklist(self): # reload the blacklist
         self.raidfinder.loadBlacklist()
-        messagebox.showinfo("Info", "'blacklist.txt' has been reloaded.\n{} entrie(s) found.".format(len(self.raidfinder.blacklist)))
+        messagebox.showinfo(self.raidfinder.translate("Info"), self.raidfinder.translate("'blacklist.txt' has been reloaded.\n{} entrie(s) found.").format(len(self.raidfinder.blacklist)))
 
     def reloadRaidList(self, prompt = True): # reload the raid list
         self.raidfinder.lasttab = self.mainframes[0].index(self.mainframes[0].select()) # memorize last used tab
         err = self.raidfinder.loadRaids() # reload the list
-        self.log("[System] Raid list have been reloaded")
+        self.log(self.raidfinder.translate("[System] Raid list have been reloaded"))
         if prompt:
             if err == "":
-                messagebox.showinfo("Info", "'raid.json' has been reloaded.\n{} code(s) found.".format(len(self.raidfinder.raids)))
+                messagebox.showinfo(self.raidfinder.translate("Info"), self.raidfinder.translate("'raid.json' has been reloaded.\n{} code(s) found.").format(len(self.raidfinder.raids)))
             else:
-                messagebox.showinfo("Error", "Failed to reload 'raid.json'\Exception: {}".format(err))
+                messagebox.showinfo(self.raidfinder.translate("Error"), self.raidfinder.translate("Failed to reload 'raid.json'\nException: {}").format(err))
 
     def updateTweetThreadCount(self, entry):
         try: # validate the spinbox value
@@ -967,7 +1002,7 @@ class RaidfinderUI(Tk.Tk):
     def copyLatest(self):
         if self.lastCode != None:
             pyperclip.copy(self.lastCode)
-            self.log("[System] Code {} has been put in the clipboard".format(self.lastCode))
+            self.log(self.raidfinder.translate("[System] Code {} has been put in the clipboard").format(self.lastCode))
 
     def formatStat(self, v):
         if v > 1000000: return str(v // 1000000) + "M"
@@ -1017,8 +1052,8 @@ class RaidfinderUI(Tk.Tk):
             d = datetime.datetime.utcnow() + datetime.timedelta(seconds=32400)
             self.timeLabel.config(text=d.strftime("%H:%M:%S JST"))
         else: self.timeLabel.config(text=strftime("%H:%M:%S"))
-        if self.raidfinder.connected: self.statusLabel.config(text="Online", background='#c7edcd')
-        else: self.statusLabel.config(text="Offline", background='#edc7c7')
+        if self.raidfinder.connected: self.statusLabel.config(text=self.raidfinder.translate("Online"), background='#c7edcd')
+        else: self.statusLabel.config(text=self.raidfinder.translate("Offline"), background='#edc7c7')
 
         if len(self.raidfinder.filtervar) > 0:
             self.filterlabel.config(background='#c7edcd')
