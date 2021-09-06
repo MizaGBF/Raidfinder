@@ -1,4 +1,4 @@
-version = "2.38" # raidfinder version
+version = "2.39" # raidfinder version
 
 #######################################################################
 # import
@@ -659,15 +659,14 @@ class RaidfinderUI(Tk.Tk):
         self.custom = []
 
         ## tweet filter
-        self.mainframes.append(ttk.Notebook(self))
+        self.mainframes.append(ttk.Frame(self))
         self.mainframes[-1].grid(row=1, column=0, rowspan=1, columnspan=10, sticky="we")
-        self.mainframes[-1].grid_columnconfigure(0, weight=1)
         self.filterlabel = Tk.Label(self.mainframes[-1], text=self.raidfinder.translate("Filter by Messages"))
-        self.filterlabel.grid(row=0, column=0)
+        self.filterlabel.pack(side=Tk.LEFT)
         Tooltip(self.filterlabel, self.raidfinder.translate("Only the tweets containing this string will be processed"))
         self.filterlabeloriginal = self.filterlabel.cget("background")
         self.filter=Tk.Text(self.mainframes[-1], height=1)
-        self.filter.grid(row=0, column=2, columnspan=5, sticky="we")
+        self.filter.pack(side=Tk.RIGHT, fill=Tk.X)
         self.filter.insert(Tk.END, self.raidfinder.filtervar)
         self.filter.bind("<FocusIn>", self.focusin)
         self.filter.bind("<FocusOut>", self.focusout)
@@ -828,7 +827,7 @@ class RaidfinderUI(Tk.Tk):
                 self.raids.append(Tk.Frame(self.mainframes[0], background=p.get('color', ''))) # make a tab
                 self.mainframes[0].add(self.raids[-1], text=self.raidfinder.translate(p.get('name', '')))
                 for r in p.get('list', []): # and add a checkbox for each raid
-                    self.raidchilds.append(Tk.Checkbutton(self.raids[-1], bg=p.get('color', ''), text=r.get('name', ''), variable=self.newTrackingVar(r.get('name', '')), command=lambda r=r.get('name', ''): self.toggleRaid(r)))
+                    self.raidchilds.append(Tk.Checkbutton(self.raids[-1], bg=p.get('color', ''), text=self.raidfinder.translate(r.get('name', '')), variable=self.newTrackingVar(self.raidfinder.translate(r.get('name', ''))), command=lambda r=self.raidfinder.translate(r.get('name', '')): self.toggleRaid(r)))
                     self.raidchilds[-1].grid(row=r.get('posY', 0), column=r.get('posX', 0), stick=Tk.W)
             # add the custom tab
             self.raids.append(Tk.Frame(self.mainframes[0], background=raids['custom color']))
