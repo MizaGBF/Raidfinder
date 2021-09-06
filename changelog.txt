@@ -1,3 +1,6 @@
+* 2.37
+- Fixed the Tweet Creation Time setting causing an exception to occur
+
 * 2.36
 - Put back the T1 raids
 

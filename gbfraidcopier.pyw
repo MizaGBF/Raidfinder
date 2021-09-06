@@ -1,4 +1,4 @@
-version = "2.36" # raidfinder version
+version = "2.37" # raidfinder version
 
 #######################################################################
 # import
@@ -554,9 +554,9 @@ class Raidfinder(tweepy.StreamListener):
                         # write to the log
                         if self.settings['time_mode'] == 1:
                             if self.settings['jst']:
-                                d = tweet_creation + datetime.timedelta(seconds=32400)
+                                d = tweet.created_at + datetime.timedelta(seconds=32400)
                                 t = d.strftime("%H:%M:%S JST")
-                            else: t = tweet_creation.strftime("%H:%M:%S UTC")
+                            else: t = tweet.created_at.strftime("%H:%M:%S UTC")
                         else:
                             if self.settings['jst']:
                                 d = datetime.datetime.utcnow() + datetime.timedelta(seconds=32400)
