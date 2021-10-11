@@ -357,7 +357,7 @@ class Raidfinder():
             self.UI.log(self.translate("If the problem persists, try to delete the keys in 'gbfraidcopier.cfg'."))
             self.UI.log(self.translate("Exception: {}".format(traceback.format_exception(type(e), e, e.__traceback__))))
 
-        self.UI.log("[Beta] The raidfinder now uses the Twitter API V2, you'll need new access keys")
+        self.UI.log("[Beta] The raidfinder need new access keys in preparation for the v2.0")
         self.UI.log("Please report any problem/issue/bug to me directly or on the github, thanks you")
 
         # main loop

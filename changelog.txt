@@ -1,3 +1,8 @@
+﻿* 2.42
+- Tweepy updated to v4.1.0
+- The Raidfinder doesn't use the API 2.0 yet
+- The code will be optimized/cleaned up and fixed (if needed) at a later date
+
 * 2.41
 - Fixed a few typos
 - Forgot an untranslated string
