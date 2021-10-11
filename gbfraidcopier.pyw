@@ -1,4 +1,4 @@
-version = "2.41" # raidfinder version
+version = "2.42" # raidfinder version
 
 #######################################################################
 # import
@@ -26,7 +26,7 @@ if __name__ == "__main__": # module check
     try: # try to import
         import tweepy
         import pyperclip
-        if tweepy.__version__ != "3.10.0" or pyperclip.__version__ != "1.8.2": # version check
+        if tweepy.__version__ != "4.1.0" or pyperclip.__version__ != "1.8.2": # version check
             raise Exception("outdated")
     except Exception as e: # failed, call pip to install
         root = Tk.Tk() # dummy window
@@ -82,7 +82,7 @@ enableTooltip = 1
 #######################################################################
 # Main class and tweepy listener
 #######################################################################
-class Raidfinder(tweepy.StreamListener):
+class Raidfinder():
     def __init__(self):
         # class variables
         self.settings = {'jp':1, 'en':1, 'sound':1, 'copy':1, 'author':1, 'blacklist':1, 'dupe':1, 'delay':0, 'delay_limit':180, 'time_mode':0, 'max_thread':4, 'jst':0, 'lang':'English'}
@@ -124,9 +124,6 @@ class Raidfinder(tweepy.StreamListener):
         self.auth = None
         self.twitter_api = None
         self.stream = None
-
-        # tweet streaming
-        super().__init__()
         self.paused = False
 
         # START
@@ -314,68 +311,6 @@ class Raidfinder(tweepy.StreamListener):
 
         return ""
 
-    def on_data(self, data):
-        if self.high_delay: # trigger high delay restart
-            self.high_delay = False
-            self.high_delay_count = min(self.high_delay_count+1, 12)
-            raise Exception("High Delay")
-
-        self.tweetQueue.put_nowait((data, datetime.datetime.utcnow()))
-
-    def on_connect(self): # when the Twitter stream connects
-        if not self.connected:
-            self.UI.log(self.translate("[System] Twitter stream connected"))
-        self.connected = True
-
-    def on_disconnect(self): # when the Twitter stream disconnects
-        if self.connected:
-            self.UI.log(self.translate("[System] Twitter stream disconnected"))
-        self.connected = False
-
-    def on_exception(self, exception): # when a problem occurs
-        print("on_exception():", traceback.format_exception(type(exception), exception, exception.__traceback__))
-        s = str(exception)
-        if s == "High Delay": # high delay restart triggered
-            self.UI.log(self.translate("[Error] High delay detected"))
-            self.connected = False
-            self.retry_delay = self.high_delay_count * 5
-        elif self.connected: # exception happened while being connected
-            if s.lower().find("timed out") != -1 or s.lower().find("connection broken") != -1:
-                self.UI.log(self.translate("[Error] Communication issue, check your internet connection or Twitter server status"))
-            else:
-                self.UI.log(self.translate("[Error] An exception occurred: {}").format(traceback.format_exception(type(exception), exception, exception.__traceback__)))
-            self.connected = False
-            self.retry_delay = 10
-        else: # else, unknown error
-            self.UI.log(self.translate("[Error] Twitter keys might be invalid or your Internet is down"))
-            self.UI.log(self.translate("Exception: {}".format(exception)))
-            self.connected = False
-            self.retry_delay = -1
- 
-    def on_error(self, status): # for error stuff
-        print("on_error():", status)
-        if status == 420:
-            self.UI.log(self.translate("[Error] Rate limited by Twitter, restarting the application might be needed"))
-            self.connected = False
-            self.retry_delay = 90
-        elif status >= 500 and status < 600:
-            self.UI.log(self.translate("[Error] HTTP Error {}: Server error, Twitter might be overloaded").format(status))
-            self.connected = False
-            self.retry_delay = 60
-        elif status == 401:
-            self.UI.log(self.translate("[Error] HTTP Error {}: Authentification failed. If the problem persists, delete the keys in 'gbfraidcopier.cfg'.").format(status))
-            self.connected = False
-            self.retry_delay = -1
-        elif not self.connected:
-            self.UI.log(self.translate("[Error] Unknown issue, please restart the application"))
-            self.connected = False
-            self.retry_delay = -1
-        else:
-            self.UI.log(self.translate("[Error] HTTP Error {}: Check your internet connection or Twitter server status").format(status))
-            self.connected = False
-            self.retry_delay = 60
-        return False
-
     def runRaidfinder(self): # MAIN FUNCTION
         # init
         err = self.loadRaids() # load the raid list
@@ -388,21 +323,21 @@ class Raidfinder(tweepy.StreamListener):
             try: # test registered keys (if any)
                 self.auth = tweepy.OAuthHandler(self.keys['consumer_key'], self.keys['consumer_secret'])
                 self.auth.set_access_token(self.keys['access_token'], self.keys['access_token_secret'])
-                self.twitter_api = tweepy.API(self.auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
+                self.twitter_api = tweepy.API(self.auth, wait_on_rate_limit=True)
                 if self.twitter_api.verify_credentials() is None: raise Exception()
             except: # ask for authentification
                 self.UI.log(self.translate("[Error] Authentification is required"))
-                self.auth = tweepy.OAuthHandler("ZTd48q7C3F13HmcmE6RxMuyiq", "YFz1Tq5njkM1zo165K3Zw0Rye9s2fC2d6kn2tCwfMc4XkjLjjb")
+                self.auth = tweepy.OAuthHandler("uSMr3m0GmKTqsNT0gnLyBpSPb", "PRya1sy5qkdJek7IWiCUQ3TLcJRcS46mPgOrEQPyllI7xqjTd2")
                 try:
                     redirect_url = self.auth.get_authorization_url()
                     webbrowser.open(redirect_url, new=2)
                     verifier = simpledialog.askstring("Authorize this application", "enter the PIN code", initialvalue="")
                     self.auth.get_access_token(verifier)
-                    self.twitter_api = tweepy.API(self.auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
+                    self.twitter_api = tweepy.API(self.auth, wait_on_rate_limit=True)
                     if self.twitter_api.verify_credentials() is None: raise Exception("Authentification failed")
                     self.keys = {
-                        'consumer_key': 'ZTd48q7C3F13HmcmE6RxMuyiq',
-                        'consumer_secret': 'YFz1Tq5njkM1zo165K3Zw0Rye9s2fC2d6kn2tCwfMc4XkjLjjb',
+                        'consumer_key': 'uSMr3m0GmKTqsNT0gnLyBpSPb',
+                        'consumer_secret': 'PRya1sy5qkdJek7IWiCUQ3TLcJRcS46mPgOrEQPyllI7xqjTd2',
                         'access_token': self.auth.access_token,
                         'access_token_secret': self.auth.access_token_secret
                     }
@@ -422,8 +357,9 @@ class Raidfinder(tweepy.StreamListener):
             self.UI.log(self.translate("If the problem persists, try to delete the keys in 'gbfraidcopier.cfg'."))
             self.UI.log(self.translate("Exception: {}".format(traceback.format_exception(type(e), e, e.__traceback__))))
 
-        # information message
-        self.UI.log(self.translate("[Info] The raidfinder will switch to the Twitter API V2 in the upcoming months, expect an update by then."))
+        self.UI.log("[Beta] The raidfinder now uses the Twitter API V2, you'll need new access keys")
+        self.UI.log("Please report any problem/issue/bug to me directly or on the github, thanks you")
+
         # main loop
         while self.apprunning:
             self.elapsed = time.time() - self.time # measure elapsed time
@@ -484,8 +420,8 @@ class Raidfinder(tweepy.StreamListener):
             try: # starting tweepy
                 if not self.connected:
                     self.UI.log(self.translate("[System] Connecting to Twitter..."))
-                    stream = tweepy.Stream(auth=self.twitter_api.auth, listener=self)
-                stream.filter(track=self.filters) # this thread will block here until an issue occur
+                    self.stream = RaidfinderStream(self)
+                self.stream.filter(track=self.filters) # this thread will block here until an issue occur
             except:
                 pass
             if not self.apprunning or self.retry_delay == -1:
@@ -513,7 +449,7 @@ class Raidfinder(tweepy.StreamListener):
                     continue
 
                 # convert
-                try: tweet = tweepy.Status.parse(self.api, json.loads(data))
+                try: tweet = tweepy.models.Status.parse(self.twitter_api, json.loads(data))
                 except: continue
                 if tweet.source != "グランブルー ファンタジー": # filter non gbf tweet
                     continue
@@ -597,6 +533,52 @@ class Raidfinder(tweepy.StreamListener):
             except Exception as e:
                 if i == -1: print(traceback.format_exception(type(e), e, e.__traceback__))
                 else: print('thread', i, ':', traceback.format_exception(type(e), e, e.__traceback__))
+
+#######################################################################
+# Stream
+#######################################################################
+class RaidfinderStream(tweepy.Stream):
+    def __init__(self, parent):
+        self.parent = parent
+        super().__init__(self.parent.keys['consumer_key'], self.parent.keys['consumer_secret'], self.parent.keys['access_token'], self.parent.keys['access_token_secret'])
+
+    def on_data(self, data):
+        if self.parent.high_delay: # trigger high delay restart
+            self.parent.high_delay = False
+            self.parent.high_delay_count = min(self.parent.high_delay_count+1, 12)
+            raise Exception("High Delay")
+
+        self.parent.tweetQueue.put_nowait((data, datetime.datetime.now(datetime.timezone.utc)))
+
+    def on_connect(self): # when the Twitter stream connects
+        if not self.parent.connected:
+            self.parent.UI.log(self.parent.translate("[System] Twitter stream connected"))
+        self.parent.connected = True
+
+    def on_disconnect(self): # when the Twitter stream disconnects
+        if self.parent.connected:
+            self.parent.UI.log(self.parent.translate("[System] Twitter stream disconnected"))
+        self.parent.connected = False
+
+    def on_exception(self, exception): # when a problem occurs
+        print("on_exception():", traceback.format_exception(type(exception), exception, exception.__traceback__))
+        s = str(exception)
+        if s == "High Delay": # high delay restart triggered
+            self.parent.UI.log(self.parent.translate("[Error] High delay detected"))
+            self.parent.connected = False
+            self.parent.retry_delay = self.parent.high_delay_count * 5
+        elif self.parent.connected: # exception happened while being connected
+            if s.lower().find("timed out") != -1 or s.lower().find("connection broken") != -1:
+                self.parent.UI.log(self.parent.translate("[Error] Communication issue, check your internet connection or Twitter server status"))
+            else:
+                self.parent.UI.log(self.parent.translate("[Error] An exception occurred: {}").format(traceback.format_exception(type(exception), exception, exception.__traceback__)))
+            self.parent.connected = False
+            self.parent.retry_delay = 10
+        else: # else, unknown error
+            self.parent.UI.log(self.parent.translate("[Error] Twitter keys might be invalid or your Internet is down"))
+            self.parent.UI.log(self.parent.translate("Exception: {}".format(exception)))
+            self.parent.connected = False
+            self.parent.retry_delay = -1
 
 #######################################################################
 # Custom UI ToolTip class

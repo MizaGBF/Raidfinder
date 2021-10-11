@@ -13,7 +13,7 @@ command on a newer version, I'll update the file if needed.
 
 == AUTHENTIFICATION ==
 A Twitter account is required to use this application. Two ways exist:
-1) If you are registered as a developper, go to https://developer.twitter.com/, create an app and fill 'gbfraidcopier.cfg' with the consumer and access tokens. You can also apply here: https://developer.twitter.com/en/apply/account
+1) If you are registered as a developper, go to https://developer.twitter.com/, create a Project (for API V2 access) and fill 'gbfraidcopier.cfg' with the consumer and access tokens. You can also apply here: https://developer.twitter.com/en/apply/account
 2) If not, your Web Browser will open, asking you to authorize the application. Give the PIN code to the raidfinder it will generate your tokens for future uses.
 
 == USAGE ==

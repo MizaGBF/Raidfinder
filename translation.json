@@ -145,7 +145,6 @@
         "[Error] Authentification is required" : "[Erreur] Il est nécessaire de vous authentifier",
         "[Error] Failed to start the raidfinder, authentification failed." : "[Erreur] Impossible de démarrer le raidfinder, l'authentification a échoué.",
         "If the problem persists, try to delete the keys in 'gbfraidcopier.cfg'." : "Si le problème persiste, effacez les clés dans 'gbfraidcopier.cfg'.",
-        "[Info] The raidfinder will switch to the Twitter API V2 in the upcoming months, expect an update by then." : "[Info] Le raidfinder va basculer sur l'API Twitter V2 dans les mois prochains, attendez vous à une mise à jour d'ici là.",
         "Ping to {}" : "Ping vers {}",
         "\nMinimum {}ms, Average {}ms, Maximum {}ms" : "\nMinimum {}ms, Moyenne {}ms, Maximum {}ms",
         "\n{:.2f}% Packet Loss" : "\n{:.2f}% de Paquet Perdu",
