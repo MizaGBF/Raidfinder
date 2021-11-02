@@ -1,4 +1,8 @@
-﻿* 2.42
+﻿* 2.43
+- Fixed the automatic module install not working if you double click the .pyw file
+- Tweepy updated to v4.2.0
+
+* 2.42
 - Tweepy updated to v4.1.0
 - The Raidfinder doesn't use the API 2.0 yet
 - The code will be optimized/cleaned up and fixed (if needed) at a later date

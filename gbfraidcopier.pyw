@@ -1,4 +1,4 @@
-version = "2.42" # raidfinder version
+version = "2.43" # raidfinder version
 
 #######################################################################
 # import
@@ -26,15 +26,19 @@ if __name__ == "__main__": # module check
     try: # try to import
         import tweepy
         import pyperclip
-        if tweepy.__version__ != "4.1.0" or pyperclip.__version__ != "1.8.2": # version check
+        if tweepy.__version__ != "4.2.0" or pyperclip.__version__ != "1.8.2": # version check
             raise Exception("outdated")
     except Exception as e: # failed, call pip to install
         root = Tk.Tk() # dummy window
         root.withdraw()
         if str(e) == "outdated": messagebox.showinfo("Outdated modules", "Modules will be updated")
         else: messagebox.showinfo("Missing modules", "Missing modules will be installed")
+        if os.name == 'nt':
+            py_interpreter = os.path.join(os.__file__.split("lib\\")[0],"python")
+        else:
+            py_interpreter = "python"
         try:
-            subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
+            subprocess.check_call([py_interpreter, "-m", "pip", "install", "-r", "requirements.txt"])
             import tweepy
             import pyperclip
         except: # failed again, we exit
@@ -45,7 +49,7 @@ if __name__ == "__main__": # module check
                 if is_admin:
                     messagebox.showerror("Installation failed", "Failed to install the missing modules, check your internet connection\nAlternatively, try to run this application as administrator to force the installation.\nOr try to run the command pip install -r requirements.txt")
                 elif messagebox.askquestion ("Installation failed","Restart the application as an administrator to try again?") == "yes":
-                    ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
+                    ctypes.windll.shell32.ShellExecuteW(None, "runas", py_interpreter, " ".join(sys.argv), None, 1)
             else:
                 messagebox.showerror("Installation failed", "Failed to install the missing modules, check your internet connection\nAlternatively, try to run this application as a sudo user.\nOr try to run the command pip install -r requirements.txt")
             exit(0)
