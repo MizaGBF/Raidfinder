@@ -483,7 +483,7 @@
                     "name": "Wilnas",
                     "en": "Lvl 200 Wilnas",
                     "jp": "Lv200 ウィルナス",
-                    "posX":5,
+                    "posX":6,
                     "posY":0
                 },
                 {
@@ -525,7 +525,7 @@
                     "name": "Wamdus",
                     "en": "Lvl 200 Wamdus",
                     "jp": "Lv200 ワムデュス",
-                    "posX":5,
+                    "posX":6,
                     "posY":1
                 },
                 {
@@ -567,7 +567,7 @@
                     "name": "Galleon",
                     "en": "Lvl 200 Galleon",
                     "jp": "Lv200 ガレヲン",
-                    "posX":5,
+                    "posX":6,
                     "posY":2
                 },
                 {
@@ -609,7 +609,7 @@
                     "name": "Ewiyar",
                     "en": "Lvl 200 Ewiyar",
                     "jp": "Lv200 イーウィヤ",
-                    "posX":5,
+                    "posX":6,
                     "posY":3
                 },
                 {
@@ -651,7 +651,7 @@
                     "name": "Lu Woh",
                     "en": "Lvl 200 Lu Woh",
                     "jp": "Lv200 ル・オー",
-                    "posX":5,
+                    "posX":6,
                     "posY":4
                 },
                 {
@@ -690,10 +690,17 @@
                     "posY":5
                 },
                 {
+                    "name": "Osiris",
+                    "en": "Lvl 120 Osiris",
+                    "jp": "Lv120 オシリス",
+                    "posX":5,
+                    "posY":5
+                },
+                {
                     "name": "Fediel",
                     "en": "Lvl 200 Fediel",
                     "jp": "Lv200 フェディエル",
-                    "posX":5,
+                    "posX":6,
                     "posY":5
                 }
             ]
