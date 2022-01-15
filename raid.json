@@ -361,6 +361,13 @@
                     "posY":0
                 },
                 {
+                    "name": "Gold EX",
+                    "en": "Lvl 75 Golden Tyrant",
+                    "jp": "Lv75 ゴールデンタイラント",
+                    "posX":3,
+                    "posY":0
+                },
+                {
                     "name": "Xuanwu",
                     "en": "Lvl 60 Xuanwu",
                     "jp": "Lv60 玄武",
@@ -379,6 +386,13 @@
                     "en": "Lvl 100 Xeno Cocytus",
                     "jp": "Lv100 ゼノ・コキュートス",
                     "posX":2,
+                    "posY":1
+                },
+                {
+                    "name": "Gold EX+",
+                    "en": "Lvl 80 Golden Tyrant",
+                    "jp": "Lv80 ゴールデンタイラント",
+                    "posX":3,
                     "posY":1
                 },
                 {
