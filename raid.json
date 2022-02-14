@@ -662,6 +662,13 @@
                     "posY":4
                 },
                 {
+                    "name": "Horus",
+                    "en": "Lvl 120 Horus",
+                    "jp": "Lv120 ホルス",
+                    "posX":5,
+                    "posY":4
+                },
+                {
                     "name": "Lu Woh",
                     "en": "Lvl 200 Lu Woh",
                     "jp": "Lv200 ル・オー",
