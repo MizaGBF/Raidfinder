@@ -1,4 +1,7 @@
-﻿* 2.43
+﻿* 2.44
+- Added informations regarding the next version
+
+* 2.43
 - Fixed the automatic module install not working if you double click the .pyw file
 - Tweepy updated to v4.2.0
 

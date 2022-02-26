@@ -1,4 +1,4 @@
-version = "2.43" # raidfinder version
+version = "2.44" # raidfinder version
 
 #######################################################################
 # import
@@ -361,8 +361,8 @@ class Raidfinder():
             self.UI.log(self.translate("If the problem persists, try to delete the keys in 'gbfraidcopier.cfg'."))
             self.UI.log(self.translate("Exception: {}".format(traceback.format_exception(type(e), e, e.__traceback__))))
 
-        self.UI.log("[Beta] The raidfinder need new access keys in preparation for the v2.0")
-        self.UI.log("Please report any problem/issue/bug to me directly or on the github, thanks you")
+        self.UI.log("[Info] The next major version(s) will potentially have breaking changes.")
+        self.UI.log("If you encounter any issues updating 'raid.json' in the future, please update the raidfinder.")
 
         # main loop
         while self.apprunning:
