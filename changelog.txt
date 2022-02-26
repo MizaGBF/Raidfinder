@@ -1,4 +1,24 @@
-﻿* 2.44
+﻿* 3.0
+- Python version required bumped to 3.6.0 minimum
+- Tweepy version required bumped to 4.6.0 minimum
+- removed ping feature
+- removed thread count option
+- removed stream restart on high tweet delay
+- removed author handle and blacklist because the Twitter API 2.0 doesn't return user infos with tweets
+- Removed authorization with your own Twitter account. You'll have to sign in on the dev portal, sadly.
+- reduced the custom raid list from 30 to 27
+- refactored the whole code (should be a bit cleaner)
+- reworked the ui
+- added decorator to "raid.json" (to add "line separators" on the ui)
+- split "translation.json" into multiple files in the "lang" folder
+- added a version check on startup (toggle available in the settings)
+- added a version check for the "raid.json" file on startup (toggle available in the settings. it can automatically download the latest file.)
+- added a tweet usage limiter
+- added a "copy second code" feature
+- the pause will now properly pause the stream and won't consume any tweet
+- updated "README.txt"
+
+* 2.44
 - Added informations regarding the next version
 
 * 2.43
