@@ -1,4 +1,7 @@
-﻿* 3.0
+﻿* 3.1
+- Fixed a bug causing Streaming rules not being updated properly while tweet usage limit enabled
+
+* 3.0
 - Python version required bumped to 3.6.0 minimum
 - Tweepy version required bumped to 4.6.0 minimum
 - removed ping feature

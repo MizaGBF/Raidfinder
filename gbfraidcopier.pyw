@@ -502,13 +502,15 @@ class Stream(tweepy.StreamingClient):
             while len(rules) > 0 or len(self.trashrules) > 0:
                 if len(rules) > 0 and len(self.trashrules) < 5:
                     resp = self.add_rules(rules[-1])
-                    for k in resp['data']:
-                        self.myrules[k['value']] = k['id']
+                    if 'data' in resp:
+                        for k in resp['data']:
+                            self.myrules[k['value']] = k['id']
                     rules.pop()
                 with self.rulelock:
                     if len(self.trashrules) > 0:
                         k = list(self.trashrules.keys())[0]
-                        self.delete_rules(self.trashrules[k])
+                        if self.trashrules[k] is not None:
+                            self.delete_rules(self.trashrules[k])
                         self.trashrules.pop(k)
             with self.rulelock:
                 self.rulepending = False
