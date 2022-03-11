@@ -124,7 +124,7 @@ class Raidfinder():
         self.bearer_token = ""
         self.keys = {}
         self.tracked = {}
-        self.lock = threading.Lock()
+        self.statlock = threading.Lock()
         self.elapsed = 0
         self.time = time.time()
         self.lastcode = ""
@@ -383,7 +383,7 @@ class Raidfinder():
             self.elapsed = time.time() - self.time # measure elapsed time
             self.time = time.time()
             if not self.settings['pause'] and self.connected:
-                with self.lock:
+                with self.statlock:
                     if self.stats['stat_time'] is None: self.stats['stat_time'] = self.elapsed
                     else: self.stats['stat_time'] += self.elapsed
             if self.ui:
@@ -395,6 +395,9 @@ class Raidfinder():
 
     def lastCode(self):
         return self.secondcode if self.settings['second'] else self.lastcode
+
+    def updateStreamTracking(self, raids):
+        self.stream.tracked.put(raids)
 
 ###########################################################################################################################
 # Log
@@ -424,8 +427,8 @@ class Stream(tweepy.StreamingClient):
         super().__init__(bearer_token=self.raidfinder.bearer_token, return_type=dict, wait_on_rate_limit=True, daemon=True)
         self.myrules = {}
         self.trashrules = {}
-        self.rulepending = False
         self.rulelock = threading.Lock()
+        self.tracked = queue.Queue()
         self.restart_delay = 0
         if not self.clearRules():
             self.raidfinder.log.push(self.raidfinder.getString("err_auth"))
@@ -486,7 +489,6 @@ class Stream(tweepy.StreamingClient):
                     if r not in newmyrules:
                         self.trashrules[r] = self.myrules[r]
                 self.myrules = newmyrules
-                self.rulepending = True
             return True
         except:
             return False
@@ -512,8 +514,6 @@ class Stream(tweepy.StreamingClient):
                         if self.trashrules[k] is not None:
                             self.delete_rules(self.trashrules[k])
                         self.trashrules.pop(k)
-            with self.rulelock:
-                self.rulepending = False
             return True
         except:
             return False
@@ -558,16 +558,24 @@ class Stream(tweepy.StreamingClient):
 
     def ruleupdater(self):
         while self.raidfinder.apprunning:
-            if self.running and self.rulepending:
-                self.applyRules()
-            time.sleep(0.01)
+            if not self.tracked.empty():
+                try:
+                    raids = None
+                    while not self.tracked.empty():
+                        raids = self.tracked.get()
+                    if raids is not None:
+                        self.buildRules(raids)
+                        self.applyRules()
+                except:
+                    pass
+            time.sleep(0.5)
 
     def watchdog(self):
         time.sleep(5)
         stats = {}
         dupes = set()
         while self.raidfinder.apprunning:
-            with self.raidfinder.lock:
+            with self.raidfinder.statlock:
                 self.raidfinder.stats['stat_received'] += stats.get('stat_received', 0)
                 self.raidfinder.stats['stat_matched'] += stats.get('stat_matched', 0)
                 self.raidfinder.stats['stat_dupes'] += stats.get('stat_dupes', 0)
@@ -860,9 +868,9 @@ class UI(Tk.Tk):
                 if state:
                     self.raidfinder.stream.buildRules([])
                 elif self.raidfinder.settings['limit']:
-                    self.raidfinder.stream.buildRules(list(self.raidfinder.tracked.keys()))
+                    self.raidfinder.updateStreamTracking(list(self.raidfinder.tracked.keys()))
                 else:
-                    self.raidfinder.stream.buildRules(self.raidfinder.raids['filters'])
+                    self.raidfinder.updateStreamTracking(self.raidfinder.raids['filters'])
 
     def toggleAdvSetting(self, n, k): # called when un/checking an advanced setting
         state = self.advsett[n].get()
@@ -872,9 +880,9 @@ class UI(Tk.Tk):
                 if self.raidfinder.settings['pause']:
                     pass
                 elif state:
-                    self.raidfinder.stream.buildRules(list(self.raidfinder.tracked.keys()))
+                    self.raidfinder.updateStreamTracking(list(self.raidfinder.tracked.keys()))
                 else:
-                    self.raidfinder.stream.buildRules(self.raidfinder.raids['filters'])
+                    self.raidfinder.updateStreamTracking(self.raidfinder.raids['filters'])
 
     def buttonCallback(self, n): # called when an advanced setting button is pressed
         if n == 0:
@@ -914,7 +922,7 @@ class UI(Tk.Tk):
             self.raidfinder.tracked.pop(self.raidfinder.raids['jp'][r], None)
             self.raidfinder.log.push(self.raidfinder.getString('track_off').format(tr))
         if self.raidfinder.settings['limit'] and not self.raidfinder.settings['pause']:
-            self.raidfinder.stream.buildRules(list(self.raidfinder.tracked.keys()))
+            self.raidfinder.updateStreamTracking(list(self.raidfinder.tracked.keys()))
 
     def editCustom(self, i): # called when editing a custom raid
         self.inputting = True # to disable the keyboard shortcuts
@@ -1014,7 +1022,7 @@ class UI(Tk.Tk):
             self.logtext.yview(Tk.END) # to the end of the text
 
         # update the stats
-        with self.raidfinder.lock:
+        with self.raidfinder.statlock:
             if self.raidfinder.stats['stat_time'] is not None:
                 self.stats['stat_time'].config(text="{}".format(datetime.timedelta(seconds=round(self.raidfinder.stats['stat_time'], 0))))
             else:
