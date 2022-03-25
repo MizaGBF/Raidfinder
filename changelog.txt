@@ -1,4 +1,7 @@
-﻿* 3.2
+﻿* 3.3
+- fixed the pause not being unpaused properly
+
+* 3.2
 - reworked a bit how the Streaming rules are handled to avoid further issues
 - minor tweak to one of the thread used to update the Stream
 

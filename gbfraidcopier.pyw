@@ -512,7 +512,7 @@ class Stream(tweepy.StreamingClient):
                     if len(self.trashrules) > 0:
                         k = list(self.trashrules.keys())[0]
                         if self.trashrules[k] is not None:
-                            self.delete_rules(self.trashrules[k])
+                            x = self.delete_rules(self.trashrules[k])
                         self.trashrules.pop(k)
             return True
         except:
@@ -866,7 +866,7 @@ class UI(Tk.Tk):
             else: self.raidfinder.log.push(self.raidfinder.getString("setting_disable").format(self.raidfinder.getString("setting_"+k)))
             if k == 'pause':
                 if state:
-                    self.raidfinder.stream.buildRules([])
+                    self.raidfinder.updateStreamTracking([])
                 elif self.raidfinder.settings['limit']:
                     self.raidfinder.updateStreamTracking(list(self.raidfinder.tracked.keys()))
                 else:
@@ -888,7 +888,7 @@ class UI(Tk.Tk):
         if n == 0:
             if self.raidfinder.loadRaids():
                 messagebox.showinfo("Info", self.raidfinder.getString("raid_reload"))
-                self.raidfinder.stream.buildRules([])
+                self.raidfinder.updateStreamTracking([])
                 self.reloadRaids(self.raidfinder.raids, self.raidfinder.custom)
             else:
                 messagebox.showerror("Error", self.raidfinder.getString("raid_reload_err"))
@@ -928,7 +928,7 @@ class UI(Tk.Tk):
         self.inputting = True # to disable the keyboard shortcuts
         tmp = self.raidfinder.settings['pause'] # save the pause setting
         self.raidfinder.settings['pause'] = True # pause the app
-        self.raidfinder.stream.buildRules([])
+        self.raidfinder.updateStreamTracking([])
         customEntry = self.raidfinder.custom[i]
         v1 = simpledialog.askstring(self.raidfinder.getString("edit_custom"), self.raidfinder.getString( "edit_custom_subA"), initialvalue=customEntry[0]) # ask for user input
         if v1 == None: # if the user cancelled
