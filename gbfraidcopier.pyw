@@ -512,7 +512,7 @@ class Stream(tweepy.StreamingClient):
                     if len(self.trashrules) > 0:
                         k = list(self.trashrules.keys())[0]
                         if self.trashrules[k] is not None:
-                            x = self.delete_rules(self.trashrules[k])
+                            self.delete_rules(self.trashrules[k])
                         self.trashrules.pop(k)
             return True
         except:
@@ -934,16 +934,22 @@ class UI(Tk.Tk):
         if v1 == None: # if the user cancelled
             self.inputting = False
             self.raidfinder.settings['pause'] = tmp
+            if not tmp:
+                self.raidfinder.updateStreamTracking(list(self.raidfinder.tracked.keys()))
             return # we return
         v2 = simpledialog.askstring(self.raidfinder.getString("edit_custom"), self.raidfinder.getString( "edit_custom_subB"), initialvalue=customEntry[1])
         if v2 == None: # same thing
             self.inputting = False
             self.raidfinder.settings['pause'] = tmp
+            if not tmp:
+                self.raidfinder.updateStreamTracking(list(self.raidfinder.tracked.keys()))
             return
         v3 = simpledialog.askstring(self.raidfinder.getString("edit_custom"), self.raidfinder.getString( "edit_custom_subC"), initialvalue=customEntry[2])
         if v3 == None: # same thing
             self.inputting = False
             self.raidfinder.settings['pause'] = tmp
+            if not tmp:
+                self.raidfinder.updateStreamTracking(list(self.raidfinder.tracked.keys()))
             return
         self.inputting = False # re-enable keyboard shortcuts
 
