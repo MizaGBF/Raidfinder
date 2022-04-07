@@ -532,13 +532,6 @@
                     "posY":4
                 },
                 {
-                    "name": "Phronesis",
-                    "en": "Lvl 150 Phronesis",
-                    "jp": "Lv150 フロネシス",
-                    "posX":1,
-                    "posY":8
-                },
-                {
                     "name": "Tiamat Malice",
                     "en": "Lvl 150 Tiamat Malice",
                     "jp": "Lv150 ティアマト・マリス",
@@ -553,11 +546,32 @@
                     "posY":4
                 },
                 {
+                    "name": "Phronesis",
+                    "en": "Lvl 150 Phronesis",
+                    "jp": "Lv150 フロネシス",
+                    "posX":1,
+                    "posY":9
+                },
+                {
                     "name": "Animus Core",
                     "en": "Lvl 150 Anima-Animus Core",
                     "jp": "Lv150 アニマ・アニムス・コア",
                     "posX":4,
-                    "posY":8
+                    "posY":9
+                },
+                {
+                    "name": "Horus",
+                    "en": "Lvl 120 Horus",
+                    "jp": "Lv120 ホルス",
+                    "posX":4,
+                    "posY":6
+                },
+                {
+                    "name": "Osiris",
+                    "en": "Lvl 120 Osiris",
+                    "jp": "Lv120 オシリス",
+                    "posX":4,
+                    "posY":10
                 },
                 {
                     "name": "Wilnas",
@@ -600,20 +614,6 @@
                     "jp": "Lv200 フェディエル",
                     "posX":3,
                     "posY":10
-                },
-                {
-                    "name": "Horus",
-                    "en": "Lvl 120 Horus",
-                    "jp": "Lv120 ホルス",
-                    "posX":4,
-                    "posY":5
-                },
-                {
-                    "name": "Osiris",
-                    "en": "Lvl 120 Osiris",
-                    "jp": "Lv120 オシリス",
-                    "posX":4,
-                    "posY":9
                 }
             ],
             "decorator": [

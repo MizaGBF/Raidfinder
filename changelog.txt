@@ -1,4 +1,8 @@
-﻿* 3.4
+﻿* 3.5
+- fixed the 'reload_raid' strings
+- updated the raid.json to make the distinction between malice and menace raids
+
+* 3.4
 - fixed the Custom raid edit button stopping the Stream when cancelling
 
 * 3.3
