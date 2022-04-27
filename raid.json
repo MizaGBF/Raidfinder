@@ -560,6 +560,13 @@
                     "posY":9
                 },
                 {
+                    "name": "Bennu",
+                    "en": "Lvl 120 Bennu",
+                    "jp": "Lv120 ベンヌ",
+                    "posX":1,
+                    "posY":10
+                },
+                {
                     "name": "Horus",
                     "en": "Lvl 120 Horus",
                     "jp": "Lv120 ホルス",
