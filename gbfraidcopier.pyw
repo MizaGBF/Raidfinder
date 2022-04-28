@@ -371,6 +371,10 @@ class Raidfinder():
                 raids['pages'].append({'name':p['name'], 'color':p['color'], 'decorator':p.get('decorator', [])})
             raids['pages'].append({'name':'Custom', 'color':data['custom color'], 'decorator':[]})
             raids['filters'] = data['filters']
+            for c in self.custom:
+                if c[0] not in raids['en']:
+                    raids['en'][c[0]] = c[1]
+                    raids['jp'][c[0]] = c[2]
             self.raids = raids
         except Exception as e:
             print(e)
@@ -914,6 +918,7 @@ class UI(Tk.Tk):
         self.readonly[r] = state
         tr = self.raidfinder.getString(r)
         if state:
+            print(self.raidfinder.raids['en'][r], self.raidfinder.raids['jp'][r])
             self.raidfinder.tracked[self.raidfinder.raids['en'][r]] = tr
             self.raidfinder.tracked[self.raidfinder.raids['jp'][r]] = tr
             self.raidfinder.log.push(self.raidfinder.getString('track_on').format(tr))
@@ -955,12 +960,17 @@ class UI(Tk.Tk):
 
         self.raidfinder.custom[i] = [v1, v2, v3] # save the user inputs
         self.raidfinder.settings['pause'] = tmp # restore the pause setting
-        self.reloadRaids(self.raidfinder.raids, self.raidfinder.custom) # reload list
+        if self.raidfinder.loadRaids():
+            self.raidfinder.updateStreamTracking([])
+            self.reloadRaids(self.raidfinder.raids, self.raidfinder.custom)
+        else:
+            messagebox.showerror("Error", self.raidfinder.getString("raid_reload_err"))
+            return
 
         # log and end
         self.raidfinder.log.push(self.raidfinder.getString("[System] {} saved in slot {}").format(v1, i+1)) # logging for the user to check any mistake
-        self.raidfinder.log("EN : {}".format(v2))
-        self.raidfinder.log("JP : {}".format(v3))
+        self.raidfinder.log.push("EN : {}".format(v2))
+        self.raidfinder.log.push("JP : {}".format(v3))
 
     def newIntVar(self, array, init=0): # used by setting checkboxes
         array.append(Tk.IntVar(value=init))

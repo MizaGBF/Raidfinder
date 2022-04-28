@@ -1,4 +1,8 @@
-﻿* 3.5
+﻿* 3.6
+- fixed a bug causing custom raids to not work at all
+- added Bennu HL
+
+* 3.5
 - fixed the 'reload_raid' strings
 - updated the raid.json to make the distinction between malice and menace raids
 
