@@ -918,7 +918,6 @@ class UI(Tk.Tk):
         self.readonly[r] = state
         tr = self.raidfinder.getString(r)
         if state:
-            print(self.raidfinder.raids['en'][r], self.raidfinder.raids['jp'][r])
             self.raidfinder.tracked[self.raidfinder.raids['en'][r]] = tr
             self.raidfinder.tracked[self.raidfinder.raids['jp'][r]] = tr
             self.raidfinder.log.push(self.raidfinder.getString('track_on').format(tr))
