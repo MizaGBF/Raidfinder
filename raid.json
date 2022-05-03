@@ -560,6 +560,13 @@
                     "posY":9
                 },
                 {
+                    "name": "Atum",
+                    "en": "Lvl 120 Atum",
+                    "jp": "Lv120 アトゥム",
+                    "posX":1,
+                    "posY":2
+                },
+                {
                     "name": "Bennu",
                     "en": "Lvl 120 Bennu",
                     "jp": "Lv120 ベンヌ",
