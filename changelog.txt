@@ -1,4 +1,8 @@
-﻿* 3.6
+﻿* 3.7
+- updated the japanese translation with Bennu and Atum raids
+- bumped tweepy version requirements
+
+* 3.6
 - fixed a bug causing custom raids to not work at all
 - added Bennu HL
 
