@@ -1,4 +1,7 @@
-﻿* 3.7
+﻿* 3.8
+- Diaspora added
+
+* 3.7
 - updated the japanese translation with Bennu and Atum raids
 - bumped tweepy version requirements
 

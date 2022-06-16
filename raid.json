@@ -726,25 +726,32 @@
                     "posY":2
                 },
                 {
+                    "name": "Diaspora",
+                    "en": "Lvl 275 Diaspora",
+                    "jp": "Lv275 ディアスポラ",
+                    "posX":3,
+                    "posY":4
+                },
+                {
                     "name": "Rose Queen HL",
                     "en": "Lvl 110 Rose Queen",
                     "jp": "Lv110 ローズクイーン",
                     "posX":3,
-                    "posY":4
+                    "posY":8
                 },
                 {
                     "name": "Lindwurm HL",
                     "en": "Lvl 200 Lindwurm",
                     "jp": "Lv200 リンドヴルム",
                     "posX":3,
-                    "posY":5
+                    "posY":9
                 },
                 {
                     "name": "Primarchs HL",
                     "en": "The Four Primarchs",
                     "jp": "四大天司ＨＬ",
                     "posX":3,
-                    "posY":6
+                    "posY":10
                 },
                 {
                     "name": "Huanglong",
