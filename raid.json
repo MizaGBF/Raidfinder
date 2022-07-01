@@ -567,11 +567,25 @@
                     "posY":2
                 },
                 {
+                    "name": "Tefnut",
+                    "en": "Lvl 120 Tefnut",
+                    "jp": "Lv120 テフヌト",
+                    "posX":1,
+                    "posY":6
+                },
+                {
                     "name": "Bennu",
                     "en": "Lvl 120 Bennu",
                     "jp": "Lv120 ベンヌ",
                     "posX":1,
                     "posY":10
+                },
+                {
+                    "name": "Ra",
+                    "en": "Lvl 120 Ra",
+                    "jp": "Lv120 ラー",
+                    "posX":4,
+                    "posY":2
                 },
                 {
                     "name": "Horus",
