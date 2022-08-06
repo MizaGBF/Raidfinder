@@ -740,11 +740,25 @@
                     "posY":2
                 },
                 {
+                    "name": "Mugen",
+                    "en": "Lvl 275 Mugen",
+                    "jp": "Lv275 ムゲン",
+                    "posX":3,
+                    "posY":4
+                },
+                {
                     "name": "Diaspora",
                     "en": "Lvl 275 Diaspora",
                     "jp": "Lv275 ディアスポラ",
-                    "posX":3,
+                    "posX":4,
                     "posY":4
+                },
+                {
+                    "name": "Siegfried",
+                    "en": "Lvl 275 Siegfried",
+                    "jp": "Lv275 ジークフリート",
+                    "posX":3,
+                    "posY":5
                 },
                 {
                     "name": "Rose Queen HL",

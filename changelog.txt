@@ -1,4 +1,7 @@
-﻿* 3.9
+﻿* 3.10
+- Mugen and Siegfried preemptively added
+
+* 3.9
 - Tefnut and Ra preemptively added
 
 * 3.8
