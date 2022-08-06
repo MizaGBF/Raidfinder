@@ -1,4 +1,9 @@
-﻿* 3.10
+﻿* 3.11
+- Removed tier 1 and tier 3 raids
+- Removed Primal tab and moved leftover raids
+- Renamed two tabs
+
+* 3.10
 - Mugen and Siegfried preemptively added
 
 * 3.9

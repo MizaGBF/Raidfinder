@@ -105,5 +105,6 @@
     "exception_unknown": "❌ Une exception inconnue est survenue: {}",
     "err_empty_token": "Première fois?\nMerci de suivre les instructions dans README.txt pour mettre en place votre Twitter token et relancer l'application.",
     "limit_info": "★ En attente d'une sélection de Raid",
-    "Custom": "Personnalisé"
+    "Custom": "Personnalisé",
+    "Other": "Autre"
 }
