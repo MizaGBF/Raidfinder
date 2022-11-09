@@ -443,12 +443,12 @@ class Stream(tweepy.StreamingClient):
                 return
         else:
             self.raidfinder.log.push(self.raidfinder.getString("limit_info"))
-        self.thread = threading.Thread(target=self.ruleupdater)
-        self.thread.daemon = True
-        self.thread.start()
-        self.thread = threading.Thread(target=self.watchdog)
-        self.thread.daemon = True
-        self.thread.start()
+        self.thread_ruleupdater = threading.Thread(target=self.ruleupdater)
+        self.thread_ruleupdater.daemon = True
+        self.thread_ruleupdater.start()
+        self.thread_watchdog = threading.Thread(target=self.watchdog)
+        self.thread_watchdog.daemon = True
+        self.thread_watchdog.start()
 
     def clearRules(self):
         try:
@@ -529,7 +529,9 @@ class Stream(tweepy.StreamingClient):
         # https://docs.tweepy.org/en/latest/streamingclient.html
 
     def on_data(self, raw_data):
-        self.tweetQueue.put((json.loads(raw_data.decode('utf8'))['data'], datetime.datetime.utcnow()))
+        x = json.loads(raw_data.decode('utf8'))
+        print(x)
+        self.tweetQueue.put((x['data'], datetime.datetime.utcnow()))
 
     def on_exception(self, exception):
         self.restart_delay = 10
@@ -893,7 +895,7 @@ class UI(Tk.Tk):
             else:
                 messagebox.showerror("Error", self.raidfinder.getString("raid_reload_err"))
         elif n == 1:
-            webbrowser.open('https://drive.google.com/drive/folders/0B9YhZA7dWJUsNzk4YU5Wd3RyZE0?resourcekey=0-dG3yEfxTyrq7j-fO4Yen0g', new=2)
+            webbrowser.open('https://github.com/MizaGBF/Raidfinder/archive/refs/heads/master.zip', new=2)
         elif n == 2:
             webbrowser.open('https://github.com/MizaGBF/Raidfinder', new=2)
 

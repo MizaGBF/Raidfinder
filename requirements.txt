@@ -1,2 +1,2 @@
-tweepy>=4.12.0
+tweepy>=4.12.1
 pyperclip>=1.8.2
