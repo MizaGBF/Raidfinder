@@ -1,4 +1,8 @@
-﻿* 3.13
+﻿* 3.14
+- Updated Tweepy to v4.12.1
+- Changed download link to direct to Github
+
+* 3.13
 - Updated Tweepy to v4.12.0
 
 * 3.12
