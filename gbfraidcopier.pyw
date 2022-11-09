@@ -529,9 +529,7 @@ class Stream(tweepy.StreamingClient):
         # https://docs.tweepy.org/en/latest/streamingclient.html
 
     def on_data(self, raw_data):
-        x = json.loads(raw_data.decode('utf8'))
-        print(x)
-        self.tweetQueue.put((x['data'], datetime.datetime.utcnow()))
+        self.tweetQueue.put((json.loads(raw_data.decode('utf8'))['data'], datetime.datetime.utcnow()))
 
     def on_exception(self, exception):
         self.restart_delay = 10
