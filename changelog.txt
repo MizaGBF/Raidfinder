@@ -1,4 +1,7 @@
-﻿* 3.14
+﻿* 3.15
+- Workaround the removal of the 'source' tweet fields
+
+* 3.14
 - Updated Tweepy to v4.12.1
 - Changed download link to direct to Github
 

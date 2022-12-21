@@ -575,98 +575,99 @@ class Stream(tweepy.StreamingClient):
         stats = {}
         dupes = set()
         while self.raidfinder.apprunning:
-            with self.raidfinder.statlock:
-                self.raidfinder.stats['stat_received'] += stats.get('stat_received', 0)
-                self.raidfinder.stats['stat_matched'] += stats.get('stat_matched', 0)
-                self.raidfinder.stats['stat_dupes'] += stats.get('stat_dupes', 0)
-                self.raidfinder.stats['stat_filter'] += stats.get('stat_filter', 0)
-                self.raidfinder.stats['stat_delay'] = stats.get('stat_delay', self.raidfinder.stats['stat_delay'])
-                self.raidfinder.stats['stat_received_last'] = stats.get('stat_received_last', self.raidfinder.stats['stat_received_last'])
-                self.raidfinder.stats['stat_matched_last'] = stats.get('stat_matched_last', self.raidfinder.stats['stat_matched_last'])
-            stats = {}
             try:
-                data, reception_time = self.tweetQueue.get(block=True, timeout=0.01) # retrieve next tweet and its reception time
-            except:
-                time.sleep(0.001)
-                if not self.running:
-                    if self.restart_delay > 0:
-                        time.sleep(self.restart_delay)
-                        self.restart_delay = 0
-                    self.start_streaming()
-                continue
-            if self.raidfinder.settings['pause']:
-                continue
-            if data['source'] != "グランブルー ファンタジー":
-                continue
-            created_at = datetime.datetime.strptime(data['created_at'], "%Y-%m-%dT%H:%M:%S.%fZ")
-            st = data['text']
-            m = self.idregex.search(st)
-            if not m:
-                continue # not found, we skip
-            code = m.group(1) # get the code
-            stats = {'stat_delay':(reception_time - created_at).seconds, 'stat_received_last':time.time(), 'stat_received':1}
+                with self.raidfinder.statlock:
+                    self.raidfinder.stats['stat_received'] += stats.get('stat_received', 0)
+                    self.raidfinder.stats['stat_matched'] += stats.get('stat_matched', 0)
+                    self.raidfinder.stats['stat_dupes'] += stats.get('stat_dupes', 0)
+                    self.raidfinder.stats['stat_filter'] += stats.get('stat_filter', 0)
+                    self.raidfinder.stats['stat_delay'] = stats.get('stat_delay', self.raidfinder.stats['stat_delay'])
+                    self.raidfinder.stats['stat_received_last'] = stats.get('stat_received_last', self.raidfinder.stats['stat_received_last'])
+                    self.raidfinder.stats['stat_matched_last'] = stats.get('stat_matched_last', self.raidfinder.stats['stat_matched_last'])
+                stats = {}
+                try:
+                    data, reception_time = self.tweetQueue.get(block=True, timeout=0.01) # retrieve next tweet and its reception time
+                except:
+                    time.sleep(0.001)
+                    if not self.running:
+                        if self.restart_delay > 0:
+                            time.sleep(self.restart_delay)
+                            self.restart_delay = 0
+                        self.start_streaming()
+                    continue
+                if self.raidfinder.settings['pause']:
+                    continue
+                created_at = datetime.datetime.strptime(data['created_at'], "%Y-%m-%dT%H:%M:%S.%fZ")
+                st = data['text']
+                m = self.idregex.search(st)
+                if not m:
+                    continue # not found, we skip
+                code = m.group(1) # get the code
+                stats = {'stat_delay':(reception_time - created_at).seconds, 'stat_received_last':time.time(), 'stat_received':1}
 
-            p = st.rfind("参加者募集！\n") # search the japanese 'I need backup' first (because it's most likely to be a japanese tweet
-            lg = '(JP)'
-            mp = 0 # minimal position of I need backup + raidname (used later to retrive the author comment if any)
-            if p != -1 and p >= 15: # check the minimal position for jp
-                if not self.raidfinder.settings['jp']: continue
-                p += 7 # valid, add the size of JP I need backup. p nows points to the raid name
-                mp = 22
-            else:
-                p = st.rfind("I need backup!\n") # same thing but for english
-                if p < 20 or not self.raidfinder.settings['en']: continue # english isn't valid, so is JP, we skip
-                p += 15 # size of I need backup
-                mp = 35
-                lg = '(EN)'
-
-            raidname = st[p:].rsplit('\nhttp', 1)[0]
-
-            r = self.raidfinder.tracked.get(raidname, None)
-            if r is None:
-                continue
-            stats['stat_matched'] = 1
-
-            comment = "" # build the author comment
-            for c in range(0, p-mp): # ignoring out of range characters
-                if ord(st[c]) in range(65536):
-                    comment += st[c]
-
-            stats['stat_matched_last'] = stats['stat_received_last']
-
-            if self.raidfinder.filter != "" and self.raidfinder.filter.lower() not in comment.lower():
-                stats['stat_filter'] = 1
-                continue
-
-            if code in dupes:
-                stats['stat_dupe'] = 1
-                continue
-
-            if self.raidfinder.settings['copy']:
-                pyperclip.copy(self.raidfinder.lastcode if self.raidfinder.settings['second'] else code) # copy if enabled
-            if self.raidfinder.settings['sound']:
-                playsound() # play a sound if enabled
-            # write to the log
-            if self.raidfinder.settings['time']:
-                if self.raidfinder.settings['jst']:
-                    t = (created_at + datetime.timedelta(seconds=32400)).strftime("%H:%M:%S")
+                p = st.rfind("参加者募集！\n") # search the japanese 'I need backup' first (because it's most likely to be a japanese tweet
+                lg = '(JP)'
+                mp = 0 # minimal position of I need backup + raidname (used later to retrive the author comment if any)
+                if p != -1 and p >= 15: # check the minimal position for jp
+                    if not self.raidfinder.settings['jp']: continue
+                    p += 7 # valid, add the size of JP I need backup. p nows points to the raid name
+                    mp = 22
                 else:
-                    t = created_at.strftime("%H:%M:%S UTC")
-            else:
-                if self.raidfinder.settings['jst']:
-                    t = (datetime.datetime.utcnow() + datetime.timedelta(seconds=32400)).strftime("%H:%M:%S JST")
+                    p = st.rfind("I need backup!\n") # same thing but for english
+                    if p < 20 or not self.raidfinder.settings['en']: continue # english isn't valid, so is JP, we skip
+                    p += 15 # size of I need backup
+                    mp = 35
+                    lg = '(EN)'
+
+                raidname = st[p:].rsplit('\nhttp', 1)[0]
+
+                r = self.raidfinder.tracked.get(raidname, None)
+                if r is None:
+                    continue
+                stats['stat_matched'] = 1
+
+                comment = "" # build the author comment
+                for c in range(0, p-mp): # ignoring out of range characters
+                    if ord(st[c]) in range(65536):
+                        comment += st[c]
+
+                stats['stat_matched_last'] = stats['stat_received_last']
+
+                if self.raidfinder.filter != "" and self.raidfinder.filter.lower() not in comment.lower():
+                    stats['stat_filter'] = 1
+                    continue
+
+                if code in dupes:
+                    stats['stat_dupe'] = 1
+                    continue
+
+                if self.raidfinder.settings['copy']:
+                    pyperclip.copy(self.raidfinder.lastcode if self.raidfinder.settings['second'] else code) # copy if enabled
+                if self.raidfinder.settings['sound']:
+                    playsound() # play a sound if enabled
+                # write to the log
+                if self.raidfinder.settings['time']:
+                    if self.raidfinder.settings['jst']:
+                        t = (created_at + datetime.timedelta(seconds=32400)).strftime("%H:%M:%S")
+                    else:
+                        t = created_at.strftime("%H:%M:%S UTC")
                 else:
-                    t = datetime.datetime.now().strftime("%H:%M:%S")
-            dupes.add(code)
-            self.raidfinder.secondcode = self.raidfinder.lastcode
-            self.raidfinder.lastcode = code
-            self.raidfinder.log.push('[{}] {} : {} {} {}'.format(t, r, code, lg, comment))
-            
-            if len(dupes) >= 500:
-                keep = list(dupes)
-                dupes = set()
-                for i in range(250, len(keep)):
-                    dupes.add(keep[i])
+                    if self.raidfinder.settings['jst']:
+                        t = (datetime.datetime.utcnow() + datetime.timedelta(seconds=32400)).strftime("%H:%M:%S JST")
+                    else:
+                        t = datetime.datetime.now().strftime("%H:%M:%S")
+                dupes.add(code)
+                self.raidfinder.secondcode = self.raidfinder.lastcode
+                self.raidfinder.lastcode = code
+                self.raidfinder.log.push('[{}] {} : {} {} {}'.format(t, r, code, lg, comment))
+                
+                if len(dupes) >= 500:
+                    keep = list(dupes)
+                    dupes = set()
+                    for i in range(250, len(keep)):
+                        dupes.add(keep[i])
+            except Exception as te:
+                print("TEST:", data)
 
 ###########################################################################################################################
 # Custom UI ToolTip
