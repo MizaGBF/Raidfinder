@@ -9,7 +9,6 @@ import tkinter.ttk as ttk
 from tkinter import messagebox, simpledialog
 import sys
 import os
-import platform
 import subprocess
 import webbrowser
 from urllib import request
@@ -27,7 +26,7 @@ try:
         if key not in versions:
             raise Exception()
 except Exception as e:
-    messagebox.showerror("Invalid version.json", "Consider redownloading a fresh copy of this raidfinder")
+    messagebox.showerror("Invalid version.json", "Consider redownloading a fresh copy of this raidfinder\nError: {}".format(e))
     raise Exception("Can't load 'version.json'") from e
 
 ###########################################################################################################################
@@ -37,7 +36,6 @@ soundFile = None
 try:
     import winsound # windows only
 except ImportError: # if it fails
-    import os
     def playsound():
         os.system('beep -f %s -l %s' % (200,100)) # frequency (Hz) and duration (ms)
 else:
@@ -56,6 +54,9 @@ else:
 ###########################################################################################################################
 # general utility
 ###########################################################################################################################
+def installRequirements(): # run requirements.txt through pip
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
+
 def cmpVer(mver, tver): # compare version strings, True if greater or equal, else False
     me = mver.split('.')
     te = tver.split('.')
@@ -67,20 +68,14 @@ def cmpVer(mver, tver): # compare version strings, True if greater or equal, els
 ###########################################################################################################################
 # import tweepy and pyperclip and check their versions
 ###########################################################################################################################
+REQ_OUTDATED = False
 if __name__ == "__main__":
     try: # try to import
         import tweepy
         import pyperclip
-        # compare and check module versions
-        if not cmpVer(tweepy.__version__, versions["tweepy"]) or not cmpVer(pyperclip.__version__, versions["pyperclip"]):
-            raise Exception("outdated")
-    except Exception as e: # failed, call pip to install
-        root = Tk.Tk() # dummy window
-        root.withdraw()
-        if str(e) == "outdated": messagebox.showinfo("Outdated modules", "Modules will be updated")
-        else: messagebox.showinfo("Missing modules", "Missing modules will be installed")
+    except: # failed, call pip to install
         try:
-            subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
+            installRequirements()
             import tweepy
             import pyperclip
         except: # failed again, we exit
@@ -88,14 +83,14 @@ if __name__ == "__main__":
                 import ctypes
                 try: is_admin = ctypes.windll.shell32.IsUserAnAdmin()
                 except: is_admin = False
-                if is_admin:
-                    messagebox.showerror("Installation failed", "Failed to install the missing modules, check your internet connection\nAlternatively, try to run this application as administrator to force the installation.\nOr try to run the command, in a command prompt, pip install -r requirements.txt")
-                elif messagebox.askquestion ("Installation failed","Restart the application as an administrator to try again?") == "yes":
+                if not is_admin:
                     ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
-            else:
-                messagebox.showerror("Installation failed", "Failed to install the missing modules, check your internet connection\nAlternatively, try to run this application as a sudo user.\nOr try to run the command, in a command prompt, pip install -r requirements.txt")
-            exit(0)
-        root.destroy()
+                else:
+                    print("Can't install the requirements")
+                exit(0)
+    # compare and check module versions
+    if not cmpVer(tweepy.__version__, versions["tweepy"]) or not cmpVer(pyperclip.__version__, versions["pyperclip"]):
+        REQ_OUTDATED = True
 else:
     # this part only run if you import the raidfinder in another project
     import tweepy
@@ -132,7 +127,7 @@ class Raidfinder():
         self.initLangs()
         if not self.loadLanguage(self.settings.get("lang", self.settings.get('lang'))):
             self.loadLanguage('en.json')
-        self.log.push(self.getString('news')) # to remove later
+        #self.log.push(self.getString('news'))
 
         self.checkUpdate()
         loadedRaid = self.loadRaids()
@@ -143,10 +138,12 @@ class Raidfinder():
             self.ui.reloadRaids(self.raids, self.custom)
         else:
             self.log.push(self.getString("err_load_raid"))
-
         if use_ui and self.bearer_token == "":
             messagebox.showinfo("Info", self.getString("err_empty_token"))
             return
+
+        if REQ_OUTDATED:
+            self.log.push(self.getString('req_outdated'))
 
     def loadSetting(self):
         # load the .cfg with the Twitter API keys and settings
@@ -546,6 +543,9 @@ class Stream(tweepy.StreamingClient):
             self.raidfinder.connected = False
         self.raidfinder.log.push(self.raidfinder.getString("twitter_restart"))
 
+    def on_errors(self, errors):
+        print("Errors:", errors)
+
     def on_connect(self):
         if not self.raidfinder.connected:
             self.raidfinder.log.push(self.raidfinder.getString('twitter_connected'))
@@ -668,6 +668,7 @@ class Stream(tweepy.StreamingClient):
                         dupes.add(keep[i])
             except Exception as te:
                 print("TEST:", data)
+                print(te)
 
 ###########################################################################################################################
 # Custom UI ToolTip
@@ -795,16 +796,16 @@ class UI(Tk.Tk):
             b.grid(row=val[1], column=val[2], stick=Tk.W)
             Tooltip(b, self.raidfinder, "setting_" + val[0] + "_desc")
         ####### buttons
-        for count, val in enumerate([('button_raidlist', 0, 2), ('button_version', 1, 2), ('button_github', 2, 2)]):
+        for count, val in enumerate([('button_raidlist', 0, 2), ('button_version', 1, 2), ('button_github', 2, 2), ('button_requirements', 3, 2)]):
             b = Tk.Button(subtabs[-1], text=self.raidfinder.getString(val[0]), command=lambda n=count: self.buttonCallback(n))
             b.grid(row=val[1], column=val[2], sticky="ews")
             Tooltip(b, self.raidfinder, val[0] + '_desc')
 
         # language choice
         l = Tk.Label(subtabs[-1], bg=subtabs[-1]['bg'], text=self.raidfinder.getString('language')) # for the current time
-        l.grid(row=3, column=2, sticky="wse")
+        l.grid(row=4, column=2, sticky="wse")
         b = Tk.OptionMenu(subtabs[-1], self.lang_var, *list(self.raidfinder.langs.values()), command=self.lang_changed)
-        b.grid(row=4, column=2, stick="ws")
+        b.grid(row=5, column=2, stick="ws")
         Tooltip(b, self.raidfinder, "lang_desc")
 
         ### stats
@@ -897,6 +898,10 @@ class UI(Tk.Tk):
             webbrowser.open('https://github.com/MizaGBF/Raidfinder/archive/refs/heads/master.zip', new=2)
         elif n == 2:
             webbrowser.open('https://github.com/MizaGBF/Raidfinder', new=2)
+        elif n == 3:
+            try: installRequirements()
+            except: pass
+            messagebox.showinfo("Info", self.raidfinder.getString("req_install"))
 
     def copyLatest(self):
         code = self.raidfinder.lastCode()

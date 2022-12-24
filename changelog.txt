@@ -1,4 +1,7 @@
-﻿* 3.15
+﻿* 3.16
+- Revamped the requirements.txt auto install system, along with related error messages. There is now a button to update them, too.
+
+* 3.15
 - Workaround the removal of the 'source' tweet fields
 
 * 3.14
