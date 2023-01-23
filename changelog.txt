@@ -1,4 +1,7 @@
-﻿* 3.16
+﻿* 3.17
+- Better Japanese translation (credits to maidfrillkinpatsu)
+
+* 3.16
 - Revamped the requirements.txt auto install system, along with related error messages. There is now a button to update them, too.
 
 * 3.15
