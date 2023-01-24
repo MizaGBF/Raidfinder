@@ -1,4 +1,7 @@
-﻿* 3.17
+﻿* 3.18
+- Added Agastia
+
+* 3.17
 - Better Japanese translation (credits to maidfrillkinpatsu)
 
 * 3.16

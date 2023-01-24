@@ -581,6 +581,13 @@
                     "posY":5
                 },
                 {
+                    "name": "Agastia",
+                    "en": "Lvl 275 Agastia",
+                    "jp": "Lv275 アガスティア",
+                    "posX":3,
+                    "posY":6
+                },
+                {
                     "name": "Rose Queen HL",
                     "en": "Lvl 110 Rose Queen",
                     "jp": "Lv110 ローズクイーン",
