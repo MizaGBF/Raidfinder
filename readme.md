@@ -1,3 +1,7 @@
+# Project is discontinued  
+Twitter won't offer a free access to the API anymore, so there is no point for me to continue working on it.  
+[Details.](https://twitter.com/TwitterDev/status/1621026986784337922)  
+  
 # Raidfinder  
 * Raidfinder for [Granblue Fantasy](http://game.granbluefantasy.jp).  
 ![Preview](https://cdn.discordapp.com/attachments/614716155646705676/947126922322788412/unknown.png)
