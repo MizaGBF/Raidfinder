@@ -1,4 +1,8 @@
-﻿* 3.18
+﻿* 3.19
+- Changed the download link used by the update notification.
+- This is probably the last update. Thanks for everyone using this raidfinder for so many years.
+
+* 3.18
 - Added Agastia
 
 * 3.17

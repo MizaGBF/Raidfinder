@@ -299,7 +299,7 @@ class Raidfinder():
             if self.settings['update_raidfinder'] == 1 and not cmpVer(self.versions['raidfinder'], data['raidfinder']):
                 res = messagebox.askyesno("Update available", self.getString('update_main').format(data['raidfinder']))
                 if res:
-                    webbrowser.open('https://drive.google.com/drive/folders/0B9YhZA7dWJUsNzk4YU5Wd3RyZE0?resourcekey=0-dG3yEfxTyrq7j-fO4Yen0g', new=2)
+                    webbrowser.open('https://github.com/MizaGBF/Raidfinder/archive/refs/heads/master.zip', new=2)
         except:
             if errmsg: messagebox.showinfo("Update Error", self.getString('update_error'))
             try: url_handle.close()
