@@ -1,4 +1,7 @@
-﻿* 3.19
+﻿* 3.20
+- Minor update related to UTC datetimes. I'm updating all my projects possibly affected by this issue.
+
+* 3.19
 - Changed the download link used by the update notification.
 - This is probably the last update. Thanks for everyone using this raidfinder for so many years.
 

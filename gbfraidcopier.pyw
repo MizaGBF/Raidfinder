@@ -2,7 +2,7 @@ import json
 import configparser
 import time
 import queue
-import datetime
+import datetime, timezone
 import base64
 import tkinter as Tk
 import tkinter.ttk as ttk
@@ -526,7 +526,7 @@ class Stream(tweepy.StreamingClient):
         # https://docs.tweepy.org/en/latest/streamingclient.html
 
     def on_data(self, raw_data):
-        self.tweetQueue.put((json.loads(raw_data.decode('utf8'))['data'], datetime.datetime.utcnow()))
+        self.tweetQueue.put((json.loads(raw_data.decode('utf8'))['data'], datetime.datetime.now(timezone.utc).replace(tzinfo=None)))
 
     def on_exception(self, exception):
         self.restart_delay = 10
@@ -653,7 +653,7 @@ class Stream(tweepy.StreamingClient):
                         t = created_at.strftime("%H:%M:%S UTC")
                 else:
                     if self.raidfinder.settings['jst']:
-                        t = (datetime.datetime.utcnow() + datetime.timedelta(seconds=32400)).strftime("%H:%M:%S JST")
+                        t = (datetime.datetime.now(timezone.utc).replace(tzinfo=None) + datetime.timedelta(seconds=32400)).strftime("%H:%M:%S JST")
                     else:
                         t = datetime.datetime.now().strftime("%H:%M:%S")
                 dupes.add(code)
@@ -1066,7 +1066,7 @@ class UI(Tk.Tk):
         
         # update the time and online indicator
         if self.raidfinder.settings.get('jst', 1):
-            d = datetime.datetime.utcnow() + datetime.timedelta(seconds=32400)
+            d = datetime.datetime.now(timezone.utc).replace(tzinfo=None) + datetime.timedelta(seconds=32400)
             self.timeLabel.config(text=d.strftime("%H:%M:%S JST"))
         else: self.timeLabel.config(text=time.strftime("%H:%M:%S"))
         
