@@ -1,4 +1,7 @@
-﻿* 3.21
+﻿* 3.22
+- Another bugfix related to the 3.20 change.
+
+* 3.21
 - Fixed the broken version 3.20 (My bad...)
 - Preemptively added Siete HL
 

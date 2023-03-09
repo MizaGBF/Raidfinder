@@ -526,7 +526,7 @@ class Stream(tweepy.StreamingClient):
         # https://docs.tweepy.org/en/latest/streamingclient.html
 
     def on_data(self, raw_data):
-        self.tweetQueue.put((json.loads(raw_data.decode('utf8'))['data'], datetime.datetime.now(timezone.utc).replace(tzinfo=None)))
+        self.tweetQueue.put((json.loads(raw_data.decode('utf8'))['data'], datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)))
 
     def on_exception(self, exception):
         self.restart_delay = 10
@@ -653,7 +653,7 @@ class Stream(tweepy.StreamingClient):
                         t = created_at.strftime("%H:%M:%S UTC")
                 else:
                     if self.raidfinder.settings['jst']:
-                        t = (datetime.datetime.now(timezone.utc).replace(tzinfo=None) + datetime.timedelta(seconds=32400)).strftime("%H:%M:%S JST")
+                        t = (datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None) + datetime.timedelta(seconds=32400)).strftime("%H:%M:%S JST")
                     else:
                         t = datetime.datetime.now().strftime("%H:%M:%S")
                 dupes.add(code)
