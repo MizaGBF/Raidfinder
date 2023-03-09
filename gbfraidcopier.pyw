@@ -2,7 +2,7 @@ import json
 import configparser
 import time
 import queue
-import datetime, timezone
+import datetime
 import base64
 import tkinter as Tk
 import tkinter.ttk as ttk
@@ -1066,7 +1066,7 @@ class UI(Tk.Tk):
         
         # update the time and online indicator
         if self.raidfinder.settings.get('jst', 1):
-            d = datetime.datetime.now(timezone.utc).replace(tzinfo=None) + datetime.timedelta(seconds=32400)
+            d = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None) + datetime.timedelta(seconds=32400)
             self.timeLabel.config(text=d.strftime("%H:%M:%S JST"))
         else: self.timeLabel.config(text=time.strftime("%H:%M:%S"))
         

@@ -1,4 +1,8 @@
-﻿* 3.20
+﻿* 3.21
+- Fixed the broken version 3.20 (My bad...)
+- Preemptively added Siete HL
+
+* 3.20
 - Minor update related to UTC datetimes. I'm updating all my projects possibly affected by this issue.
 
 * 3.19
